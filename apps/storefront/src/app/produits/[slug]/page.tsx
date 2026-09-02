@@ -13,11 +13,16 @@ import {
 } from "@/components/product/product-gallery";
 
 import {
+  ProductGrid,
+} from "@/components/product/product-grid";
+
+import {
   ProductPurchasePanel,
 } from "@/components/product/product-purchase-panel";
 
 import {
   getProduct,
+  getSimilarProducts,
 } from "@/lib/api";
 
 import {
@@ -196,6 +201,12 @@ export default async function ProductPage({
   if (!product) {
     notFound();
   }
+
+  const similarProducts =
+    await getSimilarProducts(
+      product,
+      5,
+    );
 
   const description =
     productDescription(
@@ -440,6 +451,48 @@ export default async function ProductPage({
               {
                 product.description
               }
+            </div>
+          </section>
+        )}
+
+        {similarProducts.length > 0 && (
+          <section className="mt-12 border-t border-slate-200 pt-10">
+            <div className="mb-6 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+                  Vous aimerez aussi
+                </p>
+
+                <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
+                  Produits similaires
+                </h2>
+
+                <p className="mt-2 max-w-2xl text-sm text-slate-500">
+                  Des produits proches de votre choix, disponibles dans la même catégorie.
+                </p>
+              </div>
+
+              <Link
+                href={`/categories/${product.category.slug}`}
+                className="hidden shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-[#0b4da2] transition hover:border-[#0b4da2] sm:inline-flex"
+              >
+                Voir toute la catégorie
+              </Link>
+            </div>
+
+            <ProductGrid
+              products={
+                similarProducts
+              }
+            />
+
+            <div className="mt-5 sm:hidden">
+              <Link
+                href={`/categories/${product.category.slug}`}
+                className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-black text-[#0b4da2]"
+              >
+                Voir toute la catégorie
+              </Link>
             </div>
           </section>
         )}
