@@ -17,6 +17,10 @@ import {
 } from "@/actions/owner";
 
 import {
+  OwnerMobileNavigation,
+} from "@/components/layout/owner-mobile-navigation";
+
+import {
   ownerFetch,
 } from "@/lib/backend";
 
@@ -47,31 +51,26 @@ export default async function OwnerLayout({
       icon: Store,
       label: "Catalogue",
     },
-
     {
       href: "/commandes",
       label: "Commandes",
       icon: ShoppingCart,
     },
-
     {
       href: "/paiements",
       label: "Paiements",
       icon: BadgeDollarSign,
     },
-
     {
       href: "/stock",
       label: "Stock",
       icon: Boxes,
     },
-
     {
       href: "/publicites",
       label: "Publicités",
       icon: Megaphone,
     },
-
     {
       href: "/notifications",
       label: "Notifications",
@@ -82,9 +81,12 @@ export default async function OwnerLayout({
 
   return (
     <div className="min-h-screen bg-[#f6f8fc]">
-      {/* =========================================
-          SIDEBAR DESKTOP
-      ========================================= */}
+      <OwnerMobileNavigation
+        displayName={
+          user.display_name
+        }
+      />
+
       <aside className="fixed inset-y-0 left-0 z-50 hidden w-72 flex-col bg-slate-950 p-5 text-white lg:flex">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ff6b00] shadow-lg shadow-orange-500/20">
@@ -158,101 +160,7 @@ export default async function OwnerLayout({
         </div>
       </aside>
 
-
-      {/* =========================================
-          HEADER MOBILE
-      ========================================= */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-xl lg:hidden">
-        <div className="flex h-16 items-center justify-between gap-3 px-4">
-          <Link
-            href="/"
-            className="flex min-w-0 items-center gap-3"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#ff6b00] text-white shadow-lg shadow-orange-500/20">
-              <PackageCheck
-                size={20}
-              />
-            </div>
-
-            <div className="min-w-0">
-              <strong className="block truncate text-sm font-black text-slate-950">
-                SUGU KURA
-              </strong>
-
-              <span className="block truncate text-[10px] font-medium text-slate-400">
-                Console propriétaire
-              </span>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <span className="block text-[8px] font-medium text-slate-400">
-                Connecté
-              </span>
-
-              <strong className="block max-w-20 truncate text-[10px] font-black text-slate-700">
-                {user.display_name}
-              </strong>
-            </div>
-
-            <form
-              action={
-                logoutAction
-              }
-            >
-              <button
-                type="submit"
-                title="Déconnexion"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition active:scale-95"
-              >
-                <LogOut
-                  size={17}
-                />
-              </button>
-            </form>
-          </div>
-        </div>
-
-
-        {/* =====================================
-            MENU MOBILE : 6 ÉLÉMENTS VISIBLES
-            3 COLONNES × 2 LIGNES
-        ===================================== */}
-        <nav className="border-t border-slate-100 bg-white px-3 py-2.5">
-          <div className="grid grid-cols-3 gap-2">
-            {navigation.map(
-              ({
-                href,
-                label,
-                icon: Icon,
-              }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="flex min-h-[46px] min-w-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-1.5 py-2 text-[10px] font-black text-slate-600 shadow-sm transition active:scale-[0.97] active:bg-blue-50"
-                >
-                  <Icon
-                    size={15}
-                    className="shrink-0 text-[#0b4da2]"
-                  />
-
-                  <span className="min-w-0 truncate">
-                    {label}
-                  </span>
-                </Link>
-              ),
-            )}
-          </div>
-        </nav>
-      </header>
-
-
-      {/* =========================================
-          CONTENU PRINCIPAL
-      ========================================= */}
       <div className="min-w-0 lg:ml-72">
-        {/* Barre desktop */}
         <header className="sticky top-0 z-40 hidden min-h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-6 backdrop-blur-xl lg:flex">
           <div>
             <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
@@ -282,8 +190,7 @@ export default async function OwnerLayout({
           </form>
         </header>
 
-
-        <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+        <main className="mx-auto w-full max-w-[1600px] p-4 pb-28 sm:p-6 sm:pb-28 lg:p-8">
           {children}
         </main>
       </div>
