@@ -100,7 +100,6 @@ export default async function AdvertisementsPage() {
         </div>
       </div>
 
-
       <section className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {[
           [
@@ -156,7 +155,6 @@ export default async function AdvertisementsPage() {
         )}
       </section>
 
-
       <details
         open={
           advertisements.length ===
@@ -184,7 +182,6 @@ export default async function AdvertisementsPage() {
         </div>
       </details>
 
-
       <div className="mt-7 grid gap-5">
         {advertisements.length ===
           0 && (
@@ -199,7 +196,6 @@ export default async function AdvertisementsPage() {
             </p>
           </div>
         )}
-
 
         {advertisements.map(
           (
@@ -265,8 +261,7 @@ export default async function AdvertisementsPage() {
                               .title
                           }
                           fill
-                          unoptimized
-                          sizes="340px"
+                          sizes="(max-width: 1024px) 100vw, 340px"
                           className="object-contain p-3"
                         />
                       )
