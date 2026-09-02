@@ -28,6 +28,10 @@ import {
 } from "@/components/product/product-grid";
 
 import {
+  RecentlyViewedProducts,
+} from "@/components/product/recently-viewed-products";
+
+import {
   getHomeData,
 } from "@/lib/api";
 
@@ -329,6 +333,13 @@ export default async function Home() {
         />
 
       </section>
+
+
+      {/* =====================================
+          RÉCEMMENT CONSULTÉS
+      ===================================== */}
+
+      <RecentlyViewedProducts />
 
 
       {/* =====================================
