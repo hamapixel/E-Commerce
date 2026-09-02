@@ -169,12 +169,7 @@ export function CartPageClient() {
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6 lg:py-10">
-
-      {/* =========================================
-          ENTÊTE
-      ========================================= */}
       <div className="flex flex-wrap items-end justify-between gap-4">
-
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
             SUGU KURA
@@ -187,92 +182,48 @@ export function CartPageClient() {
           <p className="mt-2 text-sm text-slate-500">
             {totalQuantity}{" "}
             article
-            {totalQuantity !==
-            1
+            {totalQuantity !== 1
               ? "s"
               : ""}
           </p>
         </div>
 
-
         <button
           type="button"
-          onClick={
-            clearCart
-          }
+          onClick={clearCart}
           className="text-xs font-bold text-red-500 transition hover:text-red-700"
         >
           Vider le panier
         </button>
       </div>
 
-
-      {/* =========================================
-          CONTENU
-      ========================================= */}
       <div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_380px]">
-
-        {/* =========================================
-            ARTICLES
-        ========================================= */}
         <section className="space-y-3">
-
           {items.map(
-            (
-              item,
-            ) => {
+            (item) => {
               const lineTotal =
                 item.unitPrice *
                 item.quantity;
-
 
               const atMax =
                 item.quantity >=
                 item.availableQuantity;
 
-
               return (
                 <article
-                  key={
-                    item.key
-                  }
+                  key={item.key}
                   className="rounded-[22px] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
                 >
                   <div className="flex gap-3 sm:gap-5">
-
-                    {/* =========================================
-                        IMAGE PRODUIT
-                    ========================================= */}
                     <Link
                       href={`/produits/${item.slug}`}
                       className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-50 sm:h-32 sm:w-32"
                     >
                       {item.image ? (
                         <Image
-                          src={
-                            item.image
-                          }
-                          alt={
-                            item.name
-                          }
+                          src={item.image}
+                          alt={item.name}
                           fill
-
-                          /*
-                           * IMPORTANT :
-                           *
-                           * Les images produits
-                           * sont servies par Django
-                           * en local :
-                           *
-                           * http://127.0.0.1:8000/media/...
-                           *
-                           * On désactive
-                           * l'optimisation Next.js
-                           * pour éviter le blocage
-                           * des IP locales.
-                           */
-                          unoptimized
-
                           sizes="128px"
                           className="object-contain p-2"
                         />
@@ -283,33 +234,21 @@ export function CartPageClient() {
                       )}
                     </Link>
 
-
-                    {/* =========================================
-                        INFORMATIONS PRODUIT
-                    ========================================= */}
                     <div className="min-w-0 flex-1">
-
                       <div className="flex items-start justify-between gap-2">
-
                         <div className="min-w-0">
                           <Link
                             href={`/produits/${item.slug}`}
                             className="line-clamp-2 text-sm font-black text-slate-900 hover:text-[#0b4da2] sm:text-base"
                           >
-                            {
-                              item.name
-                            }
+                            {item.name}
                           </Link>
 
                           <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                            {
-                              item.sku
-                            }
+                            {item.sku}
                           </p>
                         </div>
 
-
-                        {/* SUPPRESSION */}
                         <button
                           type="button"
                           onClick={() =>
@@ -320,28 +259,17 @@ export function CartPageClient() {
                           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-red-50 hover:text-red-600"
                           aria-label="Supprimer"
                         >
-                          <Trash2
-                            size={17}
-                          />
+                          <Trash2 size={17} />
                         </button>
                       </div>
 
-
-                      {/* VARIANTE */}
                       {item.variantLabel && (
                         <p className="mt-2 w-fit rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-bold text-[#0b4da2]">
-                          {
-                            item.variantLabel
-                          }
+                          {item.variantLabel}
                         </p>
                       )}
 
-
-                      {/* =========================================
-                          PRIX
-                      ========================================= */}
                       <div className="mt-3">
-
                         {item.hasPromotion &&
                           item.normalPrice >
                             item.unitPrice && (
@@ -352,7 +280,6 @@ export function CartPageClient() {
                             </span>
                           )}
 
-
                         <span className="text-base font-black text-[#ff6b00]">
                           {formatMoney(
                             item.unitPrice,
@@ -360,15 +287,8 @@ export function CartPageClient() {
                         </span>
                       </div>
 
-
-                      {/* =========================================
-                          QUANTITÉ + TOTAL LIGNE
-                      ========================================= */}
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-
                         <div className="flex h-10 items-center overflow-hidden rounded-xl border border-slate-200">
-
-                          {/* MOINS */}
                           <button
                             type="button"
                             onClick={() =>
@@ -378,21 +298,13 @@ export function CartPageClient() {
                             }
                             className="flex h-full w-10 items-center justify-center text-slate-600"
                           >
-                            <Minus
-                              size={15}
-                            />
+                            <Minus size={15} />
                           </button>
 
-
-                          {/* QUANTITÉ */}
                           <span className="flex h-full min-w-11 items-center justify-center border-x border-slate-200 text-xs font-black">
-                            {
-                              item.quantity
-                            }
+                            {item.quantity}
                           </span>
 
-
-                          {/* PLUS */}
                           <button
                             type="button"
                             onClick={() =>
@@ -400,19 +312,13 @@ export function CartPageClient() {
                                 item.key,
                               )
                             }
-                            disabled={
-                              atMax
-                            }
+                            disabled={atMax}
                             className="flex h-full w-10 items-center justify-center text-slate-600 disabled:text-slate-300"
                           >
-                            <Plus
-                              size={15}
-                            />
+                            <Plus size={15} />
                           </button>
                         </div>
 
-
-                        {/* TOTAL DE LA LIGNE */}
                         <span className="text-base font-black text-slate-950">
                           {formatMoney(
                             lineTotal,
@@ -420,13 +326,9 @@ export function CartPageClient() {
                         </span>
                       </div>
 
-
-                      {/* STOCK MAXIMUM */}
                       {atMax && (
                         <p className="mt-2 text-[10px] font-bold text-orange-600">
-                          Quantité maximale
-                          disponible atteinte
-                          ({item.availableQuantity}).
+                          Quantité maximale disponible atteinte ({item.availableQuantity}).
                         </p>
                       )}
                     </div>
@@ -437,20 +339,12 @@ export function CartPageClient() {
           )}
         </section>
 
-
-        {/* =========================================
-            RÉSUMÉ
-        ========================================= */}
         <aside className="h-fit rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-32">
-
           <h2 className="text-xl font-black text-slate-950">
             Résumé
           </h2>
 
-
           <div className="mt-5 space-y-4 text-sm">
-
-            {/* ARTICLES */}
             <div className="flex items-center justify-between">
               <span className="text-slate-500">
                 Articles
@@ -461,8 +355,6 @@ export function CartPageClient() {
               </span>
             </div>
 
-
-            {/* SOUS TOTAL */}
             <div className="flex items-center justify-between">
               <span className="text-slate-500">
                 Sous-total
@@ -475,8 +367,6 @@ export function CartPageClient() {
               </span>
             </div>
 
-
-            {/* ÉCONOMIES */}
             {savings > 0 && (
               <div className="flex items-center justify-between text-emerald-600">
                 <span className="font-semibold">
@@ -484,16 +374,13 @@ export function CartPageClient() {
                 </span>
 
                 <span className="font-black">
-                  -
-                  {formatMoney(
+                  -{formatMoney(
                     savings,
                   )}
                 </span>
               </div>
             )}
 
-
-            {/* LIVRAISON */}
             <div className="flex items-center justify-between">
               <span className="text-slate-500">
                 Livraison
@@ -505,15 +392,9 @@ export function CartPageClient() {
             </div>
           </div>
 
-
           <div className="my-5 border-t border-slate-200" />
 
-
-          {/* =========================================
-              TOTAL
-          ========================================= */}
           <div className="flex items-end justify-between gap-3">
-
             <span className="font-black text-slate-950">
               Total produits
             </span>
@@ -525,10 +406,6 @@ export function CartPageClient() {
             </span>
           </div>
 
-
-          {/* =========================================
-              CHECKOUT
-          ========================================= */}
           <Link
             href="/checkout"
             className="mt-6 flex h-14 w-full items-center justify-center rounded-2xl bg-[#0b4da2] text-sm font-black text-white transition hover:bg-[#083b7f]"
@@ -536,40 +413,22 @@ export function CartPageClient() {
             Continuer vers la commande
           </Link>
 
-
-          {/* =========================================
-              SÉCURITÉ
-          ========================================= */}
           <div className="mt-5 flex gap-2 rounded-xl bg-emerald-50 p-3">
-
             <ShieldCheck
               size={19}
               className="shrink-0 text-emerald-600"
             />
 
             <p className="text-[11px] leading-5 text-emerald-800">
-              Les quantités du panier
-              sont limitées au stock
-              disponible. Le serveur
-              vérifiera de nouveau
-              les prix, les promotions,
-              les variantes et le stock
-              avant de réserver les
-              articles.
+              Les quantités du panier sont limitées au stock disponible. Le serveur vérifiera de nouveau les prix, les promotions, les variantes et le stock avant de réserver les articles.
             </p>
           </div>
 
-
-          {/* =========================================
-              RETOUR
-          ========================================= */}
           <Link
             href="/"
             className="mt-4 flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 transition hover:bg-slate-50"
           >
-            <ArrowLeft
-              size={15}
-            />
+            <ArrowLeft size={15} />
 
             Continuer mes achats
           </Link>
