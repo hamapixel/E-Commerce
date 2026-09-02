@@ -187,6 +187,24 @@ export async function getSimilarProducts(
   );
 }
 
+export async function getFrequentlyBoughtTogether(
+  slug: string,
+  limit = 4,
+): Promise<Product[]> {
+  const safeLimit = Math.max(
+    1,
+    Math.min(
+      Math.trunc(limit),
+      8,
+    ),
+  );
+
+  return safeRequest<Product[]>(
+    `/catalog/products/${encodeURIComponent(slug)}/frequently-bought-together/?limit=${safeLimit}`,
+    [],
+  );
+}
+
 export async function getCategory(
   slug: string,
 ): Promise<Category | null> {
