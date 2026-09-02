@@ -21,6 +21,10 @@ import {
 } from "@/components/product/product-purchase-panel";
 
 import {
+  RecentlyViewedProducts,
+} from "@/components/product/recently-viewed-products";
+
+import {
   getFrequentlyBoughtTogether,
   getProduct,
   getSimilarProducts,
@@ -550,6 +554,12 @@ export default async function ProductPage({
             </div>
           </section>
         )}
+
+        <RecentlyViewedProducts
+          currentProduct={
+            product
+          }
+        />
       </div>
     </>
   );
