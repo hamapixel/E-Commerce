@@ -21,6 +21,7 @@ import {
 } from "@/components/product/product-purchase-panel";
 
 import {
+  getFrequentlyBoughtTogether,
   getProduct,
   getSimilarProducts,
 } from "@/lib/api";
@@ -202,11 +203,40 @@ export default async function ProductPage({
     notFound();
   }
 
-  const similarProducts =
-    await getSimilarProducts(
+  const [
+    rawSimilarProducts,
+    frequentlyBoughtTogether,
+  ] = await Promise.all([
+    getSimilarProducts(
       product,
-      5,
+      8,
+    ),
+
+    getFrequentlyBoughtTogether(
+      product.slug,
+      4,
+    ),
+  ]);
+
+  const frequentlyBoughtIds =
+    new Set(
+      frequentlyBoughtTogether.map(
+        (item) => item.id,
+      ),
     );
+
+  const similarProducts =
+    rawSimilarProducts
+      .filter(
+        (item) =>
+          !frequentlyBoughtIds.has(
+            item.id,
+          ),
+      )
+      .slice(
+        0,
+        5,
+      );
 
   const description =
     productDescription(
@@ -421,7 +451,7 @@ export default async function ProductPage({
             </h1>
 
             <p className="mt-2 text-xs font-semibold text-slate-400">
-              Référence :{" "}
+              Référence:{" "}
               {product.sku}
             </p>
 
@@ -452,6 +482,30 @@ export default async function ProductPage({
                 product.description
               }
             </div>
+          </section>
+        )}
+
+        {frequentlyBoughtTogether.length > 0 && (
+          <section className="mt-12 rounded-[28px] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 sm:p-7">
+            <div className="mb-6">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0b4da2]">
+                Complétez votre achat
+              </p>
+
+              <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
+                Souvent achetés ensemble
+              </h2>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Ces produits apparaissent réellement dans les mêmes commandes confirmées que cet article.
+              </p>
+            </div>
+
+            <ProductGrid
+              products={
+                frequentlyBoughtTogether
+              }
+            />
           </section>
         )}
 
