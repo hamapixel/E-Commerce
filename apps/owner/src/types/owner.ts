@@ -60,7 +60,9 @@ export interface OwnerOrderItem {
   sku: string;
   variant_label: string;
 
+  normal_price: string;
   unit_price: string;
+
   quantity: number;
   line_total: string;
 }

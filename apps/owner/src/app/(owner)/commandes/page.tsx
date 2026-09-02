@@ -1,3 +1,9 @@
+import Link from "next/link";
+
+import {
+  ReceiptText,
+} from "lucide-react";
+
 import {
   updateOrderStatusAction,
 } from "@/actions/owner";
@@ -115,59 +121,74 @@ export default async function OrdersPage() {
                 </div>
               </div>
 
-              <form
-                action={
-                  updateOrderStatusAction
-                }
-                className="mt-5 flex flex-wrap gap-2"
-              >
-                <input
-                  type="hidden"
-                  name="order_id"
-                  value={
-                    order.id
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <Link
+                  href={
+                    `/commandes/${order.id}/ticket`
                   }
-                />
+                  className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#ff6b00] px-4 text-xs font-black text-white transition hover:bg-[#e85f00]"
+                >
+                  <ReceiptText
+                    size={16}
+                  />
 
-                <select
-                  name="status"
-                  defaultValue={
-                    order.status
+                  Ticket
+                </Link>
+
+                <form
+                  action={
+                    updateOrderStatusAction
                   }
-                  className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-[#ff6b00]"
+                  className="flex flex-wrap gap-2"
                 >
-                  <option value="PENDING">
-                    En attente
-                  </option>
+                  <input
+                    type="hidden"
+                    name="order_id"
+                    value={
+                      order.id
+                    }
+                  />
 
-                  <option value="CONFIRMED">
-                    Confirmée
-                  </option>
+                  <select
+                    name="status"
+                    defaultValue={
+                      order.status
+                    }
+                    className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-[#ff6b00]"
+                  >
+                    <option value="PENDING">
+                      En attente
+                    </option>
 
-                  <option value="PREPARING">
-                    En préparation
-                  </option>
+                    <option value="CONFIRMED">
+                      Confirmée
+                    </option>
 
-                  <option value="READY">
-                    Prête
-                  </option>
+                    <option value="PREPARING">
+                      En préparation
+                    </option>
 
-                  <option value="SHIPPED">
-                    Expédiée
-                  </option>
+                    <option value="READY">
+                      Prête
+                    </option>
 
-                  <option value="DELIVERED">
-                    Livrée
-                  </option>
-                </select>
+                    <option value="SHIPPED">
+                      Expédiée
+                    </option>
 
-                <button
-                  type="submit"
-                  className="h-11 rounded-xl bg-slate-950 px-4 text-xs font-black text-white transition hover:bg-slate-800"
-                >
-                  Mettre à jour
-                </button>
-              </form>
+                    <option value="DELIVERED">
+                      Livrée
+                    </option>
+                  </select>
+
+                  <button
+                    type="submit"
+                    className="h-11 rounded-xl bg-slate-950 px-4 text-xs font-black text-white transition hover:bg-slate-800"
+                  >
+                    Mettre à jour
+                  </button>
+                </form>
+              </div>
             </article>
           ),
         )}
