@@ -1,0 +1,4212 @@
+﻿===== STOREFRONT HEADER =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\apps\storefront\src\components\cart\product-card-cart-button.tsx =====
+"use client";
+
+import Link from "next/link";
+
+import {
+  Check,
+  ShoppingCart,
+} from "lucide-react";
+
+import {
+  useState,
+} from "react";
+
+import {
+  useCartStore,
+} from "@/store/cart-store";
+
+
+interface ProductCardCartButtonProps {
+  productId: number;
+
+  slug: string;
+
+  name: string;
+
+  sku: string;
+
+  image: string | null;
+
+  currentPrice: string;
+
+  normalPrice: string;
+
+  hasPromotion: boolean;
+
+  hasVariants: boolean;
+
+  availableQuantity: number;
+}
+
+
+export function ProductCardCartButton({
+  productId,
+  slug,
+  name,
+  sku,
+  image,
+  currentPrice,
+  normalPrice,
+  hasPromotion,
+  hasVariants,
+  availableQuantity,
+}: ProductCardCartButtonProps) {
+  const addItem =
+    useCartStore(
+      (
+        state,
+      ) => state.addItem,
+    );
+
+  const [
+    added,
+    setAdded,
+  ] = useState(false);
+
+  if (hasVariants) {
+    return (
+      <Link
+        href={`/produits/${slug}`}
+        aria-label="Choisir les options"
+        title="Choisir une variante"
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0b4da2] text-white transition hover:bg-[#083b7f]"
+      >
+        <ShoppingCart
+          size={17}
+        />
+      </Link>
+    );
+  }
+
+  function handleAdd() {
+    const result =
+      addItem({
+        productId,
+
+        variantId: null,
+
+        slug,
+
+        name,
+
+        sku,
+
+        image,
+
+        unitPrice:
+          Number(
+            currentPrice,
+          ),
+
+        normalPrice:
+          Number(
+            normalPrice,
+          ),
+
+        hasPromotion,
+
+        availableQuantity,
+      });
+
+    if (
+      result === "added"
+    ) {
+      setAdded(true);
+
+      window.setTimeout(
+        () => {
+          setAdded(false);
+        },
+        1200,
+      );
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleAdd}
+      disabled={
+        availableQuantity <= 0
+      }
+      aria-label="Ajouter au panier"
+      title={
+        availableQuantity > 0
+          ? "Ajouter au panier"
+          : "Rupture de stock"
+      }
+      className={`flex h-9 w-9 items-center justify-center rounded-xl text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
+        added
+          ? "bg-emerald-600"
+          : "bg-[#0b4da2] hover:bg-[#083b7f]"
+      }`}
+    >
+      {added ? (
+        <Check size={17} />
+      ) : (
+        <ShoppingCart
+          size={17}
+        />
+      )}
+    </button>
+  );
+}
+
+===== C:\Users\HP USER\Desktop\sugu_kura\apps\storefront\src\components\layout\header.tsx =====
+"use client";
+
+import Link from "next/link";
+
+import {
+  Heart,
+  Menu,
+  Search,
+  ShoppingCart,
+  UserRound,
+} from "lucide-react";
+
+import {
+  useCartStore,
+} from "@/store/cart-store";
+
+
+export function Header() {
+  const items =
+    useCartStore(
+      (
+        state,
+      ) => state.items,
+    );
+
+  const hasHydrated =
+    useCartStore(
+      (
+        state,
+      ) =>
+        state.hasHydrated,
+    );
+
+  const totalItems =
+    hasHydrated
+      ? items.reduce(
+          (
+            total,
+            item,
+          ) =>
+            total +
+            item.quantity,
+          0,
+        )
+      : 0;
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+      <div className="bg-[#0b4da2] text-white">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-2 text-xs sm:px-6">
+          <span>
+            Livraison rapide â€¢ Bamako
+          </span>
+
+          <span className="hidden sm:block">
+            SUGU KURA â€” La technologie au meilleur prix
+          </span>
+        </div>
+      </div>
+
+      <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-4 py-3 sm:px-6 lg:gap-8">
+        <button
+          type="button"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 lg:hidden"
+          aria-label="Menu"
+        >
+          <Menu size={21} />
+        </button>
+
+        <Link
+          href="/"
+          className="shrink-0"
+        >
+          <div className="text-xl font-black tracking-tight sm:text-2xl">
+            <span className="text-[#ff6b00]">
+              SUGU
+            </span>{" "}
+
+            <span className="text-[#0b4da2]">
+              KURA
+            </span>
+          </div>
+
+          <div className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 sm:block">
+            Shopping nouvelle gÃ©nÃ©ration
+          </div>
+        </Link>
+
+        <form
+          action="/recherche"
+          method="get"
+          className="hidden flex-1 md:block"
+        >
+          <div className="flex h-12 overflow-hidden rounded-2xl border-2 border-slate-200 bg-slate-50 transition focus-within:border-[#ff6b00] focus-within:bg-white">
+            <div className="flex items-center pl-4 text-slate-400">
+              <Search
+                size={20}
+              />
+            </div>
+
+            <input
+              type="search"
+              name="search"
+              placeholder="Rechercher tÃ©lÃ©phone, ampoule, casque, ventilateur..."
+              className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
+            />
+
+            <button
+              type="submit"
+              className="bg-[#ff6b00] px-6 text-sm font-bold text-white transition hover:bg-[#e85f00]"
+            >
+              Rechercher
+            </button>
+          </div>
+        </form>
+
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <button
+            type="button"
+            className="hidden h-11 w-11 items-center justify-center rounded-xl transition hover:bg-slate-100 sm:flex"
+            aria-label="Favoris"
+          >
+            <Heart size={21} />
+          </button>
+
+          <button
+            type="button"
+            className="hidden h-11 w-11 items-center justify-center rounded-xl transition hover:bg-slate-100 sm:flex"
+            aria-label="Compte"
+          >
+            <UserRound
+              size={21}
+            />
+          </button>
+
+          <Link
+            href="/panier"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[#0b4da2] text-white"
+            aria-label={`Panier, ${totalItems} article(s)`}
+          >
+            <ShoppingCart
+              size={21}
+            />
+
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff6b00] px-1 text-[10px] font-black">
+              {totalItems >
+              99
+                ? "99+"
+                : totalItems}
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      <form
+        action="/recherche"
+        method="get"
+        className="px-4 pb-3 md:hidden"
+      >
+        <div className="flex h-11 items-center rounded-xl bg-slate-100 px-3">
+          <Search
+            size={18}
+            className="text-slate-400"
+          />
+
+          <input
+            type="search"
+            name="search"
+            placeholder="Que recherchez-vous ?"
+            className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
+          />
+
+          <button
+            type="submit"
+            className="text-xs font-black text-[#ff6b00]"
+          >
+            Chercher
+          </button>
+        </div>
+      </form>
+    </header>
+  );
+}
+
+===== C:\Users\HP USER\Desktop\sugu_kura\apps\storefront\src\components\product\product-card.tsx =====
+import Image from "next/image";
+import Link from "next/link";
+
+import {
+  Check,
+} from "lucide-react";
+
+import {
+  ProductCardCartButton,
+} from "@/components/cart/product-card-cart-button";
+
+import {
+  Countdown,
+} from "@/components/home/countdown";
+
+import {
+  formatMoney,
+} from "@/lib/format";
+
+import type {
+  Product,
+} from "@/types/api";
+
+
+interface ProductCardProps {
+  product: Product;
+}
+
+
+export function ProductCard({
+  product,
+}: ProductCardProps) {
+  return (
+    <article className="group relative flex w-full flex-col overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+
+      {/* =========================================
+          IMAGE PRODUIT
+      ========================================= */}
+      <Link
+        href={`/produits/${product.slug}`}
+        className="relative block aspect-[4/3] w-full overflow-hidden bg-[#f7f8fa]"
+      >
+        {product.primary_image ? (
+          <Image
+            src={
+              product.primary_image
+            }
+            alt={
+              product.name
+            }
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            className="object-contain p-2.5 transition duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center p-3 text-center text-xs font-black text-slate-300">
+            SUGU KURA
+          </div>
+        )}
+
+
+        {/* PROMOTION */}
+        {product.has_promotion &&
+          product.promotion && (
+            <span className="absolute left-2 top-2 max-w-[80%] rounded-md bg-[#ff6b00] px-2 py-1 text-[9px] font-black text-white shadow-sm">
+              {
+                product
+                  .promotion
+                  .badge ||
+                "PROMO"
+              }
+            </span>
+          )}
+
+
+        {/* STOCK */}
+        {product.available_quantity >
+          0 && (
+          <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-white/95 px-1.5 py-1 text-[9px] font-bold text-emerald-700 shadow-sm">
+            <Check
+              size={10}
+            />
+
+            En stock
+          </span>
+        )}
+      </Link>
+
+
+      {/* =========================================
+          INFORMATIONS
+      ========================================= */}
+      <div className="flex flex-col p-2.5 sm:p-3">
+
+        {product.brand && (
+          <p className="truncate text-[9px] font-black uppercase tracking-wider text-[#0b4da2]">
+            {
+              product.brand
+                .name
+            }
+          </p>
+        )}
+
+
+        <Link
+          href={`/produits/${product.slug}`}
+          className="mt-0.5 line-clamp-2 min-h-[36px] text-[13px] font-bold leading-[18px] text-slate-900 transition hover:text-[#0b4da2] sm:text-sm"
+        >
+          {product.name}
+        </Link>
+
+
+        {product.has_variants && (
+          <span className="mt-1.5 w-fit rounded-md bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-[#0b4da2]">
+            Plusieurs options
+          </span>
+        )}
+
+
+        {/* =========================================
+            PRIX
+        ========================================= */}
+        <div className="mt-2">
+
+          {product.has_promotion && (
+            <div className="text-[10px] font-semibold text-slate-400 line-through sm:text-xs">
+              {formatMoney(
+                product.normal_price,
+              )}
+            </div>
+          )}
+
+
+          <div className="text-[15px] font-black leading-tight text-[#ff6b00] sm:text-base">
+            {formatMoney(
+              product.current_price,
+            )}
+          </div>
+
+
+          {/* COMPTE Ã€ REBOURS */}
+          {product.promotion &&
+            product
+              .promotion
+              .remaining_seconds >
+              0 && (
+              <div className="mt-1 text-[9px] font-bold text-red-600 sm:text-[10px]">
+                Fin dans{" "}
+
+                <Countdown
+                  seconds={
+                    product
+                      .promotion
+                      .remaining_seconds
+                  }
+                />
+              </div>
+            )}
+
+
+          {/* =========================================
+              STOCK + PANIER
+          ========================================= */}
+          <div className="mt-2 flex min-w-0 items-center justify-between gap-1.5">
+
+            <span className="min-w-0 truncate text-[9px] font-medium text-slate-400 sm:text-[10px]">
+              {product.available_quantity >
+              0
+                ? `${product.available_quantity} disponible(s)`
+                : "Rupture"}
+            </span>
+
+
+            <div className="shrink-0">
+              <ProductCardCartButton
+                productId={
+                  product.id
+                }
+                slug={
+                  product.slug
+                }
+                name={
+                  product.name
+                }
+                sku={
+                  product.sku
+                }
+                image={
+                  product.primary_image
+                }
+                currentPrice={
+                  product.current_price
+                }
+                normalPrice={
+                  product.normal_price
+                }
+                hasPromotion={
+                  product.has_promotion
+                }
+                hasVariants={
+                  product.has_variants
+                }
+                availableQuantity={
+                  product.available_quantity
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+===== C:\Users\HP USER\Desktop\sugu_kura\apps\storefront\src\components\product\product-gallery.tsx =====
+"use client";
+
+import Image from "next/image";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import type {
+  ProductImage,
+} from "@/types/api";
+
+
+interface ProductGalleryProps {
+  images: ProductImage[];
+  name: string;
+  fallback: string | null;
+}
+
+
+export function ProductGallery({
+  images,
+  name,
+  fallback,
+}: ProductGalleryProps) {
+  /*
+   * Liste stable des images.
+   *
+   * useMemo Ã©vite de recrÃ©er inutilement
+   * le tableau Ã  chaque rendu.
+   */
+  const imageUrls =
+    useMemo(
+      () => {
+        if (
+          images.length >
+          0
+        ) {
+          return images
+            .filter(
+              (item) =>
+                Boolean(
+                  item.image,
+                ),
+            )
+            .map(
+              (item) => ({
+                url:
+                  item.image,
+
+                alt:
+                  item.alt_text ||
+                  name,
+              }),
+            );
+        }
+
+
+        if (fallback) {
+          return [
+            {
+              url:
+                fallback,
+
+              alt:
+                name,
+            },
+          ];
+        }
+
+
+        return [];
+      },
+      [
+        images,
+        name,
+        fallback,
+      ],
+    );
+
+
+  /*
+   * On mÃ©morise uniquement l'URL
+   * choisie manuellement par l'utilisateur.
+   *
+   * Aucun useEffect.
+   * Aucun scroll automatique.
+   */
+  const [
+    selectedUrl,
+    setSelectedUrl,
+  ] = useState<string | null>(
+    null,
+  );
+
+
+  /*
+   * Si l'image sÃ©lectionnÃ©e existe encore :
+   * on la garde.
+   *
+   * Si elle a Ã©tÃ© supprimÃ©e :
+   * on affiche simplement la premiÃ¨re restante.
+   *
+   * Aucun setState nÃ©cessaire.
+   */
+  const currentImage =
+    imageUrls.find(
+      (image) =>
+        image.url ===
+        selectedUrl,
+    ) ??
+    imageUrls[0] ??
+    null;
+
+
+  if (!currentImage) {
+    return (
+      <div className="flex aspect-square items-center justify-center rounded-[24px] border border-slate-200 bg-slate-100 text-xl font-black text-slate-300">
+        SUGU KURA
+      </div>
+    );
+  }
+
+
+  return (
+    <div className="min-w-0">
+
+      {/* =========================================
+          IMAGE PRINCIPALE
+      ========================================= */}
+      <div className="relative aspect-square w-full overflow-hidden rounded-[24px] border border-slate-200 bg-white">
+        <Image
+          src={
+            currentImage.url
+          }
+          alt={
+            currentImage.alt
+          }
+          fill
+          priority
+          unoptimized
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-contain p-3 sm:p-4"
+        />
+      </div>
+
+
+      {/* =========================================
+          MINIATURES
+
+          IMPORTANT :
+          - aucun scroll automatique
+          - aucun scrollIntoView
+          - aucun scrollTo
+          - aucun recentrage
+          - dÃ©placement uniquement manuel
+      ========================================= */}
+      {imageUrls.length >
+        1 && (
+        <div
+          className="
+            hide-scrollbar
+            mt-3
+            flex
+            touch-pan-x
+            gap-2
+            overflow-x-auto
+            overscroll-x-contain
+            scroll-auto
+            pb-1
+            [overflow-anchor:none]
+          "
+        >
+          {imageUrls.map(
+            (
+              image,
+              index,
+            ) => {
+              const isSelected =
+                currentImage.url ===
+                image.url;
+
+
+              return (
+                <button
+                  key={
+                    image.url
+                  }
+                  type="button"
+                  onClick={() => {
+                    /*
+                     * Change uniquement
+                     * l'image principale.
+                     *
+                     * La bande de miniatures
+                     * ne bouge pas.
+                     */
+                    setSelectedUrl(
+                      image.url,
+                    );
+                  }}
+                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white transition-colors sm:h-20 sm:w-20 ${
+                    isSelected
+                      ? "border-[#ff6b00]"
+                      : "border-slate-200"
+                  }`}
+                  aria-label={`Afficher l'image ${index + 1} de ${name}`}
+                >
+                  <Image
+                    src={
+                      image.url
+                    }
+                    alt={
+                      image.alt
+                    }
+                    fill
+                    unoptimized
+                    sizes="80px"
+                    className="object-contain p-1"
+                  />
+                </button>
+              );
+            },
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+===== C:\Users\HP USER\Desktop\sugu_kura\apps\storefront\src\components\product\product-grid.tsx =====
+import type {
+  Product,
+} from "@/types/api";
+
+import {
+  ProductCard,
+} from "./product-card";
+
+interface ProductGridProps {
+  products: Product[];
+}
+
+export function ProductGrid({
+  products,
+}: ProductGridProps) {
+  if (!products.length) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-12 text-center">
+        <p className="font-bold text-slate-700">
+          Aucun produit disponible pour le moment.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {products.map(
+        (product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+          />
+        ),
+      )}
+    </div>
+  );
+}
+
+===== C:\Users\HP USER\Desktop\sugu_kura\apps\storefront\src\components\product\product-purchase-panel.tsx =====
+"use client";
+
+import {
+  CheckCircle2,
+  Minus,
+  Package,
+  Plus,
+  ShoppingCart,
+} from "lucide-react";
+
+import {
+  useState,
+} from "react";
+
+import {
+  Countdown,
+} from "@/components/home/countdown";
+
+import {
+  formatMoney,
+} from "@/lib/format";
+
+import {
+  useCartStore,
+} from "@/store/cart-store";
+
+import type {
+  ProductDetail,
+} from "@/types/api";
+
+
+interface ProductPurchasePanelProps {
+  product: ProductDetail;
+}
+
+
+export function ProductPurchasePanel({
+  product,
+}: ProductPurchasePanelProps) {
+  const availableVariants =
+    product.variants.filter(
+      (variant) =>
+        variant.is_active &&
+        variant.available_quantity > 0,
+    );
+
+  const initialVariantId =
+    availableVariants.length === 1
+      ? availableVariants[0].id
+      : null;
+
+  const [
+    selectedVariantId,
+    setSelectedVariantId,
+  ] = useState<number | null>(
+    initialVariantId,
+  );
+
+  const [
+    quantity,
+    setQuantity,
+  ] = useState(1);
+
+  const [
+    message,
+    setMessage,
+  ] = useState("");
+
+  const addItem =
+    useCartStore(
+      (state) =>
+        state.addItem,
+    );
+
+  const selectedVariant =
+    product.variants.find(
+      (variant) =>
+        variant.id ===
+        selectedVariantId,
+    ) ?? null;
+
+  const hasVariants =
+    product.variants.length > 0;
+
+  const activePrice =
+    selectedVariant
+      ? selectedVariant.current_price
+      : product.current_price;
+
+  const activeNormalPrice =
+    selectedVariant
+      ? selectedVariant.effective_price
+      : product.normal_price;
+
+  const activeHasPromotion =
+    selectedVariant
+      ? selectedVariant.has_promotion
+      : product.has_promotion;
+
+  const activeStock =
+    selectedVariant
+      ? selectedVariant.available_quantity
+      : hasVariants
+        ? 0
+        : product.available_quantity;
+
+  const canBuy =
+    activeStock > 0 &&
+    (
+      !hasVariants ||
+      selectedVariant !== null
+    );
+
+  const variantLabel =
+    selectedVariant
+      ? selectedVariant.attributes.length > 0
+        ? selectedVariant.attributes
+            .map(
+              (attribute) =>
+                `${attribute.attribute}: ${attribute.value}`,
+            )
+            .join(" â€¢ ")
+        : "Option standard"
+      : "";
+
+  function selectVariant(
+    variantId: number,
+  ) {
+    setSelectedVariantId(
+      variantId,
+    );
+
+    setQuantity(1);
+
+    setMessage("");
+  }
+
+  function increment() {
+    if (
+      quantity <
+      activeStock
+    ) {
+      setQuantity(
+        quantity + 1,
+      );
+    }
+  }
+
+  function decrement() {
+    if (quantity > 1) {
+      setQuantity(
+        quantity - 1,
+      );
+    }
+  }
+
+  function handleAdd() {
+    if (
+      hasVariants &&
+      !selectedVariant
+    ) {
+      setMessage(
+        "Choisissez d'abord une variante.",
+      );
+
+      return;
+    }
+
+    const result =
+      addItem(
+        {
+          productId:
+            product.id,
+
+          variantId:
+            selectedVariant
+              ?.id ??
+            null,
+
+          slug:
+            product.slug,
+
+          name:
+            product.name,
+
+          sku:
+            selectedVariant
+              ?.sku ??
+            product.sku,
+
+          image:
+            selectedVariant
+              ?.image ??
+            product.primary_image,
+
+          variantLabel,
+
+          unitPrice:
+            Number(
+              activePrice,
+            ),
+
+          normalPrice:
+            Number(
+              activeNormalPrice,
+            ),
+
+          hasPromotion:
+            activeHasPromotion,
+
+          availableQuantity:
+            activeStock,
+        },
+
+        quantity,
+      );
+
+    if (
+      result ===
+      "out_of_stock"
+    ) {
+      setMessage(
+        "Ce produit est en rupture de stock.",
+      );
+
+      return;
+    }
+
+    if (
+      result ===
+      "max_stock"
+    ) {
+      setMessage(
+        "Vous avez dÃ©jÃ  atteint la quantitÃ© disponible en stock.",
+      );
+
+      return;
+    }
+
+    setMessage(
+      "Produit ajoutÃ© au panier âœ“",
+    );
+  }
+
+  return (
+    <>
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+        {activeHasPromotion && (
+          <div className="text-base font-bold text-slate-400 line-through">
+            {formatMoney(
+              activeNormalPrice,
+            )}
+          </div>
+        )}
+
+        <div className="text-3xl font-black text-[#ff6b00] sm:text-4xl">
+          {formatMoney(
+            activePrice,
+          )}
+        </div>
+
+        {product.promotion && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="rounded-lg bg-orange-100 px-3 py-1.5 text-xs font-black text-[#d95700]">
+              {
+                product
+                  .promotion
+                  .badge
+              }
+            </span>
+
+            {product
+              .promotion
+              .remaining_seconds >
+              0 && (
+              <span className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600">
+                Fin dans{" "}
+
+                <Countdown
+                  seconds={
+                    product
+                      .promotion
+                      .remaining_seconds
+                  }
+                />
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center gap-2 text-sm font-bold">
+          {activeStock > 0 ? (
+            <>
+              <CheckCircle2
+                size={18}
+                className="text-emerald-600"
+              />
+
+              <span className="text-emerald-700">
+                En stock â€”{" "}
+                {activeStock}{" "}
+                disponible(s)
+              </span>
+            </>
+          ) : (
+            <>
+              <Package
+                size={18}
+              />
+
+              <span className="text-red-600">
+                Rupture de stock
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {hasVariants && (
+        <section className="mt-6">
+          <h2 className="text-sm font-black text-slate-900">
+            {product.variants.length === 1
+              ? "Option du produit"
+              : "Choisissez une variante"}
+          </h2>
+
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {product.variants.map(
+              (variant) => {
+                const selected =
+                  selectedVariantId ===
+                  variant.id;
+
+                const hasAttributes =
+                  variant.attributes.length >
+                  0;
+
+                return (
+                  <button
+                    key={
+                      variant.id
+                    }
+                    type="button"
+                    disabled={
+                      variant.available_quantity <=
+                      0
+                    }
+                    onClick={() =>
+                      selectVariant(
+                        variant.id,
+                      )
+                    }
+                    className={`rounded-xl border-2 p-3 text-left transition ${
+                      selected
+                        ? "border-[#ff6b00] bg-orange-50 shadow-sm"
+                        : "border-slate-200 bg-white hover:border-blue-300"
+                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                  >
+                    {hasAttributes ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {variant.attributes.map(
+                          (
+                            attribute,
+                          ) => (
+                            <span
+                              key={`${variant.id}-${attribute.attribute_slug}`}
+                              className="rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-700"
+                            >
+                              {
+                                attribute.attribute
+                              }
+                              :{" "}
+                              {
+                                attribute.value
+                              }
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                            selected
+                              ? "border-[#ff6b00] bg-[#ff6b00]"
+                              : "border-slate-300"
+                          }`}
+                        >
+                          {selected && (
+                            <span className="h-2 w-2 rounded-full bg-white" />
+                          )}
+                        </span>
+
+                        <span className="text-sm font-black text-slate-800">
+                          Option standard
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <span className="text-sm font-black text-[#ff6b00]">
+                        {formatMoney(
+                          variant.current_price,
+                        )}
+                      </span>
+
+                      <span
+                        className={`text-[10px] font-bold ${
+                          variant.available_quantity >
+                          0
+                            ? "text-emerald-600"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {
+                          variant.available_quantity
+                        }{" "}
+                        dispo.
+                      </span>
+                    </div>
+                  </button>
+                );
+              },
+            )}
+          </div>
+
+          {availableVariants.length ===
+            1 && (
+            <p className="mt-2 text-xs font-semibold text-emerald-600">
+              âœ“ Option sÃ©lectionnÃ©e automatiquement
+            </p>
+          )}
+        </section>
+      )}
+
+      <section className="mt-6">
+        <p className="mb-2 text-xs font-black uppercase tracking-wider text-slate-500">
+          QuantitÃ©
+        </p>
+
+        <div className="flex h-12 w-fit items-center overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <button
+            type="button"
+            onClick={
+              decrement
+            }
+            disabled={
+              quantity <= 1
+            }
+            className="flex h-full w-12 items-center justify-center text-slate-600 transition hover:bg-slate-50 disabled:text-slate-300"
+            aria-label="Diminuer"
+          >
+            <Minus size={17} />
+          </button>
+
+          <span className="flex h-full min-w-14 items-center justify-center border-x border-slate-200 text-sm font-black">
+            {quantity}
+          </span>
+
+          <button
+            type="button"
+            onClick={
+              increment
+            }
+            disabled={
+              quantity >=
+              activeStock
+            }
+            className="flex h-full w-12 items-center justify-center text-slate-600 transition hover:bg-slate-50 disabled:text-slate-300"
+            aria-label="Augmenter"
+          >
+            <Plus size={17} />
+          </button>
+        </div>
+      </section>
+
+      <button
+        type="button"
+        onClick={
+          handleAdd
+        }
+        disabled={
+          !canBuy
+        }
+        className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#ff6b00] text-base font-black text-white shadow-lg shadow-orange-200 transition hover:-translate-y-0.5 hover:bg-[#ea6100] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:max-w-md"
+      >
+        <ShoppingCart
+          size={20}
+        />
+
+        {hasVariants &&
+        !selectedVariant
+          ? "Choisir une variante"
+          : "Ajouter au panier"}
+      </button>
+
+      {message && (
+        <p
+          className={`mt-3 text-sm font-bold ${
+            message.includes(
+              "âœ“",
+            )
+              ? "text-emerald-600"
+              : "text-red-600"
+          }`}
+        >
+          {message}
+        </p>
+      )}
+
+      <p className="mt-3 text-xs leading-5 text-slate-400">
+        La quantitÃ© ne peut pas dÃ©passer
+        le stock actuellement disponible.
+      </p>
+    </>
+  );
+}
+
+===== STOREFRONT PACKAGE =====
+{
+  "name": "storefront",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "lucide-react": "^1.38.0",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+
+===== PROMOTIONS MODELS =====
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+)
+from django.db import models
+from django.db.models import Q
+from django.utils import timezone
+from django.utils.text import slugify
+
+from catalog.models import (
+    Brand,
+    Category,
+    Product,
+)
+
+from .image_utils import (
+    optimize_ad_image,
+    validate_ad_image,
+)
+
+
+def generate_unique_slug(
+    instance,
+    value,
+):
+    base_slug = slugify(
+        value
+    )
+
+    if not base_slug:
+        base_slug = "campagne"
+
+    slug = base_slug
+    counter = 2
+
+    queryset = (
+        instance
+        .__class__
+        .objects
+        .all()
+    )
+
+    if instance.pk:
+        queryset = queryset.exclude(
+            pk=instance.pk
+        )
+
+    while queryset.filter(
+        slug=slug
+    ).exists():
+        slug = (
+            f"{base_slug}-{counter}"
+        )
+
+        counter += 1
+
+    return slug
+
+
+class PromotionQuerySet(models.QuerySet):
+    def active_now(
+        self,
+        at=None,
+    ):
+        """
+        Promotions rÃ©ellement actives Ã  l'instant donnÃ©.
+        """
+
+        at = at or timezone.now()
+
+        return self.filter(
+            is_active=True,
+            start_at__lte=at,
+            end_at__gt=at,
+        )
+
+
+class Promotion(models.Model):
+    """
+    Promotion ou campagne SOLDES SUGU KURA.
+
+    Le prix normal du produit n'est jamais Ã©crasÃ©.
+
+    Le moteur calcule dynamiquement le prix actif.
+
+    Ã€ expiration :
+    le prix normal redevient automatiquement effectif.
+    """
+
+    class CampaignType(models.TextChoices):
+        STANDARD = (
+            "STANDARD",
+            "Promotion",
+        )
+
+        SALE = (
+            "SALE",
+            "Soldes",
+        )
+
+    class DiscountType(models.TextChoices):
+        PERCENTAGE = (
+            "PERCENTAGE",
+            "Pourcentage",
+        )
+
+        FIXED_AMOUNT = (
+            "FIXED_AMOUNT",
+            "Montant fixe",
+        )
+
+        FIXED_PRICE = (
+            "FIXED_PRICE",
+            "Prix promotionnel fixe",
+        )
+
+    class TargetMode(models.TextChoices):
+        ALL = (
+            "ALL",
+            "Tous les produits",
+        )
+
+        CATEGORY = (
+            "CATEGORY",
+            "Une catÃ©gorie",
+        )
+
+        BRAND = (
+            "BRAND",
+            "Une marque",
+        )
+
+        PRODUCTS = (
+            "PRODUCTS",
+            "Produits sÃ©lectionnÃ©s",
+        )
+
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Nom",
+    )
+
+    slug = models.SlugField(
+        max_length=230,
+        unique=True,
+        blank=True,
+        verbose_name="Slug",
+    )
+
+    campaign_type = models.CharField(
+        max_length=20,
+        choices=CampaignType.choices,
+        default=CampaignType.STANDARD,
+        db_index=True,
+        verbose_name="Type de campagne",
+    )
+
+    discount_type = models.CharField(
+        max_length=20,
+        choices=DiscountType.choices,
+        verbose_name="Type de rÃ©duction",
+    )
+
+    discount_value = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(
+                Decimal("0.01")
+            )
+        ],
+        verbose_name="Valeur de la rÃ©duction",
+    )
+
+    target_mode = models.CharField(
+        max_length=20,
+        choices=TargetMode.choices,
+        db_index=True,
+        verbose_name="Cible",
+    )
+
+    target_category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="promotions",
+        verbose_name="CatÃ©gorie ciblÃ©e",
+    )
+
+    target_brand = models.ForeignKey(
+        Brand,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="promotions",
+        verbose_name="Marque ciblÃ©e",
+    )
+
+    products = models.ManyToManyField(
+        Product,
+        blank=True,
+        related_name="promotions",
+        verbose_name="Produits concernÃ©s",
+    )
+
+    badge_text = models.CharField(
+        max_length=60,
+        default="ðŸ”¥ PROMO",
+        blank=True,
+        verbose_name="Badge",
+    )
+
+    start_at = models.DateTimeField(
+        db_index=True,
+        verbose_name="DÃ©but",
+    )
+
+    end_at = models.DateTimeField(
+        db_index=True,
+        verbose_name="Fin",
+    )
+
+    priority = models.PositiveSmallIntegerField(
+        default=0,
+        db_index=True,
+        verbose_name="PrioritÃ©",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name="Active",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="CrÃ©Ã©e le",
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="ModifiÃ©e le",
+    )
+
+    objects = PromotionQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = "Promotion"
+        verbose_name_plural = "Promotions"
+
+        ordering = [
+            "-priority",
+            "-start_at",
+        ]
+
+        indexes = [
+            models.Index(
+                fields=[
+                    "is_active",
+                    "start_at",
+                    "end_at",
+                ],
+                name="promo_active_period_idx",
+            ),
+
+            models.Index(
+                fields=[
+                    "campaign_type",
+                    "is_active",
+                ],
+                name="promo_type_active_idx",
+            ),
+
+            models.Index(
+                fields=[
+                    "target_mode",
+                    "is_active",
+                ],
+                name="promo_target_active_idx",
+            ),
+        ]
+
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(
+                    end_at__gt=models.F(
+                        "start_at"
+                    )
+                ),
+                name="promo_end_after_start",
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        super().clean()
+
+        if (
+            self.start_at
+            and self.end_at
+            and self.end_at
+            <= self.start_at
+        ):
+            raise ValidationError(
+                {
+                    "end_at": (
+                        "La date de fin doit Ãªtre "
+                        "postÃ©rieure au dÃ©but."
+                    )
+                }
+            )
+
+        if (
+            self.discount_type
+            == self.DiscountType.PERCENTAGE
+            and self.discount_value
+            > Decimal("100.00")
+        ):
+            raise ValidationError(
+                {
+                    "discount_value": (
+                        "Une rÃ©duction en pourcentage "
+                        "ne peut pas dÃ©passer 100 %."
+                    )
+                }
+            )
+
+        if (
+            self.target_mode
+            == self.TargetMode.CATEGORY
+            and not self.target_category
+        ):
+            raise ValidationError(
+                {
+                    "target_category": (
+                        "Choisissez la catÃ©gorie "
+                        "concernÃ©e."
+                    )
+                }
+            )
+
+        if (
+            self.target_mode
+            == self.TargetMode.BRAND
+            and not self.target_brand
+        ):
+            raise ValidationError(
+                {
+                    "target_brand": (
+                        "Choisissez la marque "
+                        "concernÃ©e."
+                    )
+                }
+            )
+
+        if (
+            self.target_mode
+            != self.TargetMode.CATEGORY
+            and self.target_category
+        ):
+            raise ValidationError(
+                {
+                    "target_category": (
+                        "Cette catÃ©gorie ne doit Ãªtre "
+                        "dÃ©finie qu'en ciblage catÃ©gorie."
+                    )
+                }
+            )
+
+        if (
+            self.target_mode
+            != self.TargetMode.BRAND
+            and self.target_brand
+        ):
+            raise ValidationError(
+                {
+                    "target_brand": (
+                        "Cette marque ne doit Ãªtre "
+                        "dÃ©finie qu'en ciblage marque."
+                    )
+                }
+            )
+
+    def save(
+        self,
+        *args,
+        **kwargs,
+    ):
+        if not self.slug:
+            self.slug = (
+                generate_unique_slug(
+                    self,
+                    self.name,
+                )
+            )
+
+        self.full_clean()
+
+        super().save(
+            *args,
+            **kwargs,
+        )
+
+    @property
+    def is_current(self):
+        now = timezone.now()
+
+        return (
+            self.is_active
+            and self.start_at
+            <= now
+            < self.end_at
+        )
+
+    @property
+    def remaining_seconds(self):
+        if not self.is_current:
+            return 0
+
+        seconds = (
+            self.end_at
+            - timezone.now()
+        ).total_seconds()
+
+        return max(
+            0,
+            int(seconds),
+        )
+
+
+class AdvertisementQuerySet(
+    models.QuerySet
+):
+    def active_now(
+        self,
+        *,
+        placement=None,
+        category=None,
+        at=None,
+    ):
+        at = at or timezone.now()
+
+        queryset = self.filter(
+            is_active=True,
+            start_at__lte=at,
+            end_at__gt=at,
+        )
+
+        if placement:
+            queryset = queryset.filter(
+                placement=placement
+            )
+
+        if category:
+            queryset = queryset.filter(
+                Q(
+                    target_categories__isnull=True
+                )
+                |
+                Q(
+                    target_categories=category
+                )
+            )
+
+        return (
+            queryset
+            .distinct()
+            .order_by(
+                "-priority_level",
+                "-display_priority",
+                "id",
+            )
+        )
+
+
+class Advertisement(models.Model):
+    """
+    PublicitÃ© sponsorisÃ©e SUGU KURA.
+    """
+
+    class Placement(models.TextChoices):
+        HOME_HERO = (
+            "HOME_HERO",
+            "A â€” Grande banniÃ¨re accueil",
+        )
+
+        HOME_MIDDLE = (
+            "HOME_MIDDLE",
+            "B â€” Entre catÃ©gories et produits",
+        )
+
+        CATEGORY = (
+            "CATEGORY",
+            "C â€” Page catÃ©gorie",
+        )
+
+        PRODUCT = (
+            "PRODUCT",
+            "D â€” Page dÃ©tail produit",
+        )
+
+        CART = (
+            "CART",
+            "E â€” Panier",
+        )
+
+        MOBILE_BANNER = (
+            "MOBILE_BANNER",
+            "F â€” Petite banniÃ¨re mobile",
+        )
+
+    class Priority(models.IntegerChoices):
+        NORMAL = (
+            10,
+            "Normale",
+        )
+
+        IMPORTANT = (
+            20,
+            "Importante",
+        )
+
+        PREMIUM = (
+            30,
+            "Premium",
+        )
+
+    class DestinationType(
+        models.TextChoices
+    ):
+        PRODUCT = (
+            "PRODUCT",
+            "Produit",
+        )
+
+        CATEGORY = (
+            "CATEGORY",
+            "CatÃ©gorie",
+        )
+
+        BRAND = (
+            "BRAND",
+            "Marque",
+        )
+
+        PAGE = (
+            "PAGE",
+            "Page spÃ©ciale",
+        )
+
+        WHATSAPP = (
+            "WHATSAPP",
+            "WhatsApp",
+        )
+
+        WEBSITE = (
+            "WEBSITE",
+            "Site partenaire",
+        )
+
+        CUSTOM = (
+            "CUSTOM",
+            "Lien personnalisÃ©",
+        )
+
+    company_name = models.CharField(
+        max_length=180,
+        verbose_name="Entreprise",
+    )
+
+    company_logo = models.ImageField(
+        upload_to="advertising/logos/",
+        validators=[
+            validate_ad_image
+        ],
+        null=True,
+        blank=True,
+        verbose_name="Logo entreprise",
+    )
+
+    title = models.CharField(
+        max_length=220,
+        verbose_name="Titre",
+    )
+
+    text = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="Petit texte",
+    )
+
+    desktop_image = models.ImageField(
+        upload_to="advertising/desktop/",
+        validators=[
+            validate_ad_image
+        ],
+        verbose_name="Image desktop",
+    )
+
+    mobile_image = models.ImageField(
+        upload_to="advertising/mobile/",
+        validators=[
+            validate_ad_image
+        ],
+        null=True,
+        blank=True,
+        verbose_name="Image mobile",
+    )
+
+    button_text = models.CharField(
+        max_length=80,
+        default="Voir l'offre",
+        blank=True,
+        verbose_name="Texte bouton",
+    )
+
+    button_url = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="Lien personnalisÃ©",
+    )
+
+    whatsapp = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name="WhatsApp",
+    )
+
+    website = models.URLField(
+        blank=True,
+        verbose_name="Site web",
+    )
+
+    placement = models.CharField(
+        max_length=30,
+        choices=Placement.choices,
+        db_index=True,
+        verbose_name="Emplacement",
+    )
+
+    target_categories = (
+        models.ManyToManyField(
+            Category,
+            blank=True,
+            related_name=(
+                "targeted_advertisements"
+            ),
+            verbose_name=(
+                "CatÃ©gories contextuelles"
+            ),
+        )
+    )
+
+    priority_level = (
+        models.PositiveSmallIntegerField(
+            choices=Priority.choices,
+            default=Priority.NORMAL,
+            db_index=True,
+            verbose_name="Niveau de prioritÃ©",
+        )
+    )
+
+    display_priority = (
+        models.PositiveIntegerField(
+            default=0,
+            db_index=True,
+            verbose_name=(
+                "PrioritÃ© d'affichage"
+            ),
+        )
+    )
+
+    promotion = models.ForeignKey(
+        Promotion,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="advertisements",
+        verbose_name="Promotion associÃ©e",
+    )
+
+    display_old_price = (
+        models.DecimalField(
+            max_digits=14,
+            decimal_places=2,
+            null=True,
+            blank=True,
+            validators=[
+                MinValueValidator(
+                    Decimal("0.00")
+                )
+            ],
+            verbose_name="Ancien prix affichÃ©",
+        )
+    )
+
+    display_price = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[
+            MinValueValidator(
+                Decimal("0.00")
+            )
+        ],
+        verbose_name="Prix affichÃ©",
+    )
+
+    destination_type = (
+        models.CharField(
+            max_length=20,
+            choices=(
+                DestinationType.choices
+            ),
+            default=(
+                DestinationType.CUSTOM
+            ),
+            verbose_name=(
+                "Type de destination"
+            ),
+        )
+    )
+
+    destination_product = (
+        models.ForeignKey(
+            Product,
+            on_delete=models.SET_NULL,
+            null=True,
+            blank=True,
+            related_name=(
+                "destination_advertisements"
+            ),
+            verbose_name=(
+                "Produit destination"
+            ),
+        )
+    )
+
+    destination_category = (
+        models.ForeignKey(
+            Category,
+            on_delete=models.SET_NULL,
+            null=True,
+            blank=True,
+            related_name=(
+                "destination_advertisements"
+            ),
+            verbose_name=(
+                "CatÃ©gorie destination"
+            ),
+        )
+    )
+
+    destination_brand = (
+        models.ForeignKey(
+            Brand,
+            on_delete=models.SET_NULL,
+            null=True,
+            blank=True,
+            related_name=(
+                "destination_advertisements"
+            ),
+            verbose_name=(
+                "Marque destination"
+            ),
+        )
+    )
+
+    start_at = models.DateTimeField(
+        db_index=True,
+        verbose_name="DÃ©but",
+    )
+
+    end_at = models.DateTimeField(
+        db_index=True,
+        verbose_name="Fin",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name="Active",
+    )
+
+    hide_after_expiry = models.BooleanField(
+        default=True,
+        verbose_name=(
+            "Masquer aprÃ¨s expiration"
+        ),
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="CrÃ©Ã©e le",
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="ModifiÃ©e le",
+    )
+
+    objects = (
+        AdvertisementQuerySet
+        .as_manager()
+    )
+
+    class Meta:
+        verbose_name = "PublicitÃ©"
+        verbose_name_plural = "PublicitÃ©s"
+
+        ordering = [
+            "-priority_level",
+            "-display_priority",
+            "id",
+        ]
+
+        indexes = [
+            models.Index(
+                fields=[
+                    "placement",
+                    "is_active",
+                    "start_at",
+                    "end_at",
+                ],
+                name="ad_place_period_idx",
+            ),
+
+            models.Index(
+                fields=[
+                    "priority_level",
+                    "display_priority",
+                ],
+                name="ad_priority_idx",
+            ),
+        ]
+
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(
+                    end_at__gt=models.F(
+                        "start_at"
+                    )
+                ),
+                name="ad_end_after_start",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.company_name} â€” "
+            f"{self.title}"
+        )
+
+    def clean(self):
+        super().clean()
+
+        if (
+            self.start_at
+            and self.end_at
+            and self.end_at
+            <= self.start_at
+        ):
+            raise ValidationError(
+                {
+                    "end_at": (
+                        "La fin doit Ãªtre "
+                        "postÃ©rieure au dÃ©but."
+                    )
+                }
+            )
+
+        if (
+            self.display_old_price
+            is not None
+            and self.display_price
+            is not None
+            and self.display_price
+            > self.display_old_price
+        ):
+            raise ValidationError(
+                {
+                    "display_price": (
+                        "Le prix promotionnel affichÃ© "
+                        "ne peut pas dÃ©passer "
+                        "l'ancien prix."
+                    )
+                }
+            )
+
+        destination = (
+            self.destination_type
+        )
+
+        if (
+            destination
+            == self.DestinationType.PRODUCT
+            and not self.destination_product
+        ):
+            raise ValidationError(
+                {
+                    "destination_product": (
+                        "Choisissez le produit "
+                        "de destination."
+                    )
+                }
+            )
+
+        if (
+            destination
+            == self.DestinationType.CATEGORY
+            and not self.destination_category
+        ):
+            raise ValidationError(
+                {
+                    "destination_category": (
+                        "Choisissez la catÃ©gorie "
+                        "de destination."
+                    )
+                }
+            )
+
+        if (
+            destination
+            == self.DestinationType.BRAND
+            and not self.destination_brand
+        ):
+            raise ValidationError(
+                {
+                    "destination_brand": (
+                        "Choisissez la marque "
+                        "de destination."
+                    )
+                }
+            )
+
+        if (
+            destination
+            == self.DestinationType.WHATSAPP
+            and not self.whatsapp
+        ):
+            raise ValidationError(
+                {
+                    "whatsapp": (
+                        "Le numÃ©ro WhatsApp "
+                        "est obligatoire."
+                    )
+                }
+            )
+
+        if (
+            destination
+            == self.DestinationType.WEBSITE
+            and not self.website
+        ):
+            raise ValidationError(
+                {
+                    "website": (
+                        "Le site web "
+                        "est obligatoire."
+                    )
+                }
+            )
+
+        if (
+            destination
+            in {
+                self.DestinationType.PAGE,
+                self.DestinationType.CUSTOM,
+            }
+            and not self.button_url
+        ):
+            raise ValidationError(
+                {
+                    "button_url": (
+                        "Le lien est obligatoire "
+                        "pour cette destination."
+                    )
+                }
+            )
+
+    def save(
+        self,
+        *args,
+        **kwargs,
+    ):
+        if (
+            self.company_logo
+            and not getattr(
+                self.company_logo,
+                "_committed",
+                True,
+            )
+        ):
+            self.company_logo = (
+                optimize_ad_image(
+                    self.company_logo,
+                    max_width=1200,
+                    max_height=1200,
+                )
+            )
+
+        if (
+            self.desktop_image
+            and not getattr(
+                self.desktop_image,
+                "_committed",
+                True,
+            )
+        ):
+            self.desktop_image = (
+                optimize_ad_image(
+                    self.desktop_image,
+                    max_width=2400,
+                    max_height=1400,
+                )
+            )
+
+        if (
+            self.mobile_image
+            and not getattr(
+                self.mobile_image,
+                "_committed",
+                True,
+            )
+        ):
+            self.mobile_image = (
+                optimize_ad_image(
+                    self.mobile_image,
+                    max_width=1600,
+                    max_height=1800,
+                )
+            )
+
+        self.full_clean()
+
+        super().save(
+            *args,
+            **kwargs,
+        )
+
+    @property
+    def is_current(self):
+        now = timezone.now()
+
+        return (
+            self.is_active
+            and self.start_at
+            <= now
+            < self.end_at
+        )
+
+    @property
+    def effective_link(self):
+        if (
+            self.destination_type
+            == self.DestinationType.PRODUCT
+            and self.destination_product
+        ):
+            return (
+                "/produits/"
+                f"{self.destination_product.slug}"
+            )
+
+        if (
+            self.destination_type
+            == self.DestinationType.CATEGORY
+            and self.destination_category
+        ):
+            return (
+                "/categories/"
+                f"{self.destination_category.slug}"
+            )
+
+        if (
+            self.destination_type
+            == self.DestinationType.BRAND
+            and self.destination_brand
+        ):
+            return (
+                "/marques/"
+                f"{self.destination_brand.slug}"
+            )
+
+        if (
+            self.destination_type
+            == self.DestinationType.WHATSAPP
+        ):
+            number = "".join(
+                char
+                for char in self.whatsapp
+                if char.isdigit()
+            )
+
+            return (
+                f"https://wa.me/{number}"
+            )
+
+        if (
+            self.destination_type
+            == self.DestinationType.WEBSITE
+        ):
+            return self.website
+
+        return self.button_url
+
+
+class Partner(models.Model):
+    """
+    Entreprise ou marque partenaire SUGU KURA.
+    """
+
+    name = models.CharField(
+        max_length=180,
+        unique=True,
+        verbose_name="Nom",
+    )
+
+    logo = models.ImageField(
+        upload_to="partners/logos/",
+        validators=[
+            validate_ad_image
+        ],
+        verbose_name="Logo",
+    )
+
+    description = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="Description",
+    )
+
+    website = models.URLField(
+        blank=True,
+        verbose_name="Site web",
+    )
+
+    page_url = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="Lien interne",
+    )
+
+    display_order = models.PositiveIntegerField(
+        default=0,
+        db_index=True,
+        verbose_name="Ordre",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name="Actif",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        verbose_name = "Partenaire"
+        verbose_name_plural = "Partenaires"
+
+        ordering = [
+            "display_order",
+            "name",
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def save(
+        self,
+        *args,
+        **kwargs,
+    ):
+        if (
+            self.logo
+            and not getattr(
+                self.logo,
+                "_committed",
+                True,
+            )
+        ):
+            self.logo = (
+                optimize_ad_image(
+                    self.logo,
+                    max_width=1200,
+                    max_height=1200,
+                )
+            )
+
+        self.full_clean()
+
+        super().save(
+            *args,
+            **kwargs,
+        )
+
+    @property
+    def effective_link(self):
+        return (
+            self.page_url
+            or self.website
+        )
+
+
+class AdvertisementDailyStat(
+    models.Model
+):
+    """
+    Statistiques quotidiennes d'une publicitÃ©.
+
+    L'attribution rÃ©elle aux commandes sera reliÃ©e
+    Ã  l'Ã‰tape 13.
+    """
+
+    advertisement = models.ForeignKey(
+        Advertisement,
+        on_delete=models.CASCADE,
+        related_name="daily_stats",
+        verbose_name="PublicitÃ©",
+    )
+
+    date = models.DateField(
+        default=timezone.localdate,
+        db_index=True,
+        verbose_name="Date",
+    )
+
+    impressions = (
+        models.PositiveBigIntegerField(
+            default=0,
+            verbose_name="Impressions",
+        )
+    )
+
+    clicks = (
+        models.PositiveBigIntegerField(
+            default=0,
+            verbose_name="Clics",
+        )
+    )
+
+    orders_count = (
+        models.PositiveBigIntegerField(
+            default=0,
+            verbose_name="Commandes",
+        )
+    )
+
+    attributed_revenue = (
+        models.DecimalField(
+            max_digits=16,
+            decimal_places=2,
+            default=Decimal("0.00"),
+            validators=[
+                MinValueValidator(
+                    Decimal("0.00")
+                )
+            ],
+            verbose_name=(
+                "Chiffre d'affaires attribuÃ©"
+            ),
+        )
+    )
+
+    class Meta:
+        verbose_name = (
+            "Statistique publicitaire"
+        )
+
+        verbose_name_plural = (
+            "Statistiques publicitaires"
+        )
+
+        ordering = [
+            "-date",
+        ]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "advertisement",
+                    "date",
+                ],
+                name="unique_ad_daily_stat",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.advertisement} â€” "
+            f"{self.date}"
+        )
+
+    @property
+    def ctr(self):
+        if self.impressions == 0:
+            return Decimal("0.00")
+
+        value = (
+            Decimal(self.clicks)
+            / Decimal(self.impressions)
+        ) * Decimal("100")
+
+        return value.quantize(
+            Decimal("0.01")
+        )
+
+===== PROMOTIONS ADMIN =====
+from django.contrib import admin
+
+from .models import (
+    Advertisement,
+    AdvertisementDailyStat,
+    Partner,
+    Promotion,
+)
+
+
+@admin.register(Promotion)
+class PromotionAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "campaign_type",
+        "discount_type",
+        "discount_value",
+        "target_mode",
+        "start_at",
+        "end_at",
+        "priority",
+        "current_status",
+        "is_active",
+    )
+
+    list_filter = (
+        "campaign_type",
+        "discount_type",
+        "target_mode",
+        "is_active",
+    )
+
+    search_fields = (
+        "name",
+        "slug",
+        "badge_text",
+    )
+
+    filter_horizontal = (
+        "products",
+    )
+
+    autocomplete_fields = (
+        "target_category",
+        "target_brand",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "current_status",
+        "remaining_time",
+    )
+
+    @admin.display(
+        description="Ã‰tat actuel"
+    )
+    def current_status(
+        self,
+        obj,
+    ):
+        if obj.is_current:
+            return "ACTIVE"
+
+        return "INACTIVE"
+
+    @admin.display(
+        description="Secondes restantes"
+    )
+    def remaining_time(
+        self,
+        obj,
+    ):
+        return obj.remaining_seconds
+
+
+@admin.register(Advertisement)
+class AdvertisementAdmin(
+    admin.ModelAdmin
+):
+    list_display = (
+        "company_name",
+        "title",
+        "placement",
+        "priority_level",
+        "display_priority",
+        "start_at",
+        "end_at",
+        "current_status",
+        "is_active",
+    )
+
+    list_filter = (
+        "placement",
+        "priority_level",
+        "destination_type",
+        "is_active",
+    )
+
+    search_fields = (
+        "company_name",
+        "title",
+        "text",
+    )
+
+    autocomplete_fields = (
+        "promotion",
+        "destination_product",
+        "destination_category",
+        "destination_brand",
+    )
+
+    filter_horizontal = (
+        "target_categories",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "current_status",
+        "effective_destination",
+    )
+
+    @admin.display(
+        description="Ã‰tat actuel"
+    )
+    def current_status(
+        self,
+        obj,
+    ):
+        if obj.is_current:
+            return "ACTIVE"
+
+        return "INACTIVE"
+
+    @admin.display(
+        description="Lien effectif"
+    )
+    def effective_destination(
+        self,
+        obj,
+    ):
+        return obj.effective_link
+
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "display_order",
+        "is_active",
+        "updated_at",
+    )
+
+    list_filter = (
+        "is_active",
+    )
+
+    search_fields = (
+        "name",
+        "description",
+    )
+
+    list_editable = (
+        "display_order",
+        "is_active",
+    )
+
+
+@admin.register(
+    AdvertisementDailyStat
+)
+class AdvertisementDailyStatAdmin(
+    admin.ModelAdmin
+):
+    list_display = (
+        "advertisement",
+        "date",
+        "impressions",
+        "clicks",
+        "ctr_display",
+        "orders_count",
+        "attributed_revenue",
+    )
+
+    list_filter = (
+        "date",
+    )
+
+    search_fields = (
+        "advertisement__company_name",
+        "advertisement__title",
+    )
+
+    readonly_fields = (
+        "advertisement",
+        "date",
+        "impressions",
+        "clicks",
+        "ctr_display",
+        "orders_count",
+        "attributed_revenue",
+    )
+
+    @admin.display(
+        description="CTR %"
+    )
+    def ctr_display(
+        self,
+        obj,
+    ):
+        return obj.ctr
+
+    def has_add_permission(
+        self,
+        request,
+    ):
+        return False
+
+    def has_change_permission(
+        self,
+        request,
+        obj=None,
+    ):
+        return False
+
+    def has_delete_permission(
+        self,
+        request,
+        obj=None,
+    ):
+        return False
+
+===== PROMOTIONS API =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\promotions\api\serializers.py =====
+from django.utils import timezone
+from rest_framework import serializers
+
+from promotions.models import (
+    Advertisement,
+    Partner,
+    Promotion,
+)
+
+
+class PromotionSerializer(
+    serializers.ModelSerializer
+):
+    remaining_seconds = (
+        serializers.IntegerField(
+            read_only=True
+        )
+    )
+
+    products = (
+        serializers.SerializerMethodField()
+    )
+
+    target = (
+        serializers.SerializerMethodField()
+    )
+
+    class Meta:
+        model = Promotion
+
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "campaign_type",
+            "discount_type",
+            "discount_value",
+            "target_mode",
+            "target",
+            "products",
+            "badge_text",
+            "start_at",
+            "end_at",
+            "remaining_seconds",
+            "priority",
+        )
+
+    def get_products(
+        self,
+        obj,
+    ):
+        if (
+            obj.target_mode
+            != Promotion
+            .TargetMode
+            .PRODUCTS
+        ):
+            return []
+
+        return [
+            {
+                "id": product.pk,
+                "name": product.name,
+                "slug": product.slug,
+            }
+            for product
+            in obj.products.all()
+        ]
+
+    def get_target(
+        self,
+        obj,
+    ):
+        if (
+            obj.target_mode
+            == Promotion.TargetMode.ALL
+        ):
+            return {
+                "type": "ALL",
+            }
+
+        if (
+            obj.target_mode
+            == Promotion
+            .TargetMode
+            .CATEGORY
+            and obj.target_category
+        ):
+            return {
+                "type": "CATEGORY",
+                "id": (
+                    obj.target_category.pk
+                ),
+                "name": (
+                    obj.target_category.name
+                ),
+                "slug": (
+                    obj.target_category.slug
+                ),
+            }
+
+        if (
+            obj.target_mode
+            == Promotion
+            .TargetMode
+            .BRAND
+            and obj.target_brand
+        ):
+            return {
+                "type": "BRAND",
+                "id": (
+                    obj.target_brand.pk
+                ),
+                "name": (
+                    obj.target_brand.name
+                ),
+                "slug": (
+                    obj.target_brand.slug
+                ),
+            }
+
+        return {
+            "type": "PRODUCTS",
+        }
+
+
+class AdvertisementSerializer(
+    serializers.ModelSerializer
+):
+    effective_link = (
+        serializers.CharField(
+            read_only=True
+        )
+    )
+
+    remaining_seconds = (
+        serializers.SerializerMethodField()
+    )
+
+    promotion = (
+        PromotionSerializer(
+            read_only=True
+        )
+    )
+
+    class Meta:
+        model = Advertisement
+
+        fields = (
+            "id",
+            "company_name",
+            "company_logo",
+            "title",
+            "text",
+            "desktop_image",
+            "mobile_image",
+            "button_text",
+            "effective_link",
+            "placement",
+            "priority_level",
+            "display_priority",
+            "promotion",
+            "display_old_price",
+            "display_price",
+            "start_at",
+            "end_at",
+            "remaining_seconds",
+        )
+
+    def get_remaining_seconds(
+        self,
+        obj,
+    ):
+        now = timezone.now()
+
+        if not (
+            obj.is_active
+            and obj.start_at
+            <= now
+            < obj.end_at
+        ):
+            return 0
+
+        return max(
+            0,
+            int(
+                (
+                    obj.end_at
+                    - now
+                ).total_seconds()
+            ),
+        )
+
+
+class PartnerSerializer(
+    serializers.ModelSerializer
+):
+    effective_link = (
+        serializers.CharField(
+            read_only=True
+        )
+    )
+
+    class Meta:
+        model = Partner
+
+        fields = (
+            "id",
+            "name",
+            "logo",
+            "description",
+            "effective_link",
+            "display_order",
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\promotions\api\urls.py =====
+from rest_framework.routers import DefaultRouter
+
+from .views import (
+    ActivePromotionViewSet,
+    AdvertisementViewSet,
+    PartnerViewSet,
+)
+
+
+router = DefaultRouter()
+
+router.register(
+    r"promotions",
+    ActivePromotionViewSet,
+    basename="active-promotion",
+)
+
+router.register(
+    r"advertisements",
+    AdvertisementViewSet,
+    basename="advertisement",
+)
+
+router.register(
+    r"partners",
+    PartnerViewSet,
+    basename="partner",
+)
+
+
+urlpatterns = router.urls
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\promotions\api\views.py =====
+from django.shortcuts import get_object_or_404
+
+from rest_framework import (
+    permissions,
+    status,
+    viewsets,
+)
+
+from rest_framework.decorators import action
+
+from rest_framework.response import Response
+
+from catalog.models import Category
+
+from promotions.models import (
+    Advertisement,
+    Partner,
+    Promotion,
+)
+
+from promotions.services import (
+    record_ad_click,
+    record_ad_impression,
+)
+
+from .serializers import (
+    AdvertisementSerializer,
+    PartnerSerializer,
+    PromotionSerializer,
+)
+
+
+class ActivePromotionViewSet(
+    viewsets.ReadOnlyModelViewSet
+):
+    """
+    Promotions actives actuellement.
+
+    Cette API n'est volontairement pas paginÃ©e :
+    le frontend doit pouvoir rÃ©cupÃ©rer directement
+    les campagnes actives pour afficher les badges,
+    compteurs et blocs promotionnels.
+    """
+
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    http_method_names = [
+        "get",
+        "head",
+        "options",
+    ]
+
+    pagination_class = None
+
+    serializer_class = (
+        PromotionSerializer
+    )
+
+    def get_queryset(self):
+        return (
+            Promotion.objects
+            .active_now()
+            .select_related(
+                "target_category",
+                "target_brand",
+            )
+            .prefetch_related(
+                "products",
+            )
+            .order_by(
+                "-priority",
+                "end_at",
+            )
+        )
+
+
+class AdvertisementViewSet(
+    viewsets.ReadOnlyModelViewSet
+):
+    """
+    PublicitÃ©s actuellement diffusables.
+
+    Pas de pagination :
+    le frontend doit recevoir directement les
+    publicitÃ©s d'un emplacement pour construire
+    son slider/carrousel.
+    """
+
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    serializer_class = (
+        AdvertisementSerializer
+    )
+
+    pagination_class = None
+
+    http_method_names = [
+        "get",
+        "post",
+        "head",
+        "options",
+    ]
+
+    def get_queryset(self):
+        placement = (
+            self.request
+            .query_params
+            .get(
+                "placement"
+            )
+        )
+
+        category_slug = (
+            self.request
+            .query_params
+            .get(
+                "category"
+            )
+        )
+
+        category = None
+
+        if category_slug:
+            category = get_object_or_404(
+                Category,
+                slug=category_slug,
+                is_active=True,
+            )
+
+        return (
+            Advertisement.objects
+            .active_now(
+                placement=placement,
+                category=category,
+            )
+            .select_related(
+                "promotion",
+                "promotion__target_category",
+                "promotion__target_brand",
+                "destination_product",
+                "destination_category",
+                "destination_brand",
+            )
+            .prefetch_related(
+                "promotion__products",
+                "target_categories",
+            )
+        )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="impression",
+    )
+    def impression(
+        self,
+        request,
+        pk=None,
+    ):
+        """
+        Enregistre une impression publicitaire.
+        """
+
+        advertisement = (
+            self.get_object()
+        )
+
+        stat = record_ad_impression(
+            advertisement.pk
+        )
+
+        return Response(
+            {
+                "status": "ok",
+                "advertisement_id": (
+                    advertisement.pk
+                ),
+                "impressions": (
+                    stat.impressions
+                ),
+            },
+            status=(
+                status.HTTP_200_OK
+            ),
+        )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="click",
+    )
+    def click(
+        self,
+        request,
+        pk=None,
+    ):
+        """
+        Enregistre un clic et renvoie le lien
+        vers lequel le frontend doit rediriger.
+        """
+
+        advertisement = (
+            self.get_object()
+        )
+
+        stat = record_ad_click(
+            advertisement.pk
+        )
+
+        return Response(
+            {
+                "status": "ok",
+                "advertisement_id": (
+                    advertisement.pk
+                ),
+                "clicks": (
+                    stat.clicks
+                ),
+                "redirect_url": (
+                    advertisement
+                    .effective_link
+                ),
+            },
+            status=(
+                status.HTTP_200_OK
+            ),
+        )
+
+
+class PartnerViewSet(
+    viewsets.ReadOnlyModelViewSet
+):
+    """
+    Partenaires actifs.
+
+    Pas de pagination :
+    ils seront notamment utilisÃ©s dans le
+    slider de logos partenaires.
+    """
+
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+
+    http_method_names = [
+        "get",
+        "head",
+        "options",
+    ]
+
+    pagination_class = None
+
+    serializer_class = (
+        PartnerSerializer
+    )
+
+    queryset = (
+        Partner.objects
+        .filter(
+            is_active=True
+        )
+        .order_by(
+            "display_order",
+            "name",
+        )
+    )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\promotions\api\__init__.py =====
+
+===== OWNER PUBLICITES =====
+import {
+  toggleAdvertisementAction,
+} from "@/actions/owner";
+
+import {
+  ownerFetch,
+} from "@/lib/backend";
+
+import {
+  formatMoney,
+} from "@/lib/format";
+
+import type {
+  AdvertisementRecord,
+  MarketingSummary,
+} from "@/types/owner";
+
+
+export default async function AdvertisementsPage() {
+  const [
+    advertisements,
+    summary,
+  ] = await Promise.all([
+    ownerFetch<
+      AdvertisementRecord[]
+    >(
+      "/owner/advertisements/",
+    ),
+
+    ownerFetch<
+      MarketingSummary
+    >(
+      "/owner/marketing/summary/",
+    ),
+  ]);
+
+  const adminUrl =
+    process.env
+      .NEXT_PUBLIC_DJANGO_ADMIN_URL ??
+    "http://127.0.0.1:8000/admin/";
+
+  return (
+    <>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-slate-950">
+            PublicitÃ©s
+          </h1>
+
+          <p className="mt-2 text-sm text-slate-500">
+            ContrÃ´le des campagnes
+            sponsorisÃ©es SUGU KURA.
+          </p>
+        </div>
+
+        <a
+          href={`${adminUrl}promotions/advertisement/`}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-xl bg-[#ff6b00] px-4 py-3 text-xs font-black text-white"
+        >
+          Administration avancÃ©e
+        </a>
+      </div>
+
+      <section className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <span className="text-xs text-slate-400">
+            Actives
+          </span>
+
+          <strong className="mt-1 block text-xl">
+            {
+              summary.active_ads
+            }
+          </strong>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <span className="text-xs text-slate-400">
+            Impressions
+          </span>
+
+          <strong className="mt-1 block text-xl">
+            {
+              summary.impressions
+            }
+          </strong>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <span className="text-xs text-slate-400">
+            Clics
+          </span>
+
+          <strong className="mt-1 block text-xl">
+            {
+              summary.clicks
+            }
+          </strong>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <span className="text-xs text-slate-400">
+            CTR
+          </span>
+
+          <strong className="mt-1 block text-xl">
+            {
+              summary.ctr
+            }%
+          </strong>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <span className="text-xs text-slate-400">
+            Revenus
+          </span>
+
+          <strong className="mt-1 block text-xl">
+            {formatMoney(
+              summary.revenue,
+            )}
+          </strong>
+        </div>
+      </section>
+
+      <div className="mt-7 grid gap-4 lg:grid-cols-2">
+        {advertisements.length ===
+          0 && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 lg:col-span-2">
+            Aucune publicitÃ© configurÃ©e.
+          </div>
+        )}
+
+        {advertisements.map(
+          (
+            advertisement,
+          ) => {
+            const title =
+              String(
+                advertisement.title ??
+                advertisement.company_name ??
+                `PublicitÃ© #${advertisement.id}`,
+              );
+
+            const active =
+              Boolean(
+                advertisement.is_active,
+              );
+
+            return (
+              <article
+                key={
+                  String(
+                    advertisement.id,
+                  )
+                }
+                className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm"
+              >
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <strong className="text-lg text-slate-950">
+                      {title}
+                    </strong>
+
+                    {advertisement
+                      .company_name && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        {
+                          String(
+                            advertisement
+                              .company_name,
+                          )
+                        }
+                      </p>
+                    )}
+
+                    {advertisement
+                      .placement && (
+                      <p className="mt-2 text-xs font-bold text-[#0b4da2]">
+                        Placement :{" "}
+                        {
+                          String(
+                            advertisement
+                              .placement,
+                          )
+                        }
+                      </p>
+                    )}
+                  </div>
+
+                  <span
+                    className={`h-fit rounded-full px-3 py-1 text-xs font-black ${
+                      active
+                        ? "bg-emerald-50 text-emerald-600"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {active
+                      ? "Active"
+                      : "Inactive"}
+                  </span>
+                </div>
+
+                <form
+                  action={
+                    toggleAdvertisementAction
+                  }
+                  className="mt-5"
+                >
+                  <input
+                    type="hidden"
+                    name="advertisement_id"
+                    value={
+                      String(
+                        advertisement.id,
+                      )
+                    }
+                  />
+
+                  <button
+                    type="submit"
+                    className={`rounded-xl px-4 py-2 text-xs font-black text-white ${
+                      active
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
+                  >
+                    {active
+                      ? "DÃ©sactiver"
+                      : "Activer"}
+                  </button>
+                </form>
+              </article>
+            );
+          },
+        )}
+      </div>
+    </>
+  );
+}
+
+===== OWNER ACTIONS =====
+"use server";
+
+import {
+  cookies,
+} from "next/headers";
+
+import {
+  revalidatePath,
+} from "next/cache";
+
+import {
+  redirect,
+} from "next/navigation";
+
+
+const API_URL =
+  process.env.INTERNAL_API_URL ??
+  "http://127.0.0.1:8000/api/v1";
+
+
+async function getToken() {
+  const cookieStore =
+    await cookies();
+
+  return (
+    cookieStore.get(
+      "sk_owner_token",
+    )?.value ??
+    ""
+  );
+}
+
+
+async function postOwner(
+  path: string,
+  body?: unknown,
+) {
+  const token =
+    await getToken();
+
+  if (!token) {
+    redirect(
+      "/login",
+    );
+  }
+
+  const response =
+    await fetch(
+      `${API_URL}${path}`,
+      {
+        method: "POST",
+
+        headers: {
+          Accept:
+            "application/json",
+
+          "Content-Type":
+            "application/json",
+
+          Authorization:
+            `Token ${token}`,
+        },
+
+        body:
+          body !== undefined
+            ? JSON.stringify(
+                body,
+              )
+            : undefined,
+
+        cache: "no-store",
+      },
+    );
+
+  if (
+    response.status === 401 ||
+    response.status === 403
+  ) {
+    redirect(
+      "/login",
+    );
+  }
+
+  if (!response.ok) {
+    let message =
+      "Une erreur est survenue.";
+
+    try {
+      const data =
+        await response.json();
+
+      if (
+        typeof data.detail ===
+        "string"
+      ) {
+        message =
+          data.detail;
+      }
+    } catch {
+      // RÃƒÂ©ponse non JSON.
+    }
+
+    throw new Error(
+      message,
+    );
+  }
+
+  return response.json();
+}
+
+
+export async function loginAction(
+  formData: FormData,
+) {
+  const username =
+    String(
+      formData.get(
+        "username",
+      ) ?? "",
+    ).trim();
+
+  const password =
+    String(
+      formData.get(
+        "password",
+      ) ?? "",
+    );
+
+  const response =
+    await fetch(
+      `${API_URL}/owner/auth/login/`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Accept:
+            "application/json",
+        },
+
+        body:
+          JSON.stringify({
+            username,
+            password,
+          }),
+
+        cache: "no-store",
+      },
+    );
+
+  if (!response.ok) {
+    /*
+     * Le dÃ©tail backend n'est jamais reflÃ©tÃ© dans l'URL.
+     * Le message reste volontairement gÃ©nÃ©rique.
+     */
+    redirect(
+      "/login?error=Identifiants%20incorrects.",
+    );
+  }
+
+  const data =
+    await response.json();
+
+  const cookieStore =
+    await cookies();
+
+  cookieStore.set(
+    "sk_owner_token",
+    data.token,
+    {
+      httpOnly: true,
+
+      sameSite: "strict",
+
+      secure:
+        process.env.NODE_ENV
+        === "production",
+
+      path: "/",
+
+      priority: "high",
+
+      maxAge:
+        60 * 60 * 12,
+    },
+  );
+
+  redirect(
+    "/",
+  );
+}
+
+
+export async function logoutAction() {
+  const token =
+    await getToken();
+
+  if (token) {
+    try {
+      await fetch(
+        `${API_URL}/owner/auth/logout/`,
+        {
+          method: "POST",
+
+          headers: {
+            Authorization:
+              `Token ${token}`,
+
+            Accept:
+              "application/json",
+          },
+
+          cache: "no-store",
+        },
+      );
+    } catch {
+      // MÃƒÂªme si Django est indisponible,
+      // on supprime le cookie local.
+    }
+  }
+
+  const cookieStore =
+    await cookies();
+
+  cookieStore.delete(
+    "sk_owner_token",
+  );
+
+  redirect(
+    "/login",
+  );
+}
+
+
+export async function updateOrderStatusAction(
+  formData: FormData,
+) {
+  const id =
+    String(
+      formData.get(
+        "order_id",
+      ) ?? "",
+    );
+
+  const status =
+    String(
+      formData.get(
+        "status",
+      ) ?? "",
+    );
+
+  await postOwner(
+    `/owner/orders/${id}/set-status/`,
+    {
+      status,
+    },
+  );
+
+  revalidatePath(
+    "/commandes",
+  );
+
+  revalidatePath(
+    "/",
+  );
+}
+
+
+export async function markPaymentPaidAction(
+  formData: FormData,
+) {
+  const id =
+    String(
+      formData.get(
+        "payment_id",
+      ) ?? "",
+    );
+
+  await postOwner(
+    `/owner/payments/${id}/mark-paid/`,
+  );
+
+  revalidatePath(
+    "/paiements",
+  );
+
+  revalidatePath(
+    "/commandes",
+  );
+
+  revalidatePath(
+    "/",
+  );
+}
+
+
+export async function toggleAdvertisementAction(
+  formData: FormData,
+) {
+  const id =
+    String(
+      formData.get(
+        "advertisement_id",
+      ) ?? "",
+    );
+
+  await postOwner(
+    `/owner/advertisements/${id}/toggle/`,
+  );
+
+  revalidatePath(
+    "/publicites",
+  );
+
+  revalidatePath(
+    "/",
+  );
+}
+
+===== OWNER TYPES =====
+export interface OwnerUser {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  display_name: string;
+}
+
+
+export interface DashboardSummary {
+  orders: {
+    total: number;
+    today: number;
+    pending: number;
+    processing: number;
+    delivered: number;
+  };
+
+  money: {
+    paid_revenue: string;
+    pending_amount: string;
+    today_order_total: string;
+  };
+
+  catalog: {
+    products: number;
+    active_products: number;
+    categories: number;
+    brands: number;
+  };
+
+  inventory: {
+    low_stock: number;
+    out_of_stock: number;
+  };
+
+  checkout: {
+    active: number;
+  };
+
+  marketing: {
+    active_promotions: number;
+    active_ads: number;
+    active_partners: number;
+
+    impressions: number;
+    clicks: number;
+    ctr: number;
+
+    orders: number;
+    revenue: string;
+  };
+}
+
+
+export interface OwnerOrderItem {
+  id: number;
+
+  product_name: string;
+  sku: string;
+  variant_label: string;
+
+  unit_price: string;
+  quantity: number;
+  line_total: string;
+}
+
+
+export interface OwnerPayment {
+  id: string;
+
+  reference: string;
+
+  method: string;
+  method_label: string;
+
+  status: string;
+  status_label: string;
+
+  amount: string;
+  currency: string;
+
+  provider?: string;
+  provider_reference?: string;
+  transaction_id?: string;
+
+  paid_at: string | null;
+  created_at: string;
+}
+
+
+export interface OwnerOrder {
+  id: string;
+
+  order_number: string;
+
+  status: string;
+  status_label: string;
+
+  customer_name: string;
+  customer_phone: string;
+
+  customer_whatsapp?: string;
+  customer_email?: string;
+
+  delivery_method: string;
+  delivery_method_label: string;
+
+  city: string;
+  delivery_zone: string;
+  address?: string;
+  notes?: string;
+
+  subtotal: string;
+  delivery_fee: string;
+  total: string;
+
+  created_at: string;
+  updated_at?: string;
+
+  items: OwnerOrderItem[];
+
+  payments: OwnerPayment[];
+}
+
+
+export interface InventoryAlert {
+  id: number;
+
+  product_id: number;
+
+  product_name: string;
+  sku: string;
+
+  variant: string;
+
+  quantity_on_hand: number;
+  quantity_reserved: number;
+
+  available: number;
+
+  low_stock_threshold: number;
+
+  status:
+    | "LOW_STOCK"
+    | "OUT_OF_STOCK";
+}
+
+
+export interface MarketingSummary {
+  active_promotions: number;
+  active_ads: number;
+  active_partners: number;
+
+  impressions: number;
+  clicks: number;
+  ctr: number;
+
+  orders: number;
+  revenue: string;
+}
+
+
+export interface AdvertisementRecord {
+  id: number | string;
+
+  title?: string;
+  company_name?: string;
+
+  placement?: string;
+  priority?: string;
+
+  is_active?: boolean;
+
+  starts_at?: string | null;
+  ends_at?: string | null;
+
+  desktop_image?: string | null;
+  mobile_image?: string | null;
+
+  [key: string]: unknown;
+}

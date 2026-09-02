@@ -1,0 +1,5749 @@
+﻿===== DJANGO SETTINGS =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\asgi.py =====
+"""
+ASGI config for config project.
+
+It exposes the ASGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
+"""
+
+import os
+
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+
+application = get_asgi_application()
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\settings.py =====
+from pathlib import Path
+
+from decouple import Csv, config
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+SECRET_KEY = config(
+    "DJANGO_SECRET_KEY"
+)
+
+DEBUG = config(
+    "DJANGO_DEBUG",
+    default=False,
+    cast=bool,
+)
+
+ALLOWED_HOSTS = config(
+    "DJANGO_ALLOWED_HOSTS",
+    default="localhost,127.0.0.1",
+    cast=Csv(),
+)
+
+
+DJANGO_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+]
+
+
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "rest_framework.authtoken",
+    "django_filters",
+]
+
+
+LOCAL_APPS = [
+    "core",
+    "accounts",
+    "catalog",
+    "inventory",
+    "promotions",
+    "checkout",
+    "orders",
+    "owner_console",
+    "notifications",
+]
+
+
+INSTALLED_APPS = (
+    DJANGO_APPS
+    + THIRD_PARTY_APPS
+    + LOCAL_APPS
+)
+
+
+AUTH_USER_MODEL = "accounts.User"
+
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+
+    "corsheaders.middleware.CorsMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
+
+    "django.middleware.common.CommonMiddleware",
+
+    "django.middleware.csrf.CsrfViewMiddleware",
+
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+
+    "django.contrib.messages.middleware.MessageMiddleware",
+
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+
+ROOT_URLCONF = "config.urls"
+
+WSGI_APPLICATION = "config.wsgi.application"
+
+ASGI_APPLICATION = "config.asgi.application"
+
+
+TEMPLATES = [
+    {
+        "BACKEND": (
+            "django.template.backends."
+            "django.DjangoTemplates"
+        ),
+
+        "DIRS": [],
+
+        "APP_DIRS": True,
+
+        "OPTIONS": {
+            "context_processors": [
+                (
+                    "django.template.context_processors."
+                    "request"
+                ),
+
+                (
+                    "django.contrib.auth.context_processors."
+                    "auth"
+                ),
+
+                (
+                    "django.contrib.messages.context_processors."
+                    "messages"
+                ),
+            ],
+        },
+    },
+]
+
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+
+        "NAME": config(
+            "DB_NAME"
+        ),
+
+        "USER": config(
+            "DB_USER"
+        ),
+
+        "PASSWORD": config(
+            "DB_PASSWORD"
+        ),
+
+        "HOST": config(
+            "DB_HOST",
+            default="localhost",
+        ),
+
+        "PORT": config(
+            "DB_PORT",
+            default="5432",
+        ),
+
+        "CONN_MAX_AGE": 60,
+
+        "CONN_HEALTH_CHECKS": True,
+    },
+}
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
+    },
+
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        ),
+    },
+
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        ),
+    },
+
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        ),
+    },
+]
+
+
+LANGUAGE_CODE = "fr-fr"
+
+TIME_ZONE = config(
+    "APP_TIME_ZONE",
+    default="Africa/Bamako",
+)
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+STATIC_URL = "/static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+DEFAULT_AUTO_FIELD = (
+    "django.db.models.BigAutoField"
+)
+
+
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:3000",
+    cast=Csv(),
+)
+
+CORS_ALLOW_CREDENTIALS = True
+
+
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://localhost:3000",
+    cast=Csv(),
+)
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        (
+            "rest_framework.permissions."
+            "IsAuthenticatedOrReadOnly"
+        ),
+    ],
+
+    "DEFAULT_FILTER_BACKENDS": [
+        (
+            "django_filters.rest_framework."
+            "DjangoFilterBackend"
+        ),
+
+        "rest_framework.filters.SearchFilter",
+
+        "rest_framework.filters.OrderingFilter",
+    ],
+
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination."
+        "PageNumberPagination"
+    ),
+
+    "PAGE_SIZE": 24,
+
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
+}
+
+
+REDIS_URL = config(
+    "REDIS_URL",
+    default="redis://127.0.0.1:6379/0",
+)
+
+CELERY_BROKER_URL = REDIS_URL
+
+CELERY_RESULT_BACKEND = REDIS_URL
+
+CELERY_ACCEPT_CONTENT = [
+    "json",
+]
+
+CELERY_TASK_SERIALIZER = "json"
+
+CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_ENABLE_UTC = True
+
+
+SESSION_COOKIE_HTTPONLY = True
+
+CSRF_COOKIE_HTTPONLY = True
+
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+SECURE_REFERRER_POLICY = (
+    "strict-origin-when-cross-origin"
+)
+
+
+LOGGING = {
+    "version": 1,
+
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+
+    "root": {
+        "handlers": [
+            "console",
+        ],
+
+        "level": "INFO",
+    },
+}
+WEBPUSH_VAPID_PUBLIC_KEY = config(
+    "WEBPUSH_VAPID_PUBLIC_KEY",
+    default="",
+)
+
+WEBPUSH_VAPID_PRIVATE_KEY = config(
+    "WEBPUSH_VAPID_PRIVATE_KEY",
+    default="",
+)
+
+WEBPUSH_VAPID_SUBJECT = config(
+    "WEBPUSH_VAPID_SUBJECT",
+    default=(
+        "mailto:admin@example.com"
+    ),
+)
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\urls.py =====
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import (
+    include,
+    path,
+)
+
+
+urlpatterns = [
+    path(
+        "admin/",
+        admin.site.urls,
+    ),
+
+    path(
+        "api/v1/",
+        include(
+            "core.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/catalog/",
+        include(
+            "catalog.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/marketing/",
+        include(
+            "promotions.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/checkout/",
+        include(
+            "checkout.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/orders/",
+        include(
+            "orders.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/owner/",
+        include(
+            "owner_console.api.urls"
+        ),
+    ),
+
+    path(
+        (
+            "api/v1/owner/"
+            "notifications/"
+        ),
+        include(
+            "notifications.api.urls"
+        ),
+    ),
+]
+
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=(
+            settings.MEDIA_ROOT
+        ),
+    )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\wsgi.py =====
+"""
+WSGI config for config project.
+
+It exposes the WSGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
+"""
+
+import os
+
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+
+application = get_wsgi_application()
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\__pycache__\settings.cpython-314.pyc =====
++
+    $§•jz  ã                   ó  € ^ RI Ht ^ RIHtHt ]! ]4      P
+                  4       P                  P                  t]! R4      t	]! RR]
+R7      t]! RR]! 4       R7      t. RROt
+. RSOt. RTOt]
+],           ],           tR	t. RUOtR
+tRtRtR
+RR. RRRR. RVO//.tRRRR]! R4      R]! R4      R]! R4      R]! RRR 7      R!]! R"R#R 7      R$^<R%R//tRR&/RR'/RR(/RR)/.tR*t]! R+R,R 7      tRtRtR-t]R.,          tR/t]R0,          t R1t!]! R2R3]! 4       R7      t"Rt#]! R4R3]! 4       R7      t$R5R6.R7. RWOR8R9R:^R;R<.R=. RXO/t%]! R>R?R 7      t&]&t']&t(R@.t)R@t*R@t+]t,Rt-Rt.Rt/RAt0Rt1RBt2RC^RDRRERFRGRH//RIRERF.RJRK//t3]! RLRMR 7      t4]! RNRMR 7      t5]! RORPR 7      t6RQ# )Yé    )ÚPath)ÚCsvÚconfigÚDJANGO_SECRET_KEYÚDJANGO_DEBUGF)ÚdefaultÚcastÚDJANGO_ALLOWED_HOSTSzlocalhost,127.0.0.1z
+accounts.Userzconfig.urlszconfig.wsgi.applicationzconfig.asgi.applicationÚBACKENDz/django.template.backends.django.DjangoTemplatesÚDIRSÚAPP_DIRSTÚOPTIONSÚcontext_processorsr   ÚENGINEzdjango.db.backends.postgresqlÚNAMEÚDB_NAMEÚUSERÚDB_USERÚPASSWORDÚDB_PASSWORDÚHOSTÚDB_HOSTÚ	localhost)r   ÚPORTÚDB_PORTÚ5432ÚCONN_MAX_AGEÚCONN_HEALTH_CHECKSzHdjango.contrib.auth.password_validation.UserAttributeSimilarityValidatorz>django.contrib.auth.password_validation.MinimumLengthValidatorz?django.contrib.auth.password_validation.CommonPasswordValidatorz@django.contrib.auth.password_validation.NumericPasswordValidatorzfr-frÚ
+APP_TIME_ZONEz
+Africa/Bamakoz/static/Ústaticfilesz/media/Úmediazdjango.db.models.BigAutoFieldÚCORS_ALLOWED_ORIGINSzhttp://localhost:3000ÚCSRF_TRUSTED_ORIGINSÚDEFAULT_PERMISSION_CLASSESz4rest_framework.permissions.IsAuthenticatedOrReadOnlyÚDEFAULT_FILTER_BACKENDSÚDEFAULT_PAGINATION_CLASSz.rest_framework.pagination.PageNumberPaginationÚ	PAGE_SIZEÚDEFAULT_RENDERER_CLASSESz%rest_framework.renderers.JSONRendererÚDEFAULT_PARSER_CLASSESÚ	REDIS_URLzredis://127.0.0.1:6379/0ÚjsonÚDENYzstrict-origin-when-cross-originÚversionÚdisable_existing_loggersÚhandlersÚconsoleÚclasszlogging.StreamHandlerÚrootÚlevelÚINFOÚWEBPUSH_VAPID_PUBLIC_KEYÚ ÚWEBPUSH_VAPID_PRIVATE_KEYÚWEBPUSH_VAPID_SUBJECTzmailto:admin@example.comN)zdjango.contrib.adminzdjango.contrib.authzdjango.contrib.contenttypeszdjango.contrib.sessionszdjango.contrib.messageszdjango.contrib.staticfiles)Úrest_frameworkzrest_framework.authtokenÚdjango_filters)	ÚcoreÚaccountsÚcatalogÚ	inventoryÚ
+promotionsÚcheckoutÚordersÚ
+owner_consoleÚ
+notifications)z-django.middleware.security.SecurityMiddlewarez%corsheaders.middleware.CorsMiddlewarez4django.contrib.sessions.middleware.SessionMiddlewarez)django.middleware.common.CommonMiddlewarez)django.middleware.csrf.CsrfViewMiddlewarez7django.contrib.auth.middleware.AuthenticationMiddlewarez4django.contrib.messages.middleware.MessageMiddlewarez6django.middleware.clickjacking.XFrameOptionsMiddleware)z*django.template.context_processors.requestz+django.contrib.auth.context_processors.authz3django.contrib.messages.context_processors.messages)z1django_filters.rest_framework.DjangoFilterBackendz#rest_framework.filters.SearchFilterz%rest_framework.filters.OrderingFilter)z!rest_framework.parsers.JSONParserz!rest_framework.parsers.FormParserz&rest_framework.parsers.MultiPartParser)7Úpathlibr   Údecoupler   r   Ú__file__ÚresolveÚparentÚBASE_DIRÚ
+SECRET_KEYÚboolÚDEBUGÚ
+ALLOWED_HOSTSÚDJANGO_APPSÚTHIRD_PARTY_APPSÚ
+LOCAL_APPSÚINSTALLED_APPSÚAUTH_USER_MODELÚ
+MIDDLEWAREÚROOT_URLCONFÚWSGI_APPLICATIONÚASGI_APPLICATIONÚ	TEMPLATESÚ	DATABASESÚAUTH_PASSWORD_VALIDATORSÚ
+LANGUAGE_CODEÚ	TIME_ZONEÚUSE_I18NÚUSE_TZÚ
+STATIC_URLÚSTATIC_ROOTÚ	MEDIA_URLÚ
+MEDIA_ROOTÚDEFAULT_AUTO_FIELDr"   ÚCORS_ALLOW_CREDENTIALSr#   ÚREST_FRAMEWORKr*   ÚCELERY_BROKER_URLÚCELERY_RESULT_BACKENDÚCELERY_ACCEPT_CONTENTÚCELERY_TASK_SERIALIZERÚCELERY_RESULT_SERIALIZERÚCELERY_TIMEZONEÚCELERY_ENABLE_UTCÚSESSION_COOKIE_HTTPONLYÚCSRF_COOKIE_HTTPONLYÚX_FRAME_OPTIONSÚSECURE_CONTENT_TYPE_NOSNIFFÚSECURE_REFERRER_POLICYÚLOGGINGr5   r7   r8   © ó    Ú=C:\Users\HP USER\Desktop\sugu_kura\backend\config\settings.pyÚ<module>ru      sT  ðÝ ç  ñ ‹>×!Ñ!Ó#×*Ñ*×1Ñ1€ñ Øó€
+ñ 	ØØØ	
+ô	€ñ ØØ!Ù	‹ô€
+ò€òÐ ò
+€
+ð Øõàõð ð "€ò€
+ð& €à,Ð à,Ð ð
+ 	ð
+%ð 	àDàØ ò #ð
+ðð
+€	ðD ØÐ1à‘Øó
+ð 	‘Øó
+ð 	‘FØó
+ð 	‘ØØô
+ð
+ 	‘ØØô
+ð
+ 	˜à˜dð7ð
+€	ðF 	ð
+/ðð 	ð
+%ðð 	ð
+&ðð 	ð
+'ðð-Ð ð> €
+áØØô
+€	ð
+ €à	
+€ð €
+à˜Õ&€à€	à
+˜Õ
+€
+ð $ð ñ
+ ØØ#Ù	‹ôÐ ð Ð ñ ØØ#Ù	‹ôÐ ð !ð
+(ð#ð ò 	 ð ð	ð àØ/ð!ð ò ð=#€ñL 
+ØØ&ô
+€	ð
+ Ð à!Ð ð ðÐ ð  Ð à!Ð à€àÐ ð Ð àÐ à€à"Ð ð &ð ð ˆqà àØØÐ,ð
+ðð ØØð
+ð 	ð
+ð€ñ& "ØØôÐ ñ
+ #ØØôÐ ñ
+ Øà"ôÒ rs   
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\__pycache__\urls.cpython-314.pyc =====
++
+    ?§•j’  ã            
+       ó¬  € ^ RI Ht ^ RIHt ^ RIHt ^ RIHtHt ]! R]P                  P                  4      ]! R]! R4      4      ]! R]! R	4      4      ]! R
+]! R4      4      ]! R]! R
+4      4      ]! R]! R4      4      ]! R]! R4      4      ]! R]! R4      4      .t]P                  '       d(   ]]! ]P                  ]P                  R7      ,
+          tR# R# )é    )Úsettings)Ústatic)Úadmin)ÚincludeÚpathzadmin/zapi/v1/z	core.urlszapi/v1/catalog/zcatalog.api.urlszapi/v1/marketing/zpromotions.api.urlszapi/v1/checkout/zcheckout.api.urlszapi/v1/orders/zorders.api.urlsz
+api/v1/owner/zowner_console.api.urlszapi/v1/owner/notifications/znotifications.api.urls)Ú
+document_rootN)Údjango.confr   Údjango.conf.urls.staticr   Údjango.contribr   Údjango.urlsr   r   ÚsiteÚurlsÚurlpatternsÚDEBUGÚ	MEDIA_URLÚ
+MEDIA_ROOT© ó    Ú9C:\Users\HP USER\Desktop\sugu_kura\backend\config\urls.pyÚ<module>r      s  ðÝ  Ý *Ý  ÷ñ 	ØØ
+
+‰
+‰óñ
+ 	ØÙØó	
+óñ 	ØÙØó	
+óñ 	ØÙØ!ó	
+óñ 	ØÙØó	
+óñ 	ØÙØó	
+óñ 	ØÙØ$ó	
+óñ 	ð
+ñ 	Ø$ó	
+óða9€ðx ‡>‡>€>Ø‘6Ø×Ñà×Ñôõ ‚Kñ r   
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\config\__pycache__\wsgi.cpython-314.pyc =====
++
+    êA•j•  ã                   ód   € R t ^ RIt^ RIHt ]P                  P                  RR4       ]! 4       tR# )zÖ
+WSGI config for config project.
+
+It exposes the WSGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
+N)Úget_wsgi_applicationÚDJANGO_SETTINGS_MODULEzconfig.settings)Ú__doc__ÚosÚdjango.core.wsgir   ÚenvironÚ
+setdefaultÚapplication© ó    Ú9C:\Users\HP USER\Desktop\sugu_kura\backend\config\wsgi.pyÚ<module>r
+      s0   ðñó 
+å 1à ‡
+
+× Ñ Ð.Ð0AÔ Bá"Ó$‚r   
+
+===== REQUIREMENTS =====
+
+===== AUTH / ACCOUNTS =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\admin.py =====
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
+from .models import User
+
+
+@admin.register(User)
+class SuguKuraUserAdmin(UserAdmin):
+    list_display = (
+        "username",
+        "email",
+        "role",
+        "phone",
+        "is_staff",
+        "is_active",
+    )
+
+    list_filter = (
+        "role",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+    )
+
+    search_fields = (
+        "username",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "whatsapp",
+    )
+
+    ordering = (
+        "username",
+    )
+
+    fieldsets = UserAdmin.fieldsets + (
+        (
+            "SUGU KURA",
+            {
+                "fields": (
+                    "role",
+                    "phone",
+                    "whatsapp",
+                ),
+            },
+        ),
+    )
+
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (
+            "SUGU KURA",
+            {
+                "fields": (
+                    "email",
+                    "role",
+                    "phone",
+                    "whatsapp",
+                ),
+            },
+        ),
+    )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\apps.py =====
+from django.apps import AppConfig
+
+
+class AccountsConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+
+    name = "accounts"
+
+    verbose_name = "Comptes et utilisateurs"
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\models.py =====
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+
+class User(AbstractUser):
+    """
+    Utilisateur principal de SUGU KURA.
+
+    Les rôles métier sont séparés des permissions techniques
+    Django (is_staff / is_superuser).
+    """
+
+    class Role(models.TextChoices):
+        OWNER = "OWNER", "Propriétaire"
+        MANAGER = "MANAGER", "Manager"
+        CLIENT = "CLIENT", "Client"
+
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.CLIENT,
+        db_index=True,
+        verbose_name="Rôle",
+    )
+
+    email = models.EmailField(
+        unique=True,
+        verbose_name="Adresse e-mail",
+    )
+
+    phone = models.CharField(
+        max_length=30,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name="Téléphone",
+    )
+
+    whatsapp = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name="WhatsApp",
+    )
+
+    REQUIRED_FIELDS = [
+        "email",
+    ]
+
+    class Meta:
+        verbose_name = "Utilisateur"
+        verbose_name_plural = "Utilisateurs"
+        ordering = [
+            "username",
+        ]
+
+    def __str__(self):
+        return self.get_full_name() or self.username
+
+    @property
+    def is_owner(self):
+        return self.role == self.Role.OWNER
+
+    @property
+    def is_manager(self):
+        return self.role == self.Role.MANAGER
+
+    @property
+    def is_client(self):
+        return self.role == self.Role.CLIENT
+
+    @property
+    def display_name(self):
+        return self.get_full_name() or self.username
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\permissions.py =====
+from rest_framework.permissions import BasePermission
+
+
+class IsOwner(BasePermission):
+    """
+    Autorise uniquement le propriétaire SUGU KURA.
+    """
+
+    message = "Accès réservé au propriétaire."
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        return bool(
+            user
+            and user.is_authenticated
+            and user.is_active
+            and user.role == user.Role.OWNER
+        )
+
+
+class IsOwnerOrManager(BasePermission):
+    """
+    Autorise OWNER et MANAGER.
+    """
+
+    message = "Accès réservé au propriétaire ou à un manager."
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        return bool(
+            user
+            and user.is_authenticated
+            and user.is_active
+            and user.role
+            in {
+                user.Role.OWNER,
+                user.Role.MANAGER,
+            }
+        )
+
+
+class IsClient(BasePermission):
+    """
+    Autorise uniquement un utilisateur ayant le rôle CLIENT.
+    """
+
+    message = "Accès réservé aux clients."
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        return bool(
+            user
+            and user.is_authenticated
+            and user.is_active
+            and user.role == user.Role.CLIENT
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\tests.py =====
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from rest_framework.test import APIRequestFactory
+
+from .permissions import (
+    IsClient,
+    IsOwner,
+    IsOwnerOrManager,
+)
+
+
+User = get_user_model()
+
+
+class UserModelTests(TestCase):
+    def test_default_role_is_client(self):
+        user = User.objects.create_user(
+            username="client_test",
+            email="client@sugukura.test",
+            password="StrongPassword123!",
+        )
+
+        self.assertEqual(
+            user.role,
+            User.Role.CLIENT,
+        )
+
+        self.assertTrue(
+            user.is_client
+        )
+
+        self.assertFalse(
+            user.is_owner
+        )
+
+    def test_owner_role(self):
+        user = User.objects.create_user(
+            username="owner_test",
+            email="owner@sugukura.test",
+            password="StrongPassword123!",
+            role=User.Role.OWNER,
+        )
+
+        self.assertTrue(
+            user.is_owner
+        )
+
+        self.assertFalse(
+            user.is_client
+        )
+
+    def test_manager_role(self):
+        user = User.objects.create_user(
+            username="manager_test",
+            email="manager@sugukura.test",
+            password="StrongPassword123!",
+            role=User.Role.MANAGER,
+        )
+
+        self.assertTrue(
+            user.is_manager
+        )
+
+
+class RolePermissionTests(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+
+        self.owner = User.objects.create_user(
+            username="owner_permission",
+            email="owner_permission@sugukura.test",
+            password="StrongPassword123!",
+            role=User.Role.OWNER,
+        )
+
+        self.manager = User.objects.create_user(
+            username="manager_permission",
+            email="manager_permission@sugukura.test",
+            password="StrongPassword123!",
+            role=User.Role.MANAGER,
+        )
+
+        self.client_user = User.objects.create_user(
+            username="client_permission",
+            email="client_permission@sugukura.test",
+            password="StrongPassword123!",
+            role=User.Role.CLIENT,
+        )
+
+    def make_request(self, user):
+        request = self.factory.get("/")
+
+        request.user = user
+
+        return request
+
+    def test_owner_permission_accepts_owner(self):
+        request = self.make_request(
+            self.owner
+        )
+
+        self.assertTrue(
+            IsOwner().has_permission(
+                request,
+                None,
+            )
+        )
+
+    def test_owner_permission_rejects_manager(self):
+        request = self.make_request(
+            self.manager
+        )
+
+        self.assertFalse(
+            IsOwner().has_permission(
+                request,
+                None,
+            )
+        )
+
+    def test_owner_or_manager_accepts_owner(self):
+        request = self.make_request(
+            self.owner
+        )
+
+        self.assertTrue(
+            IsOwnerOrManager().has_permission(
+                request,
+                None,
+            )
+        )
+
+    def test_owner_or_manager_accepts_manager(self):
+        request = self.make_request(
+            self.manager
+        )
+
+        self.assertTrue(
+            IsOwnerOrManager().has_permission(
+                request,
+                None,
+            )
+        )
+
+    def test_owner_or_manager_rejects_client(self):
+        request = self.make_request(
+            self.client_user
+        )
+
+        self.assertFalse(
+            IsOwnerOrManager().has_permission(
+                request,
+                None,
+            )
+        )
+
+    def test_client_permission_accepts_client(self):
+        request = self.make_request(
+            self.client_user
+        )
+
+        self.assertTrue(
+            IsClient().has_permission(
+                request,
+                None,
+            )
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\views.py =====
+from django.shortcuts import render
+
+# Create your views here.
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\__init__.py =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\management\__init__.py =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\management\commands\create_owner.py =====
+from getpass import getpass
+
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+
+
+User = get_user_model()
+
+
+class Command(BaseCommand):
+    help = "Crée le compte OWNER principal de SUGU KURA."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--username",
+            type=str,
+            help="Nom d'utilisateur du propriétaire.",
+        )
+
+        parser.add_argument(
+            "--email",
+            type=str,
+            help="Adresse e-mail du propriétaire.",
+        )
+
+    @transaction.atomic
+    def handle(self, *args, **options):
+        username = options.get("username")
+
+        if not username:
+            username = input(
+                "Nom d'utilisateur OWNER : "
+            ).strip()
+
+        if not username:
+            raise CommandError(
+                "Le nom d'utilisateur est obligatoire."
+            )
+
+        email = options.get("email")
+
+        if not email:
+            email = input(
+                "Adresse e-mail OWNER : "
+            ).strip()
+
+        if not email:
+            raise CommandError(
+                "L'adresse e-mail est obligatoire."
+            )
+
+        existing_username = User.objects.filter(
+            username__iexact=username
+        ).first()
+
+        if existing_username:
+            raise CommandError(
+                "Ce nom d'utilisateur existe déjà."
+            )
+
+        existing_email = User.objects.filter(
+            email__iexact=email
+        ).first()
+
+        if existing_email:
+            raise CommandError(
+                "Cette adresse e-mail existe déjà."
+            )
+
+        password = getpass(
+            "Mot de passe OWNER : "
+        )
+
+        password_confirmation = getpass(
+            "Confirmer le mot de passe : "
+        )
+
+        if not password:
+            raise CommandError(
+                "Le mot de passe est obligatoire."
+            )
+
+        if password != password_confirmation:
+            raise CommandError(
+                "Les mots de passe ne correspondent pas."
+            )
+
+        user = User(
+            username=username,
+            email=email,
+            role=User.Role.OWNER,
+            is_staff=True,
+            is_superuser=True,
+            is_active=True,
+        )
+
+        user.set_password(password)
+
+        user.full_clean(
+            exclude=[
+                "password",
+            ]
+        )
+
+        user.save()
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                "OWNER SUGU KURA créé avec succès."
+            )
+        )
+
+        self.stdout.write(
+            f"Username : {user.username}"
+        )
+
+        self.stdout.write(
+            f"Email    : {user.email}"
+        )
+
+        self.stdout.write(
+            f"Role     : {user.role}"
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\management\commands\__init__.py =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\migrations\0001_initial.py =====
+# Generated by Django 5.2.17 on 2026-08-31 09:13
+
+import django.contrib.auth.models
+import django.contrib.auth.validators
+import django.utils.timezone
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+        ('auth', '0012_alter_user_first_name_max_length'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='User',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('password', models.CharField(max_length=128, verbose_name='password')),
+                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
+                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
+                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username')),
+                ('first_name', models.CharField(blank=True, max_length=150, verbose_name='first name')),
+                ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
+                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
+                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
+                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
+                ('role', models.CharField(choices=[('OWNER', 'PropriÃ©taire'), ('MANAGER', 'Manager'), ('CLIENT', 'Client')], db_index=True, default='CLIENT', max_length=20, verbose_name='RÃ´le')),
+                ('email', models.EmailField(max_length=254, unique=True, verbose_name='Adresse e-mail')),
+                ('phone', models.CharField(blank=True, max_length=30, null=True, unique=True, verbose_name='TÃ©lÃ©phone')),
+                ('whatsapp', models.CharField(blank=True, max_length=30, verbose_name='WhatsApp')),
+                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
+                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+            ],
+            options={
+                'verbose_name': 'Utilisateur',
+                'verbose_name_plural': 'Utilisateurs',
+                'ordering': ['username'],
+            },
+            managers=[
+                ('objects', django.contrib.auth.models.UserManager()),
+            ],
+        ),
+    ]
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\accounts\migrations\__init__.py =====
+
+===== OWNER CONSOLE API =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\admin.py =====
+from django.contrib import admin
+
+# Register your models here.
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\apps.py =====
+from django.apps import AppConfig
+
+
+class OwnerConsoleConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+
+    name = "owner_console"
+
+    verbose_name = "Console propriÃ©taire"
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\models.py =====
+from django.db import models
+
+# Create your models here.
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\tests.py =====
+from django.contrib.auth import (
+    get_user_model,
+)
+
+from django.test import TestCase
+
+from rest_framework.authtoken.models import (
+    Token,
+)
+
+from rest_framework.test import (
+    APIClient,
+)
+
+
+User = get_user_model()
+
+
+class OwnerConsoleAPITests(
+    TestCase
+):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.owner = (
+            User.objects.create_user(
+                username="OWNER_TEST",
+                email="owner-test@sugukura.test",
+                password="StrongPass123!",
+                role=(
+                    User.Role.OWNER
+                ),
+            )
+        )
+
+        self.normal_user = (
+            User.objects.create_user(
+                username="CLIENT_TEST",
+                email="client-test@sugukura.test",
+                password="StrongPass123!",
+                role=(
+                    User.Role.CLIENT
+                ),
+            )
+        )
+
+    def test_owner_login(
+        self
+    ):
+        response = self.client.post(
+            (
+                "/api/v1/owner/"
+                "auth/login/"
+            ),
+            {
+                "username": (
+                    "OWNER_TEST"
+                ),
+                "password": (
+                    "StrongPass123!"
+                ),
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIn(
+            "token",
+            response.data,
+        )
+
+        self.assertIn(
+            "user",
+            response.data,
+        )
+
+        self.assertEqual(
+            response.data[
+                "user"
+            ][
+                "username"
+            ],
+            "OWNER_TEST",
+        )
+
+        self.assertEqual(
+            response.data[
+                "user"
+            ][
+                "role"
+            ],
+            User.Role.OWNER,
+        )
+
+    def test_client_cannot_login_owner_console(
+        self
+    ):
+        response = self.client.post(
+            (
+                "/api/v1/owner/"
+                "auth/login/"
+            ),
+            {
+                "username": (
+                    "CLIENT_TEST"
+                ),
+                "password": (
+                    "StrongPass123!"
+                ),
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            403,
+        )
+
+    def test_owner_dashboard(
+        self
+    ):
+        token = Token.objects.create(
+            user=self.owner
+        )
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Token {token.key}"
+            )
+        )
+
+        response = self.client.get(
+            (
+                "/api/v1/owner/"
+                "dashboard/"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIn(
+            "orders",
+            response.data,
+        )
+
+        self.assertIn(
+            "money",
+            response.data,
+        )
+
+        self.assertIn(
+            "catalog",
+            response.data,
+        )
+
+        self.assertIn(
+            "inventory",
+            response.data,
+        )
+
+        self.assertIn(
+            "checkout",
+            response.data,
+        )
+
+        self.assertIn(
+            "marketing",
+            response.data,
+        )
+
+    def test_client_cannot_access_dashboard(
+        self
+    ):
+        token = Token.objects.create(
+            user=self.normal_user
+        )
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Token {token.key}"
+            )
+        )
+
+        response = self.client.get(
+            (
+                "/api/v1/owner/"
+                "dashboard/"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            403,
+        )
+
+    def test_anonymous_cannot_access_dashboard(
+        self
+    ):
+        response = self.client.get(
+            (
+                "/api/v1/owner/"
+                "dashboard/"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+    def test_owner_me(
+        self
+    ):
+        token = Token.objects.create(
+            user=self.owner
+        )
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Token {token.key}"
+            )
+        )
+
+        response = self.client.get(
+            (
+                "/api/v1/owner/"
+                "auth/me/"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertEqual(
+            response.data[
+                "username"
+            ],
+            "OWNER_TEST",
+        )
+
+        self.assertEqual(
+            response.data[
+                "email"
+            ],
+            "owner-test@sugukura.test",
+        )
+
+        self.assertEqual(
+            response.data[
+                "role"
+            ],
+            User.Role.OWNER,
+        )
+
+    def test_owner_logout(
+        self
+    ):
+        token = Token.objects.create(
+            user=self.owner
+        )
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Token {token.key}"
+            )
+        )
+
+        response = self.client.post(
+            (
+                "/api/v1/owner/"
+                "auth/logout/"
+            ),
+            {},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertFalse(
+            Token.objects.filter(
+                user=self.owner
+            ).exists()
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\views.py =====
+from django.shortcuts import render
+
+# Create your views here.
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\__init__.py =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\catalog_serializers.py =====
+from django.db import transaction
+
+from rest_framework import serializers
+
+from catalog.models import (
+    Brand,
+    Category,
+    Product,
+    ProductImage,
+    ProductVariant,
+)
+
+from inventory.models import InventoryItem
+
+
+# ============================================================
+# CATEGORY
+# ============================================================
+
+
+class OwnerCategorySerializer(serializers.ModelSerializer):
+    parent_name = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
+    products_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "description",
+            "parent",
+            "parent_name",
+            "image",
+            "image_url",
+            "icon",
+            "display_order",
+            "is_active",
+            "is_featured_home",
+            "seo_title",
+            "seo_description",
+            "products_count",
+            "created_at",
+            "updated_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "slug",
+            "parent_name",
+            "image_url",
+            "products_count",
+            "created_at",
+            "updated_at",
+        )
+
+        extra_kwargs = {
+            "image": {
+                "write_only": True,
+                "required": False,
+                "allow_null": True,
+            },
+        }
+
+    def get_parent_name(self, obj):
+        if not obj.parent_id:
+            return None
+
+        return obj.parent.name
+
+    def get_image_url(self, obj):
+        if not obj.image:
+            return None
+
+        request = self.context.get("request")
+
+        url = obj.image.url
+
+        if request:
+            return request.build_absolute_uri(url)
+
+        return url
+
+    def get_products_count(self, obj):
+        return Product.objects.filter(
+            category=obj
+        ).count()
+
+    def validate_parent(self, value):
+        if not value:
+            return value
+
+        # Une catÃ©gorie ne peut pas Ãªtre
+        # son propre parent.
+        if (
+            self.instance
+            and value.pk == self.instance.pk
+        ):
+            raise serializers.ValidationError(
+                "Une catÃ©gorie ne peut pas "
+                "Ãªtre son propre parent."
+            )
+
+        # EmpÃªche Ã©galement les boucles :
+        #
+        # TÃ©lÃ©phones -> Smartphones
+        # Smartphones -> TÃ©lÃ©phones
+        #
+        if self.instance:
+            current = value
+
+            visited = set()
+
+            while current:
+                if current.pk in visited:
+                    break
+
+                visited.add(current.pk)
+
+                if current.pk == self.instance.pk:
+                    raise serializers.ValidationError(
+                        "Cette sÃ©lection crÃ©erait "
+                        "une boucle entre les catÃ©gories."
+                    )
+
+                current = current.parent
+
+        return value
+
+
+# ============================================================
+# BRAND
+# ============================================================
+
+
+class OwnerBrandSerializer(serializers.ModelSerializer):
+    logo_url = serializers.SerializerMethodField()
+    products_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Brand
+
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "logo",
+            "logo_url",
+            "description",
+            "website",
+            "display_order",
+            "is_active",
+            "is_featured",
+            "seo_title",
+            "seo_description",
+            "products_count",
+            "created_at",
+            "updated_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "slug",
+            "logo_url",
+            "products_count",
+            "created_at",
+            "updated_at",
+        )
+
+        extra_kwargs = {
+            "logo": {
+                "write_only": True,
+                "required": False,
+                "allow_null": True,
+            },
+        }
+
+    def get_logo_url(self, obj):
+        if not obj.logo:
+            return None
+
+        request = self.context.get("request")
+
+        url = obj.logo.url
+
+        if request:
+            return request.build_absolute_uri(url)
+
+        return url
+
+    def get_products_count(self, obj):
+        return Product.objects.filter(
+            brand=obj
+        ).count()
+
+
+# ============================================================
+# PRODUCT
+# ============================================================
+
+
+class OwnerProductSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(
+        source="category.name",
+        read_only=True,
+    )
+
+    brand_name = serializers.SerializerMethodField()
+
+    primary_image = serializers.ImageField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    primary_image_url = serializers.SerializerMethodField()
+
+    images_count = serializers.SerializerMethodField()
+    variants_count = serializers.SerializerMethodField()
+
+    stock_on_hand = serializers.SerializerMethodField()
+    stock_reserved = serializers.SerializerMethodField()
+    stock_available = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "sku",
+            "barcode",
+            "category",
+            "category_name",
+            "brand",
+            "brand_name",
+            "short_description",
+            "description",
+            "base_price",
+            "purchase_price",
+            "status",
+            "is_featured",
+            "seo_title",
+            "seo_description",
+            "primary_image",
+            "primary_image_url",
+            "images_count",
+            "variants_count",
+            "stock_on_hand",
+            "stock_reserved",
+            "stock_available",
+            "created_at",
+            "updated_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "slug",
+            "category_name",
+            "brand_name",
+            "primary_image_url",
+            "images_count",
+            "variants_count",
+            "stock_on_hand",
+            "stock_reserved",
+            "stock_available",
+            "created_at",
+            "updated_at",
+        )
+
+    # --------------------------------------------------------
+    # MARQUE
+    # --------------------------------------------------------
+
+    def get_brand_name(self, obj):
+        if not obj.brand_id:
+            return None
+
+        return obj.brand.name
+
+    # --------------------------------------------------------
+    # PHOTO PRINCIPALE
+    # --------------------------------------------------------
+
+    def get_primary_image_url(self, obj):
+        image = (
+            ProductImage.objects
+            .filter(
+                product=obj,
+                is_primary=True,
+            )
+            .order_by(
+                "display_order",
+                "id",
+            )
+            .first()
+        )
+
+        # SÃ©curitÃ© :
+        # s'il n'existe aucune photo marquÃ©e principale,
+        # on prend simplement la premiÃ¨re photo.
+        if image is None:
+            image = (
+                ProductImage.objects
+                .filter(
+                    product=obj
+                )
+                .order_by(
+                    "display_order",
+                    "id",
+                )
+                .first()
+            )
+
+        if (
+            image is None
+            or not image.image
+        ):
+            return None
+
+        request = self.context.get("request")
+
+        url = image.image.url
+
+        if request:
+            return request.build_absolute_uri(url)
+
+        return url
+
+    # --------------------------------------------------------
+    # NOMBRE DE PHOTOS
+    # --------------------------------------------------------
+
+    def get_images_count(self, obj):
+        return ProductImage.objects.filter(
+            product=obj
+        ).count()
+
+    # --------------------------------------------------------
+    # NOMBRE DE VARIANTES
+    # --------------------------------------------------------
+
+    def get_variants_count(self, obj):
+        # On utilise volontairement le modÃ¨le directement.
+        #
+        # Ainsi nous ne dÃ©pendons pas d'un related_name
+        # particulier comme :
+        #
+        # obj.variants
+        #
+        return ProductVariant.objects.filter(
+            product=obj
+        ).count()
+
+    # --------------------------------------------------------
+    # STOCK
+    # --------------------------------------------------------
+
+    def _stock_totals(self, obj):
+        """
+        Retourne :
+            quantitÃ© physique
+            quantitÃ© rÃ©servÃ©e
+
+        Le rÃ©sultat est mis en cache temporairement
+        sur l'instance Product afin que les trois champs
+        stock_on_hand / stock_reserved / stock_available
+        ne dÃ©clenchent pas chacun une nouvelle requÃªte SQL.
+        """
+
+        cache_attribute = (
+            "_owner_serializer_stock_totals"
+        )
+
+        cached = getattr(
+            obj,
+            cache_attribute,
+            None,
+        )
+
+        if cached is not None:
+            return cached
+
+        items = (
+            InventoryItem.objects
+            .filter(
+                product=obj
+            )
+            .values(
+                "quantity_on_hand",
+                "quantity_reserved",
+            )
+        )
+
+        quantity_on_hand = 0
+        quantity_reserved = 0
+
+        for item in items:
+            quantity_on_hand += (
+                item["quantity_on_hand"]
+            )
+
+            quantity_reserved += (
+                item["quantity_reserved"]
+            )
+
+        result = (
+            quantity_on_hand,
+            quantity_reserved,
+        )
+
+        setattr(
+            obj,
+            cache_attribute,
+            result,
+        )
+
+        return result
+
+    def get_stock_on_hand(self, obj):
+        quantity_on_hand, _ = (
+            self._stock_totals(obj)
+        )
+
+        return quantity_on_hand
+
+    def get_stock_reserved(self, obj):
+        _, quantity_reserved = (
+            self._stock_totals(obj)
+        )
+
+        return quantity_reserved
+
+    def get_stock_available(self, obj):
+        (
+            quantity_on_hand,
+            quantity_reserved,
+        ) = self._stock_totals(obj)
+
+        return max(
+            quantity_on_hand
+            - quantity_reserved,
+            0,
+        )
+
+    # --------------------------------------------------------
+    # VALIDATIONS
+    # --------------------------------------------------------
+
+    def validate_sku(self, value):
+        value = value.strip().upper()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Le SKU est obligatoire."
+            )
+
+        return value
+
+    # --------------------------------------------------------
+    # CREATE
+    # --------------------------------------------------------
+
+    @transaction.atomic
+    def create(self, validated_data):
+        primary_image = validated_data.pop(
+            "primary_image",
+            None,
+        )
+
+        # ----------------------------------------------------
+        # 1. CrÃ©ation du produit
+        # ----------------------------------------------------
+        product = super().create(
+            validated_data
+        )
+
+        # ----------------------------------------------------
+        # 2. CrÃ©ation automatique de la ligne de stock
+        #
+        # Tout nouveau produit doit apparaÃ®tre immÃ©diatement
+        # dans la gestion du stock, mÃªme avec une quantitÃ© 0.
+        #
+        # Si le produit reÃ§oit ensuite une premiÃ¨re variante,
+        # la gestion des variantes pourra transfÃ©rer cette
+        # ligne de stock vers cette variante.
+        # ----------------------------------------------------
+        InventoryItem.objects.get_or_create(
+            product=product,
+            variant=None,
+            defaults={
+                "quantity_on_hand": 0,
+                "quantity_reserved": 0,
+                "low_stock_threshold": 5,
+            },
+        )
+
+        # ----------------------------------------------------
+        # 3. Photo principale Ã©ventuelle
+        # ----------------------------------------------------
+        if primary_image:
+            ProductImage.objects.create(
+                product=product,
+                image=primary_image,
+                alt_text=product.name,
+                is_primary=True,
+                display_order=0,
+            )
+
+        return product
+
+    # --------------------------------------------------------
+    # UPDATE
+    # --------------------------------------------------------
+
+    @transaction.atomic
+    def update(
+        self,
+        instance,
+        validated_data,
+    ):
+        primary_image = validated_data.pop(
+            "primary_image",
+            None,
+        )
+
+        product = super().update(
+            instance,
+            validated_data,
+        )
+
+        # ----------------------------------------------------
+        # SÃ©curitÃ© stock :
+        #
+        # Un produit simple doit toujours possÃ©der une ligne
+        # InventoryItem. En revanche, si le produit possÃ¨de
+        # dÃ©jÃ  des variantes, on ne crÃ©e surtout pas une ligne
+        # gÃ©nÃ©rale supplÃ©mentaire afin d'Ã©viter de compter le
+        # stock deux fois.
+        # ----------------------------------------------------
+        if not ProductVariant.objects.filter(
+            product=product
+        ).exists():
+            InventoryItem.objects.get_or_create(
+                product=product,
+                variant=None,
+                defaults={
+                    "quantity_on_hand": 0,
+                    "quantity_reserved": 0,
+                    "low_stock_threshold": 5,
+                },
+            )
+
+        if primary_image:
+            # L'ancienne photo principale
+            # reste dans la galerie mais n'est
+            # plus principale.
+            ProductImage.objects.filter(
+                product=product,
+                is_primary=True,
+            ).update(
+                is_primary=False
+            )
+
+            ProductImage.objects.create(
+                product=product,
+                image=primary_image,
+                alt_text=product.name,
+                is_primary=True,
+                display_order=0,
+            )
+
+        return product
+
+
+# ============================================================
+# PRODUCT IMAGE
+# ============================================================
+
+
+class OwnerProductImageSerializer(
+    serializers.ModelSerializer
+):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductImage
+
+        fields = (
+            "id",
+            "product",
+            "image",
+            "image_url",
+            "alt_text",
+            "is_primary",
+            "display_order",
+            "created_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "image_url",
+            "created_at",
+        )
+
+        extra_kwargs = {
+            "image": {
+                "write_only": True,
+            },
+        }
+
+    def get_image_url(self, obj):
+        if not obj.image:
+            return None
+
+        request = self.context.get("request")
+
+        url = obj.image.url
+
+        if request:
+            return request.build_absolute_uri(url)
+
+        return url
+
+    # --------------------------------------------------------
+    # CREATE IMAGE
+    # --------------------------------------------------------
+
+    @transaction.atomic
+    def create(self, validated_data):
+        product = validated_data["product"]
+
+        is_primary = validated_data.get(
+            "is_primary",
+            False,
+        )
+
+        # Si cette nouvelle photo doit Ãªtre
+        # principale, on retire ce statut
+        # aux anciennes.
+        if is_primary:
+            ProductImage.objects.filter(
+                product=product,
+                is_primary=True,
+            ).update(
+                is_primary=False
+            )
+
+        image = super().create(
+            validated_data
+        )
+
+        # Si c'est la toute premiÃ¨re photo du produit,
+        # elle devient automatiquement principale.
+        has_another_image = (
+            ProductImage.objects
+            .filter(
+                product=product
+            )
+            .exclude(
+                pk=image.pk
+            )
+            .exists()
+        )
+
+        if (
+            not has_another_image
+            and not image.is_primary
+        ):
+            image.is_primary = True
+
+            image.save(
+                update_fields=[
+                    "is_primary",
+                ]
+            )
+
+        return image
+
+    # --------------------------------------------------------
+    # UPDATE IMAGE
+    # --------------------------------------------------------
+
+    @transaction.atomic
+    def update(
+        self,
+        instance,
+        validated_data,
+    ):
+        requested_primary = (
+            validated_data.get(
+                "is_primary",
+                instance.is_primary,
+            )
+        )
+
+        product = (
+            validated_data.get(
+                "product",
+                instance.product,
+            )
+        )
+
+        # Une photo principale doit Ãªtre unique
+        # pour un produit.
+        if requested_primary:
+            ProductImage.objects.filter(
+                product=product,
+                is_primary=True,
+            ).exclude(
+                pk=instance.pk
+            ).update(
+                is_primary=False
+            )
+
+        image = super().update(
+            instance,
+            validated_data,
+        )
+
+        return image
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\catalog_views.py =====
+from django.db import transaction
+from django.db.models import Q
+
+from django.db.models.deletion import (
+    ProtectedError,
+)
+
+from rest_framework import (
+    permissions,
+    status,
+    viewsets,
+)
+
+from rest_framework.authentication import (
+    SessionAuthentication,
+    TokenAuthentication,
+)
+
+from rest_framework.decorators import (
+    action,
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+
+from rest_framework.pagination import (
+    PageNumberPagination,
+)
+
+from rest_framework.response import (
+    Response,
+)
+
+from accounts.permissions import (
+    IsOwner,
+)
+
+from catalog.models import (
+    Brand,
+    Category,
+    Product,
+    ProductImage,
+)
+
+from .catalog_serializers import (
+    OwnerBrandSerializer,
+    OwnerCategorySerializer,
+    OwnerProductImageSerializer,
+    OwnerProductSerializer,
+)
+
+
+OWNER_AUTHENTICATION = [
+    TokenAuthentication,
+    SessionAuthentication,
+]
+
+
+OWNER_PERMISSIONS = [
+    permissions.IsAuthenticated,
+    IsOwner,
+]
+
+
+class OwnerProductPagination(
+    PageNumberPagination
+):
+    page_size = 20
+
+    page_size_query_param = (
+        "page_size"
+    )
+
+    max_page_size = 100
+
+
+class OwnerCategoryViewSet(
+    viewsets.ModelViewSet
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = (
+        OWNER_PERMISSIONS
+    )
+
+    serializer_class = (
+        OwnerCategorySerializer
+    )
+
+    pagination_class = None
+
+    queryset = (
+        Category.objects
+        .select_related(
+            "parent"
+        )
+        .all()
+        .order_by(
+            "display_order",
+            "name",
+        )
+    )
+
+    def destroy(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        instance = self.get_object()
+
+        try:
+            self.perform_destroy(
+                instance
+            )
+
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Cette catÃ©gorie est "
+                        "encore utilisÃ©e. "
+                        "DÃ©sactivez-la plutÃ´t "
+                        "que de la supprimer."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_409_CONFLICT
+                ),
+            )
+
+        return Response(
+            status=(
+                status
+                .HTTP_204_NO_CONTENT
+            )
+        )
+
+
+class OwnerBrandViewSet(
+    viewsets.ModelViewSet
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = (
+        OWNER_PERMISSIONS
+    )
+
+    serializer_class = (
+        OwnerBrandSerializer
+    )
+
+    pagination_class = None
+
+    queryset = (
+        Brand.objects
+        .all()
+        .order_by(
+            "display_order",
+            "name",
+        )
+    )
+
+    def destroy(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        instance = self.get_object()
+
+        try:
+            self.perform_destroy(
+                instance
+            )
+
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Cette marque est "
+                        "encore utilisÃ©e. "
+                        "DÃ©sactivez-la plutÃ´t "
+                        "que de la supprimer."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_409_CONFLICT
+                ),
+            )
+
+        return Response(
+            status=(
+                status
+                .HTTP_204_NO_CONTENT
+            )
+        )
+
+
+class OwnerProductViewSet(
+    viewsets.ModelViewSet
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = (
+        OWNER_PERMISSIONS
+    )
+
+    serializer_class = (
+        OwnerProductSerializer
+    )
+
+    pagination_class = (
+        OwnerProductPagination
+    )
+
+    def get_queryset(self):
+        queryset = (
+            Product.objects
+            .select_related(
+                "category",
+                "brand",
+            )
+            .all()
+            .order_by(
+                "-updated_at",
+                "-id",
+            )
+        )
+
+        q = (
+            self.request
+            .query_params
+            .get(
+                "q",
+                "",
+            )
+            .strip()
+        )
+
+        status_value = (
+            self.request
+            .query_params
+            .get(
+                "status",
+                "",
+            )
+            .strip()
+        )
+
+        category = (
+            self.request
+            .query_params
+            .get(
+                "category",
+                "",
+            )
+            .strip()
+        )
+
+        brand = (
+            self.request
+            .query_params
+            .get(
+                "brand",
+                "",
+            )
+            .strip()
+        )
+
+        if q:
+            queryset = queryset.filter(
+                Q(
+                    name__icontains=q
+                )
+                |
+                Q(
+                    sku__icontains=q
+                )
+                |
+                Q(
+                    barcode__icontains=q
+                )
+            )
+
+        if status_value:
+            queryset = queryset.filter(
+                status=status_value
+            )
+
+        if category:
+            queryset = queryset.filter(
+                category_id=category
+            )
+
+        if brand:
+            queryset = queryset.filter(
+                brand_id=brand
+            )
+
+        return queryset
+
+    def destroy(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        instance = self.get_object()
+
+        try:
+            self.perform_destroy(
+                instance
+            )
+
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Ce produit possÃ¨de "
+                        "dÃ©jÃ  des donnÃ©es liÃ©es "
+                        "(commande, stock, etc.). "
+                        "Changez son statut "
+                        "plutÃ´t que de le supprimer."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_409_CONFLICT
+                ),
+            )
+
+        return Response(
+            status=(
+                status
+                .HTTP_204_NO_CONTENT
+            )
+        )
+
+    @action(
+        detail=True,
+        methods=[
+            "get",
+        ],
+        url_path="images",
+    )
+    def images(
+        self,
+        request,
+        pk=None,
+    ):
+        product = (
+            self.get_object()
+        )
+
+        images = (
+            ProductImage.objects
+            .filter(
+                product=product
+            )
+            .order_by(
+                "display_order",
+                "id",
+            )
+        )
+
+        serializer = (
+            OwnerProductImageSerializer(
+                images,
+                many=True,
+                context={
+                    "request": request
+                },
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+
+
+class OwnerProductImageViewSet(
+    viewsets.ModelViewSet
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = (
+        OWNER_PERMISSIONS
+    )
+
+    serializer_class = (
+        OwnerProductImageSerializer
+    )
+
+    pagination_class = None
+
+    queryset = (
+        ProductImage.objects
+        .select_related(
+            "product"
+        )
+        .all()
+        .order_by(
+            "product_id",
+            "display_order",
+            "id",
+        )
+    )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="make-primary",
+    )
+    @transaction.atomic
+    def make_primary(
+        self,
+        request,
+        pk=None,
+    ):
+        image = (
+            self.get_object()
+        )
+
+        ProductImage.objects.filter(
+            product=image.product,
+            is_primary=True,
+        ).exclude(
+            pk=image.pk
+        ).update(
+            is_primary=False
+        )
+
+        if not image.is_primary:
+            image.is_primary = True
+
+            image.save(
+                update_fields=[
+                    "is_primary",
+                ]
+            )
+
+        serializer = (
+            self.get_serializer(
+                image
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+
+    @transaction.atomic
+    def destroy(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        image = (
+            self.get_object()
+        )
+
+        product = (
+            image.product
+        )
+
+        was_primary = (
+            image.is_primary
+        )
+
+        storage = None
+        image_name = None
+
+        if image.image:
+            storage = (
+                image.image.storage
+            )
+
+            image_name = (
+                image.image.name
+            )
+
+        image.delete()
+
+        if was_primary:
+            next_image = (
+                ProductImage.objects
+                .filter(
+                    product=product
+                )
+                .order_by(
+                    "display_order",
+                    "id",
+                )
+                .first()
+            )
+
+            if next_image:
+                ProductImage.objects.filter(
+                    product=product,
+                    is_primary=True,
+                ).exclude(
+                    pk=next_image.pk
+                ).update(
+                    is_primary=False
+                )
+
+                if not next_image.is_primary:
+                    next_image.is_primary = True
+
+                    next_image.save(
+                        update_fields=[
+                            "is_primary",
+                        ]
+                    )
+
+        transaction.on_commit(
+            lambda: (
+                storage.delete(
+                    image_name
+                )
+                if (
+                    storage
+                    and
+                    image_name
+                )
+                else None
+            )
+        )
+
+        return Response(
+            status=(
+                status
+                .HTTP_204_NO_CONTENT
+            )
+        )
+
+
+@api_view([
+    "GET",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes(
+    OWNER_PERMISSIONS
+)
+def owner_catalog_metadata(
+    request,
+):
+    product_status_field = (
+        Product
+        ._meta
+        .get_field(
+            "status"
+        )
+    )
+
+    status_choices = [
+        {
+            "value": value,
+            "label": label,
+        }
+        for (
+            value,
+            label,
+        )
+        in product_status_field.choices
+    ]
+
+    return Response(
+        {
+            "product_statuses": (
+                status_choices
+            ),
+
+            "categories": [
+                {
+                    "id": category.pk,
+                    "name": category.name,
+                    "parent_id": (
+                        category.parent_id
+                    ),
+                    "is_active": (
+                        category.is_active
+                    ),
+                }
+                for category
+                in (
+                    Category.objects
+                    .all()
+                    .order_by(
+                        "name"
+                    )
+                )
+            ],
+
+            "brands": [
+                {
+                    "id": brand.pk,
+                    "name": brand.name,
+                    "is_active": (
+                        brand.is_active
+                    ),
+                }
+                for brand
+                in (
+                    Brand.objects
+                    .all()
+                    .order_by(
+                        "name"
+                    )
+                )
+            ],
+        }
+    )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\inventory_views.py =====
+from django.core.paginator import Paginator
+from django.db.models import F
+from django.db.models import Q
+from django.db.models import Sum
+
+from rest_framework import permissions
+from rest_framework import status
+from rest_framework.authentication import (
+    SessionAuthentication,
+    TokenAuthentication,
+)
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.response import Response
+
+from accounts.permissions import IsOwner
+
+from inventory.models import InventoryItem
+
+from inventory.services import (
+    InsufficientReservedStockError,
+    InsufficientStockError,
+    InvalidStockQuantityError,
+    add_stock,
+    adjust_stock,
+    remove_stock,
+)
+
+
+# ============================================================
+# AUTHENTIFICATION OWNER
+# ============================================================
+
+OWNER_AUTHENTICATION = [
+    TokenAuthentication,
+    SessionAuthentication,
+]
+
+
+OWNER_PERMISSIONS = [
+    permissions.IsAuthenticated,
+    IsOwner,
+]
+
+
+# ============================================================
+# UTILITAIRES
+# ============================================================
+
+def _base_queryset():
+    return (
+        InventoryItem.objects
+        .select_related(
+            "product",
+            "variant",
+            "product__brand",
+            "product__category",
+        )
+        .prefetch_related(
+            "variant__selections__attribute_value__attribute",
+        )
+        .annotate(
+            calculated_available=(
+                F("quantity_on_hand")
+                - F("quantity_reserved")
+            )
+        )
+    )
+
+
+def _item_status(item):
+    available = (
+        item.quantity_on_hand
+        - item.quantity_reserved
+    )
+
+    if available <= 0:
+        return "OUT_OF_STOCK"
+
+    if available <= item.low_stock_threshold:
+        return "LOW_STOCK"
+
+    return "IN_STOCK"
+
+
+def _variant_label(item):
+    """
+    Retourne uniquement les vraies valeurs de variante.
+
+    Exemple :
+        Stockage = 256 Go
+        Couleur = Noir
+
+    RÃ©sultat :
+        256 Go / Noir
+
+    On n'utilise volontairement pas str(item.variant),
+    car __str__ peut retourner quelque chose comme :
+        Samsung Galaxy A26 â€” SAM-A26
+    ce qui duplique le nom du produit et le SKU dans l'interface.
+    """
+
+    if not item.variant:
+        return ""
+
+    values = []
+
+    for selection in item.variant.selections.all():
+        value = (
+            selection
+            .attribute_value
+            .display_value
+        )
+
+        value = str(
+            value or ""
+        ).strip()
+
+        if (
+            value
+            and value not in values
+        ):
+            values.append(
+                value
+            )
+
+    return " / ".join(
+        values
+    )
+
+
+def _serialize_item(item):
+    available = (
+        item.quantity_on_hand
+        - item.quantity_reserved
+    )
+
+    return {
+        "id": item.pk,
+
+        "product_id": (
+            item.product_id
+        ),
+
+        "product_name": (
+            item.product.name
+        ),
+
+        "sku": (
+            item.variant.sku
+            if item.variant
+            else item.product.sku
+        ),
+
+        "barcode": (
+            item.variant.barcode
+            if (
+                item.variant
+                and item.variant.barcode
+            )
+            else (
+                item.product.barcode
+                or ""
+            )
+        ),
+
+        "variant": (
+            _variant_label(
+                item
+            )
+        ),
+
+        "quantity_on_hand": (
+            item.quantity_on_hand
+        ),
+
+        "quantity_reserved": (
+            item.quantity_reserved
+        ),
+
+        "available": available,
+
+        "low_stock_threshold": (
+            item.low_stock_threshold
+        ),
+
+        "status": (
+            _item_status(item)
+        ),
+
+        "updated_at": (
+            item.updated_at
+        ),
+    }
+
+
+def _parse_integer(
+    value,
+    *,
+    field_name,
+    minimum=None,
+):
+    try:
+        parsed = int(value)
+    except (
+        TypeError,
+        ValueError,
+    ) as exc:
+        raise ValueError(
+            f"{field_name} doit Ãªtre un entier."
+        ) from exc
+
+    if (
+        minimum is not None
+        and parsed < minimum
+    ):
+        raise ValueError(
+            (
+                f"{field_name} doit Ãªtre "
+                f"supÃ©rieur ou Ã©gal Ã  "
+                f"{minimum}."
+            )
+        )
+
+    return parsed
+
+
+# ============================================================
+# LISTE COMPLÃˆTE DU STOCK
+# ============================================================
+
+@api_view([
+    "GET",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes(
+    OWNER_PERMISSIONS
+)
+def inventory_items(
+    request,
+):
+    """
+    Liste paginÃ©e du stock propriÃ©taire.
+
+    Filtres :
+        ?q=samsung
+        ?status=IN_STOCK
+        ?status=LOW_STOCK
+        ?status=OUT_OF_STOCK
+        ?page=1
+        ?page_size=20
+    """
+
+    base_queryset = (
+        _base_queryset()
+    )
+
+
+    # ========================================================
+    # RÃ‰SUMÃ‰ GLOBAL
+    # ========================================================
+
+    totals = (
+        base_queryset.aggregate(
+            total_on_hand=Sum(
+                "quantity_on_hand"
+            ),
+            total_reserved=Sum(
+                "quantity_reserved"
+            ),
+        )
+    )
+
+
+    total_items = (
+        base_queryset.count()
+    )
+
+
+    out_of_stock = (
+        base_queryset
+        .filter(
+            calculated_available__lte=0
+        )
+        .count()
+    )
+
+
+    low_stock = (
+        base_queryset
+        .filter(
+            calculated_available__gt=0,
+            calculated_available__lte=F(
+                "low_stock_threshold"
+            ),
+        )
+        .count()
+    )
+
+
+    in_stock = max(
+        0,
+        total_items
+        - low_stock
+        - out_of_stock,
+    )
+
+
+    total_on_hand = (
+        totals[
+            "total_on_hand"
+        ]
+        or 0
+    )
+
+
+    total_reserved = (
+        totals[
+            "total_reserved"
+        ]
+        or 0
+    )
+
+
+    summary = {
+        "total_items": (
+            total_items
+        ),
+
+        "in_stock": (
+            in_stock
+        ),
+
+        "low_stock": (
+            low_stock
+        ),
+
+        "out_of_stock": (
+            out_of_stock
+        ),
+
+        "total_on_hand": (
+            total_on_hand
+        ),
+
+        "total_reserved": (
+            total_reserved
+        ),
+
+        "total_available": (
+            total_on_hand
+            - total_reserved
+        ),
+    }
+
+
+    # ========================================================
+    # FILTRAGE
+    # ========================================================
+
+    queryset = (
+        base_queryset
+    )
+
+
+    search = (
+        request.query_params
+        .get(
+            "q",
+            "",
+        )
+        .strip()
+    )
+
+
+    if search:
+        queryset = (
+            queryset.filter(
+                Q(
+                    product__name__icontains=(
+                        search
+                    )
+                )
+                |
+                Q(
+                    product__sku__icontains=(
+                        search
+                    )
+                )
+                |
+                Q(
+                    product__barcode__icontains=(
+                        search
+                    )
+                )
+                |
+                Q(
+                    variant__sku__icontains=(
+                        search
+                    )
+                )
+                |
+                Q(
+                    variant__barcode__icontains=(
+                        search
+                    )
+                )
+                |
+                Q(
+                    variant__selections__attribute_value__display_value__icontains=(
+                        search
+                    )
+                )
+            )
+            .distinct()
+        )
+
+
+    stock_status = (
+        request.query_params
+        .get(
+            "status",
+            "",
+        )
+        .strip()
+        .upper()
+    )
+
+
+    if (
+        stock_status
+        == "OUT_OF_STOCK"
+    ):
+        queryset = (
+            queryset.filter(
+                calculated_available__lte=0
+            )
+        )
+
+
+    elif (
+        stock_status
+        == "LOW_STOCK"
+    ):
+        queryset = (
+            queryset.filter(
+                calculated_available__gt=0,
+                calculated_available__lte=F(
+                    "low_stock_threshold"
+                ),
+            )
+        )
+
+
+    elif (
+        stock_status
+        == "IN_STOCK"
+    ):
+        queryset = (
+            queryset.filter(
+                calculated_available__gt=F(
+                    "low_stock_threshold"
+                )
+            )
+        )
+
+
+    queryset = (
+        queryset.order_by(
+            "product__name",
+            "variant__sku",
+            "pk",
+        )
+    )
+
+
+    # ========================================================
+    # PAGINATION
+    # ========================================================
+
+    try:
+        page_number = max(
+            1,
+            int(
+                request.query_params
+                .get(
+                    "page",
+                    "1",
+                )
+            ),
+        )
+    except ValueError:
+        page_number = 1
+
+
+    try:
+        page_size = int(
+            request.query_params
+            .get(
+                "page_size",
+                "20",
+            )
+        )
+    except ValueError:
+        page_size = 20
+
+
+    page_size = min(
+        max(
+            page_size,
+            1,
+        ),
+        100,
+    )
+
+
+    paginator = Paginator(
+        queryset,
+        page_size,
+    )
+
+
+    page_obj = (
+        paginator.get_page(
+            page_number
+        )
+    )
+
+
+    return Response(
+        {
+            "summary": summary,
+
+            "count": (
+                paginator.count
+            ),
+
+            "page": (
+                page_obj.number
+            ),
+
+            "page_size": (
+                page_size
+            ),
+
+            "total_pages": (
+                paginator.num_pages
+            ),
+
+            "results": [
+                _serialize_item(
+                    item
+                )
+                for item
+                in page_obj.object_list
+            ],
+        }
+    )
+
+
+# ============================================================
+# ACTION SUR LE STOCK
+# ============================================================
+
+@api_view([
+    "POST",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes(
+    OWNER_PERMISSIONS
+)
+def inventory_item_action(
+    request,
+    item_id,
+):
+    """
+    Actions possibles :
+
+    RECEIVE
+        EntrÃ©e de stock.
+
+    REMOVE
+        Sortie manuelle.
+
+    ADJUST
+        Stock physique rÃ©el aprÃ¨s inventaire.
+
+    THRESHOLD
+        Modifier le seuil d'alerte.
+    """
+
+    item = (
+        InventoryItem.objects
+        .select_related(
+            "product",
+            "variant",
+        )
+        .prefetch_related(
+            "variant__selections__attribute_value__attribute",
+        )
+        .filter(
+            pk=item_id
+        )
+        .first()
+    )
+
+
+    if item is None:
+        return Response(
+            {
+                "detail": (
+                    "Ligne de stock introuvable."
+                )
+            },
+            status=(
+                status.HTTP_404_NOT_FOUND
+            ),
+        )
+
+
+    operation = (
+        str(
+            request.data.get(
+                "operation",
+                "",
+            )
+        )
+        .strip()
+        .upper()
+    )
+
+
+    reference = (
+        str(
+            request.data.get(
+                "reference",
+                "",
+            )
+            or ""
+        )
+        .strip()[:120]
+    )
+
+
+    note = (
+        str(
+            request.data.get(
+                "note",
+                "",
+            )
+            or ""
+        )
+        .strip()[:1000]
+    )
+
+
+    try:
+        # ====================================================
+        # ENTRÃ‰E STOCK
+        # ====================================================
+
+        if operation == "RECEIVE":
+            quantity = (
+                _parse_integer(
+                    request.data.get(
+                        "quantity"
+                    ),
+                    field_name=(
+                        "La quantitÃ©"
+                    ),
+                    minimum=1,
+                )
+            )
+
+
+            item = add_stock(
+                item.pk,
+                quantity,
+                reference=reference,
+                note=note,
+                user=request.user,
+            )
+
+
+        # ====================================================
+        # SORTIE STOCK
+        # ====================================================
+
+        elif operation == "REMOVE":
+            quantity = (
+                _parse_integer(
+                    request.data.get(
+                        "quantity"
+                    ),
+                    field_name=(
+                        "La quantitÃ©"
+                    ),
+                    minimum=1,
+                )
+            )
+
+
+            item = remove_stock(
+                item.pk,
+                quantity,
+                reference=reference,
+                note=note,
+                user=request.user,
+            )
+
+
+        # ====================================================
+        # AJUSTEMENT INVENTAIRE
+        # ====================================================
+
+        elif operation == "ADJUST":
+            new_quantity = (
+                _parse_integer(
+                    request.data.get(
+                        "new_quantity"
+                    ),
+                    field_name=(
+                        "Le nouveau stock"
+                    ),
+                    minimum=0,
+                )
+            )
+
+
+            item = adjust_stock(
+                item.pk,
+                new_quantity,
+                reference=reference,
+                note=note,
+                user=request.user,
+            )
+
+
+        # ====================================================
+        # SEUIL D'ALERTE
+        # ====================================================
+
+        elif operation == "THRESHOLD":
+            threshold = (
+                _parse_integer(
+                    request.data.get(
+                        "low_stock_threshold"
+                    ),
+                    field_name=(
+                        "Le seuil d'alerte"
+                    ),
+                    minimum=0,
+                )
+            )
+
+
+            item.low_stock_threshold = (
+                threshold
+            )
+
+            item.save(
+                update_fields=[
+                    "low_stock_threshold",
+                    "updated_at",
+                ]
+            )
+
+
+        else:
+            return Response(
+                {
+                    "detail": (
+                        "OpÃ©ration stock inconnue."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_400_BAD_REQUEST
+                ),
+            )
+
+
+    except (
+        ValueError,
+        InvalidStockQuantityError,
+        InsufficientStockError,
+        InsufficientReservedStockError,
+    ) as exc:
+        return Response(
+            {
+                "detail": str(exc)
+            },
+            status=(
+                status
+                .HTTP_400_BAD_REQUEST
+            ),
+        )
+
+
+    item = (
+        InventoryItem.objects
+        .select_related(
+            "product",
+            "variant",
+        )
+        .prefetch_related(
+            "variant__selections__attribute_value__attribute",
+        )
+        .get(
+            pk=item.pk
+        )
+    )
+
+
+    return Response(
+        {
+            "detail": (
+                "Stock mis Ã  jour avec succÃ¨s."
+            ),
+
+            "item": (
+                _serialize_item(
+                    item
+                )
+            ),
+        },
+        status=(
+            status.HTTP_200_OK
+        ),
+    )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\serializers.py =====
+from rest_framework import serializers
+
+from promotions.models import (
+    Advertisement,
+)
+
+
+class OwnerLoginSerializer(
+    serializers.Serializer
+):
+    username = serializers.CharField(
+        max_length=150
+    )
+
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+    )
+
+
+class AdvertisementOwnerSerializer(
+    serializers.ModelSerializer
+):
+    class Meta:
+        model = Advertisement
+
+        fields = "__all__"
+
+        read_only_fields = (
+            "id",
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\urls.py =====
+from django.urls import (
+    path,
+)
+
+from rest_framework.routers import (
+    DefaultRouter,
+)
+
+from .catalog_views import (
+    OwnerBrandViewSet,
+    OwnerCategoryViewSet,
+    OwnerProductImageViewSet,
+    OwnerProductViewSet,
+    owner_catalog_metadata,
+)
+
+from .inventory_views import (
+    inventory_item_action,
+    inventory_items,
+)
+
+from .views import (
+    OwnerAdvertisementViewSet,
+    OwnerOrderViewSet,
+    OwnerPaymentViewSet,
+    dashboard_summary,
+    inventory_alerts,
+    marketing_summary,
+    owner_login,
+    owner_logout,
+    owner_me,
+)
+from .variant_views import (
+    OwnerProductVariantViewSet,
+)
+
+
+# ============================================================
+# ROUTER DRF
+# ============================================================
+
+router = DefaultRouter()
+
+
+# ============================================================
+# COMMANDES
+# ============================================================
+
+router.register(
+    r"orders",
+    OwnerOrderViewSet,
+    basename="owner-order",
+)
+
+router.register(
+    r"catalog/variants",
+    OwnerProductVariantViewSet,
+    basename="owner-catalog-variants",
+)
+
+
+# ============================================================
+# PAIEMENTS
+# ============================================================
+
+router.register(
+    r"payments",
+    OwnerPaymentViewSet,
+    basename="owner-payment",
+)
+
+
+# ============================================================
+# PUBLICITÃ‰S
+# ============================================================
+
+router.register(
+    r"advertisements",
+    OwnerAdvertisementViewSet,
+    basename="owner-advertisement",
+)
+
+
+# ============================================================
+# CATÃ‰GORIES
+# ============================================================
+
+router.register(
+    r"catalog/categories",
+    OwnerCategoryViewSet,
+    basename="owner-category",
+)
+
+
+# ============================================================
+# MARQUES
+# ============================================================
+
+router.register(
+    r"catalog/brands",
+    OwnerBrandViewSet,
+    basename="owner-brand",
+)
+
+
+# ============================================================
+# PRODUITS
+# ============================================================
+
+router.register(
+    r"catalog/products",
+    OwnerProductViewSet,
+    basename="owner-product",
+)
+
+
+# ============================================================
+# IMAGES PRODUITS
+# ============================================================
+
+router.register(
+    r"catalog/product-images",
+    OwnerProductImageViewSet,
+    basename="owner-product-image",
+)
+
+
+# ============================================================
+# ROUTES CLASSIQUES
+# ============================================================
+
+urlpatterns = [
+
+    # ========================================================
+    # AUTHENTIFICATION
+    # ========================================================
+
+    path(
+        "auth/login/",
+        owner_login,
+        name="owner-login",
+    ),
+
+    path(
+        "auth/logout/",
+        owner_logout,
+        name="owner-logout",
+    ),
+
+    path(
+        "auth/me/",
+        owner_me,
+        name="owner-me",
+    ),
+
+
+    # ========================================================
+    # DASHBOARD
+    # ========================================================
+
+    path(
+        "dashboard/",
+        dashboard_summary,
+        name="owner-dashboard",
+    ),
+
+
+    # ========================================================
+    # STOCK - LISTE COMPLÃˆTE
+    # ========================================================
+
+    path(
+        "inventory/",
+        inventory_items,
+        name="owner-inventory-list",
+    ),
+
+
+    # ========================================================
+    # STOCK - ACTIONS
+    # ========================================================
+
+    path(
+        "inventory/<int:item_id>/action/",
+        inventory_item_action,
+        name="owner-inventory-action",
+    ),
+
+
+    # ========================================================
+    # ALERTES STOCK
+    # ========================================================
+
+    path(
+        "inventory-alerts/",
+        inventory_alerts,
+        name="owner-inventory-alerts",
+    ),
+
+
+    # ========================================================
+    # MARKETING
+    # ========================================================
+
+    path(
+        "marketing/summary/",
+        marketing_summary,
+        name="owner-marketing-summary",
+    ),
+
+
+    # ========================================================
+    # MÃ‰TADONNÃ‰ES CATALOGUE
+    # ========================================================
+
+    path(
+        "catalog/metadata/",
+        owner_catalog_metadata,
+        name="owner-catalog-metadata",
+    ),
+]
+
+
+# ============================================================
+# ROUTES DES VIEWSETS DRF
+# ============================================================
+
+urlpatterns += router.urls
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\variant_views.py =====
+from decimal import Decimal, InvalidOperation
+
+from django.db import transaction
+from django.db.models.deletion import ProtectedError
+from django.utils.text import slugify
+
+from rest_framework import permissions, serializers, status, viewsets
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from accounts.permissions import IsOwner
+from catalog.models import Attribute, AttributeValue, Product, ProductAttribute, ProductVariant
+from inventory.models import InventoryItem
+from inventory.services import adjust_stock
+
+
+OWNER_AUTHENTICATION = [TokenAuthentication, SessionAuthentication]
+OWNER_PERMISSIONS = [permissions.IsAuthenticated, IsOwner]
+
+
+def _clean(value):
+    return str(value or "").strip()
+
+
+def _sku(value):
+    return _clean(value).upper()
+
+
+def _attribute_type(name, color_hex=""):
+    key = slugify(_clean(name))
+    if color_hex or key in {"couleur", "color", "colour"}:
+        return "COLOR"
+    return "TEXT"
+
+
+def _get_attribute(name, color_hex=""):
+    name = _clean(name)
+    if not name:
+        raise serializers.ValidationError({"attributes": "Nom d'attribut obligatoire."})
+
+    attr_slug = slugify(name) or "attribut"
+    attribute = Attribute.objects.filter(slug=attr_slug).first()
+
+    if attribute is None:
+        attribute = Attribute.objects.create(
+            name=name,
+            slug=attr_slug,
+            data_type=_attribute_type(name, color_hex),
+        )
+
+    return attribute
+
+
+def _get_attribute_value(attribute, display_value, color_hex=""):
+    display_value = _clean(display_value)
+    if not display_value:
+        raise serializers.ValidationError({"attributes": "Valeur d'attribut obligatoire."})
+
+    existing = AttributeValue.objects.filter(
+        attribute=attribute,
+        display_value__iexact=display_value,
+    ).first()
+
+    if existing:
+        if color_hex and existing.color_hex != color_hex:
+            existing.color_hex = color_hex
+            existing.save(update_fields=["color_hex"])
+        return existing
+
+    base = slugify(display_value) or display_value.lower()
+    key = base
+    counter = 2
+
+    while AttributeValue.objects.filter(attribute=attribute, value=key).exists():
+        key = f"{base}-{counter}"
+        counter += 1
+
+    return AttributeValue.objects.create(
+        attribute=attribute,
+        value=key,
+        display_value=display_value,
+        color_hex=_clean(color_hex),
+    )
+
+
+def _variant_attributes(variant):
+    selections = (
+        variant.selections
+        .select_related("attribute_value__attribute")
+        .all()
+        .order_by(
+            "attribute_value__attribute__name",
+            "attribute_value__display_order",
+            "id",
+        )
+    )
+
+    return [
+        {
+            "attribute_id": s.attribute_value.attribute_id,
+            "attribute": s.attribute_value.attribute.name,
+            "attribute_slug": s.attribute_value.attribute.slug,
+            "value_id": s.attribute_value_id,
+            "value": s.attribute_value.display_value,
+            "color_hex": s.attribute_value.color_hex or "",
+        }
+        for s in selections
+    ]
+
+
+def _inventory(variant):
+    try:
+        return variant.inventory
+    except Exception:
+        return None
+
+
+def _ensure_inventory(product, variant, first_variant):
+    """
+    Garantit une ligne InventoryItem pour la variante.
+
+    Cas particulier de la premiÃ¨re variante :
+    on rÃ©utilise la ligne de stock du produit simple afin de
+    conserver son stock, ses rÃ©servations et son historique.
+
+    IMPORTANT PostgreSQL :
+    InventoryItem possÃ¨de une relation variant nullable.
+    Avec un SELECT FOR UPDATE classique, Django/PostgreSQL peut
+    tenter de verrouiller aussi le cÃ´tÃ© nullable d'une jointure
+    externe, ce que PostgreSQL refuse.
+
+    On supprime donc tout select_related implicite Ã©ventuel et
+    on demande explicitement de verrouiller uniquement la ligne
+    InventoryItem elle-mÃªme avec of=("self",).
+    """
+
+    item = (
+        InventoryItem.objects
+        .filter(
+            variant_id=variant.pk,
+        )
+        .first()
+    )
+
+    if item:
+        return item
+
+    if first_variant:
+        base = (
+            InventoryItem.objects
+            .select_related(None)
+            .select_for_update(
+                of=("self",),
+            )
+            .filter(
+                product_id=product.pk,
+                variant_id__isnull=True,
+            )
+            .first()
+        )
+
+        if base:
+            base.variant = variant
+            base.save(
+                update_fields=[
+                    "variant",
+                    "updated_at",
+                ]
+            )
+            return base
+
+    item, _ = (
+        InventoryItem.objects
+        .get_or_create(
+            product=product,
+            variant=variant,
+            defaults={
+                "quantity_on_hand": 0,
+                "quantity_reserved": 0,
+                "low_stock_threshold": 5,
+            },
+        )
+    )
+
+    return item
+
+
+def _parse_attributes(raw):
+    if isinstance(raw, str):
+        import json
+        try:
+            raw = json.loads(raw)
+        except json.JSONDecodeError:
+            raw = []
+
+    return raw if isinstance(raw, list) else []
+
+
+def _sync_attributes(product, variant, raw_attributes):
+    values = []
+
+    for index, item in enumerate(_parse_attributes(raw_attributes), start=1):
+        if not isinstance(item, dict):
+            continue
+
+        name = _clean(item.get("name"))
+        display_value = _clean(item.get("value"))
+        color_hex = _clean(item.get("color_hex"))
+
+        if not name or not display_value:
+            continue
+
+        attribute = _get_attribute(name, color_hex)
+
+        product_attribute, _ = ProductAttribute.objects.get_or_create(
+            product=product,
+            attribute=attribute,
+            defaults={
+                "is_required": False,
+                "is_variant_axis": True,
+                "display_order": index,
+            },
+        )
+
+        if not product_attribute.is_variant_axis:
+            product_attribute.is_variant_axis = True
+            product_attribute.save(update_fields=["is_variant_axis"])
+
+        values.append(
+            _get_attribute_value(attribute, display_value, color_hex)
+        )
+
+    variant.attribute_values.set(values)
+
+
+class OwnerProductVariantSerializer(serializers.ModelSerializer):
+    attributes = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
+    stock_on_hand = serializers.SerializerMethodField()
+    stock_reserved = serializers.SerializerMethodField()
+    stock_available = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductVariant
+        fields = (
+            "id",
+            "product",
+            "sku",
+            "barcode",
+            "price",
+            "image",
+            "image_url",
+            "is_active",
+            "attributes",
+            "label",
+            "stock_on_hand",
+            "stock_reserved",
+            "stock_available",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = (
+            "id",
+            "product",
+            "image_url",
+            "attributes",
+            "label",
+            "stock_on_hand",
+            "stock_reserved",
+            "stock_available",
+            "created_at",
+            "updated_at",
+        )
+        extra_kwargs = {
+            "image": {
+                "write_only": True,
+                "required": False,
+                "allow_null": True,
+            }
+        }
+
+    def get_attributes(self, obj):
+        return _variant_attributes(obj)
+
+    def get_label(self, obj):
+        return " / ".join(
+            item["value"]
+            for item in _variant_attributes(obj)
+            if item["value"]
+        )
+
+    def get_stock_on_hand(self, obj):
+        item = _inventory(obj)
+        return item.quantity_on_hand if item else 0
+
+    def get_stock_reserved(self, obj):
+        item = _inventory(obj)
+        return item.quantity_reserved if item else 0
+
+    def get_stock_available(self, obj):
+        item = _inventory(obj)
+        return item.quantity_available if item else 0
+
+    def get_image_url(self, obj):
+        if not obj.image:
+            return None
+        request = self.context.get("request")
+        url = obj.image.url
+        return request.build_absolute_uri(url) if request else url
+
+
+class OwnerProductVariantViewSet(viewsets.ViewSet):
+    authentication_classes = OWNER_AUTHENTICATION
+    permission_classes = OWNER_PERMISSIONS
+
+    def _variant(self, pk):
+        return (
+            ProductVariant.objects
+            .select_related("product")
+            .prefetch_related("selections__attribute_value__attribute")
+            .filter(pk=pk)
+            .first()
+        )
+
+    def list(self, request):
+        queryset = (
+            ProductVariant.objects
+            .select_related("product")
+            .prefetch_related("selections__attribute_value__attribute")
+            .all()
+            .order_by("product_id", "id")
+        )
+
+        product_id = request.query_params.get("product")
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+
+        return Response(
+            OwnerProductVariantSerializer(
+                queryset,
+                many=True,
+                context={"request": request},
+            ).data
+        )
+
+    def retrieve(self, request, pk=None):
+        variant = self._variant(pk)
+        if not variant:
+            return Response(
+                {"detail": "Variante introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            OwnerProductVariantSerializer(
+                variant,
+                context={"request": request},
+            ).data
+        )
+
+    @transaction.atomic
+    def create(self, request):
+        product = Product.objects.filter(pk=request.data.get("product")).first()
+        if not product:
+            return Response(
+                {"detail": "Produit introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        sku = _sku(request.data.get("sku"))
+        if not sku:
+            return Response(
+                {"sku": ["Le SKU de la variante est obligatoire."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if ProductVariant.objects.filter(sku__iexact=sku).exists():
+            return Response(
+                {"sku": ["Une variante avec ce SKU existe dÃ©jÃ ."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        raw_price = request.data.get("price")
+        if raw_price is None or _clean(raw_price) == "":
+            price = product.base_price
+        else:
+            try:
+                price = Decimal(str(raw_price))
+            except (InvalidOperation, TypeError, ValueError):
+                return Response(
+                    {"price": ["Prix invalide."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if price < 0:
+                return Response(
+                    {"price": ["Le prix ne peut pas Ãªtre nÃ©gatif."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        previous_count = ProductVariant.objects.filter(product=product).count()
+
+        variant = ProductVariant.objects.create(
+            product=product,
+            sku=sku,
+            barcode=_clean(request.data.get("barcode")),
+            price=price,
+            image=request.FILES.get("image"),
+            is_active=str(request.data.get("is_active", "true")).lower()
+            not in {"false", "0", "off", "no"},
+        )
+
+        _sync_attributes(
+            product,
+            variant,
+            request.data.get("attributes", []),
+        )
+
+        item = _ensure_inventory(
+            product,
+            variant,
+            first_variant=(previous_count == 0),
+        )
+
+        raw_stock = request.data.get("stock_quantity")
+        if raw_stock is not None and _clean(raw_stock) != "":
+            try:
+                quantity = int(raw_stock)
+            except (TypeError, ValueError):
+                transaction.set_rollback(True)
+                return Response(
+                    {"stock_quantity": ["Le stock doit Ãªtre un entier."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if quantity < 0:
+                transaction.set_rollback(True)
+                return Response(
+                    {"stock_quantity": ["Le stock ne peut pas Ãªtre nÃ©gatif."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if quantity != item.quantity_on_hand:
+                adjust_stock(
+                    item.pk,
+                    quantity,
+                    reference="OWNER-VARIANT",
+                    note="Stock dÃ©fini depuis la gestion des variantes.",
+                    user=request.user,
+                )
+
+        variant = self._variant(variant.pk)
+
+        return Response(
+            OwnerProductVariantSerializer(
+                variant,
+                context={"request": request},
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @transaction.atomic
+    def partial_update(self, request, pk=None):
+        variant = self._variant(pk)
+        if not variant:
+            return Response(
+                {"detail": "Variante introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if "sku" in request.data:
+            sku = _sku(request.data.get("sku"))
+            if not sku:
+                return Response(
+                    {"sku": ["Le SKU est obligatoire."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if (
+                ProductVariant.objects
+                .filter(sku__iexact=sku)
+                .exclude(pk=variant.pk)
+                .exists()
+            ):
+                return Response(
+                    {"sku": ["Une autre variante utilise dÃ©jÃ  ce SKU."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            variant.sku = sku
+
+        if "barcode" in request.data:
+            variant.barcode = _clean(request.data.get("barcode"))
+
+        if "price" in request.data:
+            raw_price = request.data.get("price")
+            try:
+                variant.price = (
+                    variant.product.base_price
+                    if _clean(raw_price) == ""
+                    else Decimal(str(raw_price))
+                )
+            except (InvalidOperation, TypeError, ValueError):
+                return Response(
+                    {"price": ["Prix invalide."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if variant.price < 0:
+                return Response(
+                    {"price": ["Le prix ne peut pas Ãªtre nÃ©gatif."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        if "is_active" in request.data:
+            variant.is_active = str(request.data.get("is_active")).lower() not in {
+                "false",
+                "0",
+                "off",
+                "no",
+            }
+
+        image = request.FILES.get("image")
+        if image:
+            variant.image = image
+
+        variant.save()
+
+        if "attributes" in request.data:
+            _sync_attributes(
+                variant.product,
+                variant,
+                request.data.get("attributes", []),
+            )
+
+        item = _inventory(variant)
+        if item is None:
+            item = _ensure_inventory(
+                variant.product,
+                variant,
+                first_variant=False,
+            )
+
+        if "stock_quantity" in request.data:
+            try:
+                quantity = int(request.data.get("stock_quantity"))
+            except (TypeError, ValueError):
+                return Response(
+                    {"stock_quantity": ["Le stock doit Ãªtre un entier."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if quantity < 0:
+                return Response(
+                    {"stock_quantity": ["Le stock ne peut pas Ãªtre nÃ©gatif."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if quantity != item.quantity_on_hand:
+                adjust_stock(
+                    item.pk,
+                    quantity,
+                    reference="OWNER-VARIANT",
+                    note="Ajustement depuis la fiche variante.",
+                    user=request.user,
+                )
+
+        variant = self._variant(variant.pk)
+
+        return Response(
+            OwnerProductVariantSerializer(
+                variant,
+                context={"request": request},
+            ).data
+        )
+
+    def update(self, request, pk=None):
+        return self.partial_update(request, pk=pk)
+
+    @transaction.atomic
+    def destroy(self, request, pk=None):
+        variant = self._variant(pk)
+        if not variant:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        item = _inventory(variant)
+        if item and (
+            item.quantity_on_hand > 0
+            or item.quantity_reserved > 0
+        ):
+            return Response(
+                {
+                    "detail": (
+                        "Impossible de supprimer une variante qui possÃ¨de "
+                        "encore du stock. Mettez son stock Ã  0 ou dÃ©sactivez-la."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        if item:
+            item.delete()
+
+        try:
+            variant.delete()
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Cette variante possÃ¨de dÃ©jÃ  des commandes ou donnÃ©es liÃ©es. "
+                        "DÃ©sactivez-la au lieu de la supprimer."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="metadata")
+    def metadata(self, request):
+        attributes = (
+            Attribute.objects
+            .prefetch_related("values")
+            .all()
+            .order_by("name")
+        )
+
+        return Response(
+            {
+                "attributes": [
+                    {
+                        "id": attribute.pk,
+                        "name": attribute.name,
+                        "slug": attribute.slug,
+                        "data_type": attribute.data_type,
+                        "values": [
+                            {
+                                "id": value.pk,
+                                "value": value.value,
+                                "display_value": value.display_value,
+                                "color_hex": value.color_hex or "",
+                            }
+                            for value in attribute.values.all().order_by(
+                                "display_order",
+                                "id",
+                            )
+                        ],
+                    }
+                    for attribute in attributes
+                ]
+            }
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\views.py =====
+from decimal import Decimal
+
+from django.contrib.auth import authenticate
+
+from django.db.models import (
+    F,
+    Q,
+    Sum,
+)
+
+from django.utils import timezone
+
+from rest_framework import (
+    mixins,
+    permissions,
+    status,
+    viewsets,
+)
+
+from rest_framework.authentication import (
+    SessionAuthentication,
+    TokenAuthentication,
+)
+
+from rest_framework.authtoken.models import (
+    Token,
+)
+
+from rest_framework.decorators import (
+    action,
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+
+from rest_framework.response import (
+    Response,
+)
+
+from accounts.permissions import (
+    IsOwner,
+)
+
+from catalog.models import (
+    Brand,
+    Category,
+    Product,
+)
+
+from checkout.models import (
+    CheckoutSession,
+)
+
+from inventory.models import (
+    InventoryItem,
+)
+
+from orders.api.serializers import (
+    OrderSerializer,
+    PaymentSerializer,
+)
+
+from orders.models import (
+    Order,
+    Payment,
+)
+
+from orders.services import (
+    PaymentError,
+    mark_payment_paid,
+)
+
+from promotions.models import (
+    Advertisement,
+    AdvertisementDailyStat,
+    Partner,
+    Promotion,
+)
+
+from .serializers import (
+    AdvertisementOwnerSerializer,
+    OwnerLoginSerializer,
+)
+
+
+OWNER_AUTHENTICATION = [
+    TokenAuthentication,
+    SessionAuthentication,
+]
+
+
+def _active_count(
+    model,
+):
+    field_names = {
+        field.name
+        for field
+        in model._meta.fields
+    }
+
+    queryset = model.objects.all()
+
+    if "is_active" in field_names:
+        queryset = queryset.filter(
+            is_active=True
+        )
+
+    return queryset.count()
+
+
+def _marketing_totals():
+    field_names = {
+        field.name
+        for field
+        in AdvertisementDailyStat
+        ._meta
+        .fields
+    }
+
+    aggregations = {}
+
+    if "impressions" in field_names:
+        aggregations[
+            "impressions"
+        ] = Sum(
+            "impressions"
+        )
+
+    if "clicks" in field_names:
+        aggregations[
+            "clicks"
+        ] = Sum(
+            "clicks"
+        )
+
+    if "orders" in field_names:
+        aggregations[
+            "orders"
+        ] = Sum(
+            "orders"
+        )
+
+    if "revenue" in field_names:
+        aggregations[
+            "revenue"
+        ] = Sum(
+            "revenue"
+        )
+
+    result = (
+        AdvertisementDailyStat
+        .objects
+        .aggregate(
+            **aggregations
+        )
+        if aggregations
+        else {}
+    )
+
+    impressions = (
+        result.get(
+            "impressions"
+        )
+        or 0
+    )
+
+    clicks = (
+        result.get(
+            "clicks"
+        )
+        or 0
+    )
+
+    orders = (
+        result.get(
+            "orders"
+        )
+        or 0
+    )
+
+    revenue = (
+        result.get(
+            "revenue"
+        )
+        or Decimal("0.00")
+    )
+
+    ctr = (
+        round(
+            (
+                float(clicks)
+                / float(impressions)
+            )
+            * 100,
+            2,
+        )
+        if impressions
+        else 0
+    )
+
+    return {
+        "impressions": impressions,
+        "clicks": clicks,
+        "ctr": ctr,
+        "orders": orders,
+        "revenue": str(
+            revenue
+        ),
+    }
+
+
+@api_view([
+    "POST",
+])
+@authentication_classes([])
+@permission_classes([
+    permissions.AllowAny,
+])
+def owner_login(
+    request,
+):
+    serializer = OwnerLoginSerializer(
+        data=request.data
+    )
+
+    serializer.is_valid(
+        raise_exception=True
+    )
+
+    username = (
+        serializer
+        .validated_data[
+            "username"
+        ]
+    )
+
+    password = (
+        serializer
+        .validated_data[
+            "password"
+        ]
+    )
+
+    user = authenticate(
+        request=request,
+        username=username,
+        password=password,
+    )
+
+    if (
+        user is None
+        or not user.is_active
+    ):
+        return Response(
+            {
+                "detail": (
+                    "Identifiants incorrects."
+                )
+            },
+            status=(
+                status
+                .HTTP_400_BAD_REQUEST
+            ),
+        )
+
+    if not user.is_owner:
+        return Response(
+            {
+                "detail": (
+                    "AccÃ¨s rÃ©servÃ© "
+                    "au propriÃ©taire."
+                )
+            },
+            status=(
+                status
+                .HTTP_403_FORBIDDEN
+            ),
+        )
+
+    Token.objects.filter(
+        user=user
+    ).delete()
+
+    token = Token.objects.create(
+        user=user
+    )
+
+    return Response(
+        {
+            "token": token.key,
+
+            "user": {
+                "id": user.pk,
+                "username": (
+                    user.username
+                ),
+                "email": (
+                    user.email
+                ),
+                "role": (
+                    user.role
+                ),
+                "display_name": (
+                    user.display_name
+                ),
+            },
+        }
+    )
+
+
+@api_view([
+    "POST",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes([
+    permissions.IsAuthenticated,
+    IsOwner,
+])
+def owner_logout(
+    request,
+):
+    if (
+        request.auth
+        and hasattr(
+            request.auth,
+            "delete",
+        )
+    ):
+        request.auth.delete()
+
+    return Response(
+        {
+            "detail": (
+                "DÃ©connexion rÃ©ussie."
+            )
+        }
+    )
+
+
+@api_view([
+    "GET",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes([
+    permissions.IsAuthenticated,
+    IsOwner,
+])
+def owner_me(
+    request,
+):
+    user = request.user
+
+    return Response(
+        {
+            "id": user.pk,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role,
+            "display_name": (
+                user.display_name
+            ),
+        }
+    )
+
+
+@api_view([
+    "GET",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes([
+    permissions.IsAuthenticated,
+    IsOwner,
+])
+def dashboard_summary(
+    request,
+):
+    today = (
+        timezone.localdate()
+    )
+
+    paid_revenue = (
+        Payment.objects
+        .filter(
+            status=(
+                Payment.Status.PAID
+            )
+        )
+        .aggregate(
+            total=Sum(
+                "amount"
+            )
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    pending_amount = (
+        Payment.objects
+        .filter(
+            status=(
+                Payment.Status.PENDING
+            )
+        )
+        .aggregate(
+            total=Sum(
+                "amount"
+            )
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    today_total = (
+        Order.objects
+        .filter(
+            created_at__date=(
+                today
+            )
+        )
+        .aggregate(
+            total=Sum(
+                "total"
+            )
+        )["total"]
+        or Decimal("0.00")
+    )
+
+    stock_queryset = (
+        InventoryItem.objects
+        .annotate(
+            calculated_available=(
+                F(
+                    "quantity_on_hand"
+                )
+                - F(
+                    "quantity_reserved"
+                )
+            )
+        )
+    )
+
+    low_stock_count = (
+        stock_queryset
+        .filter(
+            calculated_available__gt=0,
+            calculated_available__lte=F(
+                "low_stock_threshold"
+            ),
+        )
+        .count()
+    )
+
+    out_of_stock_count = (
+        stock_queryset
+        .filter(
+            calculated_available__lte=0
+        )
+        .count()
+    )
+
+    processing_statuses = [
+        Order.Status.CONFIRMED,
+        Order.Status.PREPARING,
+        Order.Status.READY,
+        Order.Status.SHIPPED,
+    ]
+
+    return Response(
+        {
+            "orders": {
+                "total": (
+                    Order.objects.count()
+                ),
+
+                "today": (
+                    Order.objects
+                    .filter(
+                        created_at__date=(
+                            today
+                        )
+                    )
+                    .count()
+                ),
+
+                "pending": (
+                    Order.objects
+                    .filter(
+                        status=(
+                            Order.Status.PENDING
+                        )
+                    )
+                    .count()
+                ),
+
+                "processing": (
+                    Order.objects
+                    .filter(
+                        status__in=(
+                            processing_statuses
+                        )
+                    )
+                    .count()
+                ),
+
+                "delivered": (
+                    Order.objects
+                    .filter(
+                        status=(
+                            Order.Status.DELIVERED
+                        )
+                    )
+                    .count()
+                ),
+            },
+
+            "money": {
+                "paid_revenue": str(
+                    paid_revenue
+                ),
+
+                "pending_amount": str(
+                    pending_amount
+                ),
+
+                "today_order_total": str(
+                    today_total
+                ),
+            },
+
+            "catalog": {
+                "products": (
+                    Product.objects.count()
+                ),
+
+                "active_products": (
+                    Product.objects
+                    .filter(
+                        status=(
+                            Product.Status.ACTIVE
+                        )
+                    )
+                    .count()
+                ),
+
+                "categories": (
+                    Category.objects.count()
+                ),
+
+                "brands": (
+                    Brand.objects.count()
+                ),
+            },
+
+            "inventory": {
+                "low_stock": (
+                    low_stock_count
+                ),
+
+                "out_of_stock": (
+                    out_of_stock_count
+                ),
+            },
+
+            "checkout": {
+                "active": (
+                    CheckoutSession
+                    .objects
+                    .filter(
+                        status=(
+                            CheckoutSession
+                            .Status
+                            .ACTIVE
+                        )
+                    )
+                    .count()
+                ),
+            },
+
+            "marketing": {
+                "active_promotions": (
+                    _active_count(
+                        Promotion
+                    )
+                ),
+
+                "active_ads": (
+                    _active_count(
+                        Advertisement
+                    )
+                ),
+
+                "active_partners": (
+                    _active_count(
+                        Partner
+                    )
+                ),
+
+                **_marketing_totals(),
+            },
+        }
+    )
+
+
+class OwnerOrderViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwner,
+    ]
+
+    pagination_class = None
+
+    serializer_class = (
+        OrderSerializer
+    )
+
+    def get_queryset(self):
+        return (
+            Order.objects
+            .select_related(
+                "checkout_session"
+            )
+            .prefetch_related(
+                "items",
+                "items__product",
+                "payments",
+            )
+            .order_by(
+                "-created_at"
+            )
+        )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="set-status",
+    )
+    def set_status(
+        self,
+        request,
+        pk=None,
+    ):
+        order = self.get_object()
+
+        new_status = (
+            request.data.get(
+                "status"
+            )
+        )
+
+        allowed = {
+            Order.Status.PENDING,
+            Order.Status.CONFIRMED,
+            Order.Status.PREPARING,
+            Order.Status.READY,
+            Order.Status.SHIPPED,
+            Order.Status.DELIVERED,
+        }
+
+        if new_status not in allowed:
+            return Response(
+                {
+                    "detail": (
+                        "Statut de commande "
+                        "non autorisÃ©."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_400_BAD_REQUEST
+                ),
+            )
+
+        order.status = new_status
+
+        order.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        return Response(
+            OrderSerializer(
+                order,
+                context={
+                    "request": request
+                },
+            ).data
+        )
+
+
+class OwnerPaymentViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwner,
+    ]
+
+    pagination_class = None
+
+    serializer_class = (
+        PaymentSerializer
+    )
+
+    def get_queryset(self):
+        return (
+            Payment.objects
+            .select_related(
+                "order"
+            )
+            .order_by(
+                "-created_at"
+            )
+        )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="mark-paid",
+    )
+    def mark_paid(
+        self,
+        request,
+        pk=None,
+    ):
+        payment = self.get_object()
+
+        try:
+            payment = (
+                mark_payment_paid(
+                    payment.pk,
+                    user=request.user,
+                )
+            )
+
+        except PaymentError as exc:
+            return Response(
+                {
+                    "detail": str(exc)
+                },
+                status=(
+                    status
+                    .HTTP_400_BAD_REQUEST
+                ),
+            )
+
+        return Response(
+            PaymentSerializer(
+                payment,
+                context={
+                    "request": request
+                },
+            ).data
+        )
+
+
+@api_view([
+    "GET",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes([
+    permissions.IsAuthenticated,
+    IsOwner,
+])
+def inventory_alerts(
+    request,
+):
+    queryset = (
+        InventoryItem.objects
+        .select_related(
+            "product",
+            "variant",
+            "product__brand",
+            "product__category",
+        )
+        .annotate(
+            calculated_available=(
+                F(
+                    "quantity_on_hand"
+                )
+                - F(
+                    "quantity_reserved"
+                )
+            )
+        )
+        .filter(
+            Q(
+                calculated_available__lte=F(
+                    "low_stock_threshold"
+                )
+            )
+        )
+        .order_by(
+            "calculated_available",
+            "product__name",
+        )
+    )
+
+    results = []
+
+    for item in queryset:
+        results.append(
+            {
+                "id": item.pk,
+
+                "product_id": (
+                    item.product_id
+                ),
+
+                "product_name": (
+                    item.product.name
+                ),
+
+                "sku": (
+                    item.variant.sku
+                    if item.variant
+                    else item.product.sku
+                ),
+
+                "variant": (
+                    str(
+                        item.variant
+                    )
+                    if item.variant
+                    else ""
+                ),
+
+                "quantity_on_hand": (
+                    item.quantity_on_hand
+                ),
+
+                "quantity_reserved": (
+                    item.quantity_reserved
+                ),
+
+                "available": (
+                    item.calculated_available
+                ),
+
+                "low_stock_threshold": (
+                    item.low_stock_threshold
+                ),
+
+                "status": (
+                    "OUT_OF_STOCK"
+                    if item.calculated_available
+                    <= 0
+                    else "LOW_STOCK"
+                ),
+            }
+        )
+
+    return Response(
+        results
+    )
+
+
+@api_view([
+    "GET",
+])
+@authentication_classes(
+    OWNER_AUTHENTICATION
+)
+@permission_classes([
+    permissions.IsAuthenticated,
+    IsOwner,
+])
+def marketing_summary(
+    request,
+):
+    return Response(
+        {
+            "active_promotions": (
+                _active_count(
+                    Promotion
+                )
+            ),
+
+            "active_ads": (
+                _active_count(
+                    Advertisement
+                )
+            ),
+
+            "active_partners": (
+                _active_count(
+                    Partner
+                )
+            ),
+
+            **_marketing_totals(),
+        }
+    )
+
+
+class OwnerAdvertisementViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    authentication_classes = (
+        OWNER_AUTHENTICATION
+    )
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwner,
+    ]
+
+    pagination_class = None
+
+    serializer_class = (
+        AdvertisementOwnerSerializer
+    )
+
+    queryset = (
+        Advertisement.objects
+        .all()
+        .order_by(
+            "-pk"
+        )
+    )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="toggle",
+    )
+    def toggle(
+        self,
+        request,
+        pk=None,
+    ):
+        advertisement = (
+            self.get_object()
+        )
+
+        field_names = {
+            field.name
+            for field
+            in Advertisement
+            ._meta
+            .fields
+        }
+
+        if (
+            "is_active"
+            not in field_names
+        ):
+            return Response(
+                {
+                    "detail": (
+                        "Le modÃ¨le publicitÃ© "
+                        "ne possÃ¨de pas "
+                        "le champ is_active."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_400_BAD_REQUEST
+                ),
+            )
+
+        advertisement.is_active = (
+            not advertisement.is_active
+        )
+
+        advertisement.save(
+            update_fields=[
+                "is_active"
+            ]
+        )
+
+        return Response(
+            AdvertisementOwnerSerializer(
+                advertisement,
+                context={
+                    "request": request
+                },
+            ).data
+        )
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\api\__init__.py =====
+
+===== C:\Users\HP USER\Desktop\sugu_kura\backend\owner_console\migrations\__init__.py =====
+
+===== ROOT URLS =====
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import (
+    include,
+    path,
+)
+
+
+urlpatterns = [
+    path(
+        "admin/",
+        admin.site.urls,
+    ),
+
+    path(
+        "api/v1/",
+        include(
+            "core.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/catalog/",
+        include(
+            "catalog.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/marketing/",
+        include(
+            "promotions.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/checkout/",
+        include(
+            "checkout.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/orders/",
+        include(
+            "orders.api.urls"
+        ),
+    ),
+
+    path(
+        "api/v1/owner/",
+        include(
+            "owner_console.api.urls"
+        ),
+    ),
+
+    path(
+        (
+            "api/v1/owner/"
+            "notifications/"
+        ),
+        include(
+            "notifications.api.urls"
+        ),
+    ),
+]
+
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=(
+            settings.MEDIA_ROOT
+        ),
+    )
+
+===== ENV NAMES ONLY =====
+DJANGO_SECRET_KEY
+DJANGO_DEBUG
+DJANGO_ALLOWED_HOSTS
+DB_NAME
+DB_USER
+DB_PASSWORD
+DB_HOST
+DB_PORT
+CORS_ALLOWED_ORIGINS
+CSRF_TRUSTED_ORIGINS
+REDIS_URL
+APP_TIME_ZONE
+WEBPUSH_VAPID_PUBLIC_KEY
+WEBPUSH_VAPID_PRIVATE_KEY
+WEBPUSH_VAPID_SUBJECT
+
+===== NEXT CONFIG STOREFRONT =====
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "8000",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/media/**",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+
+===== NEXT CONFIG OWNER =====
+import type {
+  NextConfig,
+} from "next";
+
+
+const isDevelopment =
+  process.env.NODE_ENV !==
+  "production";
+
+
+const nextConfig: NextConfig = {
+  images: {
+    /*
+     * Next.js 16 bloque par dÃ©faut
+     * l'optimisation des images provenant
+     * d'adresses IP locales.
+     *
+     * En dÃ©veloppement, notre backend Django
+     * fonctionne sur 127.0.0.1:8000.
+     *
+     * IMPORTANT :
+     * cette option reste dÃ©sactivÃ©e
+     * automatiquement en production.
+     */
+    dangerouslyAllowLocalIP:
+      isDevelopment,
+
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "8000",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/media/**",
+      },
+    ],
+  },
+};
+
+
+export default nextConfig;

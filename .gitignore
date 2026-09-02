@@ -1,0 +1,51 @@
+# =========================
+# PYTHON / DJANGO
+# =========================
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Django local
+db.sqlite3
+media/
+staticfiles/
+
+# =========================
+# ENV / SECRETS
+# =========================
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+credentials*.json
+secrets*.json
+
+# =========================
+# NEXT / NODE
+# =========================
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# =========================
+# LOGS / CACHE
+# =========================
+*.log
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# =========================
+# SYSTEM / IDE
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

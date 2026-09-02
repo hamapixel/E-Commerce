@@ -1,0 +1,3042 @@
+﻿===== ACTIONS CATALOGUE =====
+"use server";
+
+import {
+  revalidatePath,
+} from "next/cache";
+
+import {
+  redirect,
+} from "next/navigation";
+
+import {
+  ownerFetch,
+} from "@/lib/backend";
+
+
+// ============================================================
+// TYPES INTERNES
+// ============================================================
+
+interface CreatedProductResponse {
+  id: number;
+}
+
+
+// ============================================================
+// UTILITAIRES
+// ============================================================
+
+function checkbox(
+  formData: FormData,
+  name: string,
+) {
+  return (
+    formData.get(name) ===
+    "on"
+  );
+}
+
+
+function cleanFile(
+  formData: FormData,
+  name: string,
+) {
+  const value =
+    formData.get(name);
+
+  if (
+    value instanceof File
+    &&
+    value.size === 0
+  ) {
+    formData.delete(name);
+  }
+}
+
+
+function cleanOptionalField(
+  formData: FormData,
+  name: string,
+) {
+  const value =
+    formData.get(name);
+
+  if (
+    value === null
+    ||
+    String(value).trim() === ""
+  ) {
+    formData.delete(name);
+  }
+}
+
+
+function getUploadedFiles(
+  formData: FormData,
+  name: string,
+) {
+  const files: File[] = [];
+
+  const values =
+    formData.getAll(name);
+
+  for (
+    const value
+    of values
+  ) {
+    if (
+      value instanceof File
+      &&
+      value.size > 0
+    ) {
+      files.push(value);
+    }
+  }
+
+  return files;
+}
+
+
+function getStringValue(
+  formData: FormData,
+  name: string,
+) {
+  const value =
+    formData.get(name);
+
+  if (
+    value === null
+  ) {
+    return "";
+  }
+
+  return String(
+    value,
+  ).trim();
+}
+
+
+function getSafeOrder(
+  formData: FormData,
+) {
+  const rawValue =
+    Number(
+      formData.get(
+        "display_order",
+      ) ?? 0,
+    );
+
+  if (
+    !Number.isFinite(
+      rawValue,
+    )
+  ) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.trunc(
+      rawValue,
+    ),
+  );
+}
+
+
+function revalidateCatalogue() {
+  revalidatePath(
+    "/catalogue",
+  );
+
+  revalidatePath(
+    "/catalogue/produits",
+  );
+}
+
+
+function revalidateProduct(
+  productId: number,
+) {
+  revalidateCatalogue();
+
+  revalidatePath(
+    `/catalogue/produits/${productId}/modifier`,
+  );
+}
+
+
+// ============================================================
+// CATÃ‰GORIES
+// ============================================================
+
+export async function createCategoryAction(
+  formData: FormData,
+) {
+  cleanFile(
+    formData,
+    "image",
+  );
+
+  formData.set(
+    "is_active",
+    String(
+      checkbox(
+        formData,
+        "is_active",
+      ),
+    ),
+  );
+
+  formData.set(
+    "is_featured_home",
+    String(
+      checkbox(
+        formData,
+        "is_featured_home",
+      ),
+    ),
+  );
+
+  cleanOptionalField(
+    formData,
+    "parent",
+  );
+
+  await ownerFetch(
+    "/owner/catalog/categories/",
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  revalidatePath(
+    "/catalogue",
+  );
+
+  revalidatePath(
+    "/catalogue/categories",
+  );
+
+  redirect(
+    "/catalogue/categories?created=1",
+  );
+}
+
+
+// ============================================================
+// MARQUES
+// ============================================================
+
+export async function createBrandAction(
+  formData: FormData,
+) {
+  cleanFile(
+    formData,
+    "logo",
+  );
+
+  formData.set(
+    "is_active",
+    String(
+      checkbox(
+        formData,
+        "is_active",
+      ),
+    ),
+  );
+
+  formData.set(
+    "is_featured",
+    String(
+      checkbox(
+        formData,
+        "is_featured",
+      ),
+    ),
+  );
+
+  await ownerFetch(
+    "/owner/catalog/brands/",
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  revalidatePath(
+    "/catalogue",
+  );
+
+  revalidatePath(
+    "/catalogue/marques",
+  );
+
+  redirect(
+    "/catalogue/marques?created=1",
+  );
+}
+
+
+// ============================================================
+// CRÃ‰ATION PRODUIT
+// ============================================================
+
+export async function createProductAction(
+  formData: FormData,
+) {
+  /*
+   * Le champ "images" permet de sÃ©lectionner
+   * plusieurs photos en une seule fois.
+   */
+  const images =
+    getUploadedFiles(
+      formData,
+      "images",
+    );
+
+  const productName =
+    getStringValue(
+      formData,
+      "name",
+    );
+
+
+  /*
+   * "images" n'est pas un champ du serializer
+   * Django Product.
+   */
+  formData.delete(
+    "images",
+  );
+
+
+  /*
+   * La premiÃ¨re photo sÃ©lectionnÃ©e devient
+   * primary_image.
+   *
+   * Le serializer Django crÃ©e automatiquement
+   * une ProductImage principale Ã  partir
+   * de primary_image.
+   */
+  if (
+    images.length > 0
+  ) {
+    formData.set(
+      "primary_image",
+      images[0],
+    );
+  } else {
+    cleanFile(
+      formData,
+      "primary_image",
+    );
+  }
+
+
+  formData.set(
+    "is_featured",
+    String(
+      checkbox(
+        formData,
+        "is_featured",
+      ),
+    ),
+  );
+
+  cleanOptionalField(
+    formData,
+    "brand",
+  );
+
+  cleanOptionalField(
+    formData,
+    "barcode",
+  );
+
+  cleanOptionalField(
+    formData,
+    "purchase_price",
+  );
+
+
+  /*
+   * CrÃ©ation du produit.
+   */
+  const product =
+    await ownerFetch<
+      CreatedProductResponse
+    >(
+      "/owner/catalog/products/",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+
+  /*
+   * La premiÃ¨re photo existe dÃ©jÃ  grÃ¢ce
+   * Ã  primary_image.
+   *
+   * On ajoute donc seulement les photos
+   * suivantes Ã  la galerie.
+   */
+  for (
+    let index = 1;
+    index < images.length;
+    index += 1
+  ) {
+    const imageFormData =
+      new FormData();
+
+    imageFormData.set(
+      "product",
+      String(
+        product.id,
+      ),
+    );
+
+    imageFormData.set(
+      "image",
+      images[index],
+    );
+
+    if (productName) {
+      imageFormData.set(
+        "alt_text",
+        productName,
+      );
+    }
+
+    imageFormData.set(
+      "is_primary",
+      "false",
+    );
+
+    imageFormData.set(
+      "display_order",
+      String(
+        index,
+      ),
+    );
+
+    await ownerFetch(
+      "/owner/catalog/product-images/",
+      {
+        method: "POST",
+        body:
+          imageFormData,
+      },
+    );
+  }
+
+
+  revalidateCatalogue();
+
+  redirect(
+    "/catalogue/produits?created=1",
+  );
+}
+
+
+// ============================================================
+// MODIFICATION PRODUIT
+// ============================================================
+
+export async function updateProductAction(
+  productId: number,
+  formData: FormData,
+) {
+  cleanFile(
+    formData,
+    "primary_image",
+  );
+
+  formData.set(
+    "is_featured",
+    String(
+      checkbox(
+        formData,
+        "is_featured",
+      ),
+    ),
+  );
+
+  cleanOptionalField(
+    formData,
+    "brand",
+  );
+
+  cleanOptionalField(
+    formData,
+    "barcode",
+  );
+
+  cleanOptionalField(
+    formData,
+    "purchase_price",
+  );
+
+  await ownerFetch(
+    `/owner/catalog/products/${productId}/`,
+    {
+      method: "PATCH",
+      body: formData,
+    },
+  );
+
+  revalidateProduct(
+    productId,
+  );
+
+  redirect(
+    `/catalogue/produits/${productId}/modifier?updated=1`,
+  );
+}
+
+
+// ============================================================
+// ARCHIVER PRODUIT
+// ============================================================
+
+export async function archiveProductAction(
+  productId: number,
+  formData: FormData,
+) {
+  void formData;
+
+  await ownerFetch(
+    `/owner/catalog/products/${productId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        status: "ARCHIVED",
+      }),
+    },
+  );
+
+  revalidateProduct(
+    productId,
+  );
+
+  redirect(
+    `/catalogue/produits/${productId}/modifier?archived=1`,
+  );
+}
+
+
+// ============================================================
+// AJOUTER PLUSIEURS IMAGES PRODUIT
+// ============================================================
+
+export async function addProductImageAction(
+  productId: number,
+  formData: FormData,
+) {
+  const images =
+    getUploadedFiles(
+      formData,
+      "images",
+    );
+
+
+  if (
+    images.length === 0
+  ) {
+    throw new Error(
+      "Veuillez sÃ©lectionner au moins une image.",
+    );
+  }
+
+
+  const altText =
+    getStringValue(
+      formData,
+      "alt_text",
+    );
+
+  const baseOrder =
+    getSafeOrder(
+      formData,
+    );
+
+  const makeFirstPrimary =
+    checkbox(
+      formData,
+      "is_primary",
+    );
+
+
+  /*
+   * Chaque photo est envoyÃ©e sÃ©parÃ©ment
+   * Ã  l'API Django ProductImage.
+   *
+   * Cela permet de sÃ©lectionner 2, 5,
+   * 10 photos ou davantage en une fois.
+   */
+  for (
+    let index = 0;
+    index < images.length;
+    index += 1
+  ) {
+    const imageFormData =
+      new FormData();
+
+    imageFormData.set(
+      "product",
+      String(
+        productId,
+      ),
+    );
+
+    imageFormData.set(
+      "image",
+      images[index],
+    );
+
+
+    if (altText) {
+      imageFormData.set(
+        "alt_text",
+        altText,
+      );
+    }
+
+
+    imageFormData.set(
+      "display_order",
+      String(
+        baseOrder +
+          index,
+      ),
+    );
+
+
+    /*
+     * Si l'utilisateur coche
+     * "photo principale", seule
+     * la premiÃ¨re photo sÃ©lectionnÃ©e
+     * devient principale.
+     */
+    imageFormData.set(
+      "is_primary",
+      String(
+        makeFirstPrimary &&
+          index === 0,
+      ),
+    );
+
+
+    await ownerFetch(
+      "/owner/catalog/product-images/",
+      {
+        method: "POST",
+        body:
+          imageFormData,
+      },
+    );
+  }
+
+
+  /*
+   * IMPORTANT :
+   *
+   * PAS DE REDIRECT ICI.
+   *
+   * La page reste exactement lÃ 
+   * oÃ¹ l'utilisateur travaille.
+   */
+  revalidateProduct(
+    productId,
+  );
+}
+
+
+// ============================================================
+// PHOTO PRINCIPALE
+// ============================================================
+
+export async function makePrimaryProductImageAction(
+  productId: number,
+  imageId: number,
+  formData: FormData,
+) {
+  void formData;
+
+  await ownerFetch(
+    `/owner/catalog/product-images/${imageId}/make-primary/`,
+    {
+      method: "POST",
+    },
+  );
+
+  /*
+   * Pas de redirect :
+   * pas de saut de page.
+   */
+  revalidateProduct(
+    productId,
+  );
+}
+
+
+// ============================================================
+// SUPPRIMER UNE PHOTO
+// ============================================================
+
+export async function deleteProductImageAction(
+  productId: number,
+  imageId: number,
+  formData: FormData,
+) {
+  void formData;
+
+  await ownerFetch(
+    `/owner/catalog/product-images/${imageId}/`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  /*
+   * Pas de redirect :
+   * la position de la page reste stable.
+   */
+  revalidateProduct(
+    productId,
+  );
+}
+
+
+===== TYPES CATALOGUE =====
+// ============================================================
+// SUGU KURA â€” TYPES CATALOGUE OWNER
+// ============================================================
+
+
+// ============================================================
+// CATÃ‰GORIE
+// ============================================================
+
+export interface OwnerCategory {
+  id: number;
+
+  name: string;
+
+  slug: string;
+
+  description: string;
+
+  parent: number | null;
+
+  parent_name: string | null;
+
+  image_url: string | null;
+
+  icon: string;
+
+  display_order: number;
+
+  is_active: boolean;
+
+  is_featured_home: boolean;
+
+  seo_title: string;
+
+  seo_description: string;
+
+  products_count: number;
+
+  created_at: string;
+
+  updated_at: string;
+}
+
+
+// ============================================================
+// MARQUE
+// ============================================================
+
+export interface OwnerBrand {
+  id: number;
+
+  name: string;
+
+  slug: string;
+
+  logo_url: string | null;
+
+  description: string;
+
+  website: string;
+
+  display_order: number;
+
+  is_active: boolean;
+
+  is_featured: boolean;
+
+  seo_title: string;
+
+  seo_description: string;
+
+  products_count: number;
+
+  created_at: string;
+
+  updated_at: string;
+}
+
+
+// ============================================================
+// PRODUIT
+// ============================================================
+
+export interface OwnerProduct {
+  id: number;
+
+  name: string;
+
+  slug: string;
+
+  sku: string;
+
+  barcode: string | null;
+
+  category: number;
+
+  category_name: string;
+
+  brand: number | null;
+
+  brand_name: string | null;
+
+  short_description: string;
+
+  description: string;
+
+  base_price: string;
+
+  purchase_price: string | null;
+
+  status: string;
+
+  is_featured: boolean;
+
+  seo_title: string;
+
+  seo_description: string;
+
+  primary_image_url: string | null;
+
+  images_count: number;
+
+  variants_count: number;
+
+  stock_on_hand: number;
+
+  stock_reserved: number;
+
+  stock_available: number;
+
+  created_at: string;
+
+  updated_at: string;
+}
+
+
+// ============================================================
+// PAGINATION PRODUITS
+// ============================================================
+
+export interface OwnerPaginatedProducts {
+  count: number;
+
+  next: string | null;
+
+  previous: string | null;
+
+  results: OwnerProduct[];
+}
+
+
+// ============================================================
+// CHOIX GÃ‰NÃ‰RIQUE
+// ============================================================
+
+export interface SelectChoice {
+  value: string;
+
+  label: string;
+}
+
+
+// ============================================================
+// MÃ‰TADONNÃ‰ES CATALOGUE
+// ============================================================
+
+export interface CatalogMetadataCategory {
+  id: number;
+
+  name: string;
+
+  parent_id: number | null;
+
+  is_active: boolean;
+}
+
+
+export interface CatalogMetadataBrand {
+  id: number;
+
+  name: string;
+
+  is_active: boolean;
+}
+
+
+export interface CatalogMetadata {
+  product_statuses: SelectChoice[];
+
+  categories: CatalogMetadataCategory[];
+
+  brands: CatalogMetadataBrand[];
+}
+
+
+// ============================================================
+// IMAGE PRODUIT
+// ============================================================
+
+export interface OwnerProductImage {
+  id: number;
+
+  product: number;
+
+  image_url: string | null;
+
+  alt_text: string;
+
+  is_primary: boolean;
+
+  display_order: number;
+
+  created_at: string;
+}
+
+
+===== BACKEND FETCH OWNER =====
+import {
+  cookies,
+} from "next/headers";
+
+import {
+  redirect,
+} from "next/navigation";
+
+
+const API_URL =
+  process.env.INTERNAL_API_URL ??
+  "http://127.0.0.1:8000/api/v1";
+
+
+// ============================================================
+// EXTRACTION DES ERREURS API
+// ============================================================
+
+function extractApiError(
+  data: unknown,
+): string {
+  if (
+    typeof data === "string"
+  ) {
+    return data;
+  }
+
+  if (
+    !data
+    ||
+    typeof data !== "object"
+  ) {
+    return "Erreur serveur.";
+  }
+
+  const record =
+    data as Record<
+      string,
+      unknown
+    >;
+
+  if (
+    typeof record.detail
+    === "string"
+  ) {
+    return record.detail;
+  }
+
+  const messages: string[] = [];
+
+  for (
+    const [
+      field,
+      value,
+    ]
+    of Object.entries(
+      record
+    )
+  ) {
+    if (
+      Array.isArray(
+        value
+      )
+    ) {
+      for (
+        const item
+        of value
+      ) {
+        messages.push(
+          `${field}: ${String(item)}`
+        );
+      }
+
+      continue;
+    }
+
+    if (
+      typeof value
+      === "string"
+    ) {
+      messages.push(
+        `${field}: ${value}`
+      );
+
+      continue;
+    }
+
+    if (
+      value
+      &&
+      typeof value
+      === "object"
+    ) {
+      messages.push(
+        `${field}: ${JSON.stringify(value)}`
+      );
+
+      continue;
+    }
+
+    messages.push(
+      `${field}: ${String(value)}`
+    );
+  }
+
+  if (
+    messages.length
+  ) {
+    return messages.join(
+      " | "
+    );
+  }
+
+  return "Erreur serveur.";
+}
+
+
+// ============================================================
+// DÃ‰TECTION FORM DATA
+// ============================================================
+
+function isFormDataBody(
+  body: BodyInit | null | undefined,
+): body is FormData {
+  if (!body) {
+    return false;
+  }
+
+  // Cas normal.
+  if (
+    typeof FormData
+    !== "undefined"
+    &&
+    body instanceof FormData
+  ) {
+    return true;
+  }
+
+  // SÃ©curitÃ© supplÃ©mentaire pour Next.js / Node.js.
+  // Certains objets FormData peuvent provenir
+  // d'un contexte diffÃ©rent et Ã©chouer au instanceof.
+  return (
+    Object.prototype.toString.call(
+      body
+    ) === "[object FormData]"
+  );
+}
+
+
+// ============================================================
+// FETCH OWNER
+// ============================================================
+
+export async function ownerFetch<T>(
+  path: string,
+  options:
+    RequestInit = {},
+): Promise<T> {
+  const cookieStore =
+    await cookies();
+
+  const token =
+    cookieStore.get(
+      "sk_owner_token",
+    )?.value;
+
+  if (!token) {
+    redirect(
+      "/login",
+    );
+  }
+
+
+  // ----------------------------------------------------------
+  // HEADERS
+  // ----------------------------------------------------------
+
+  const headers =
+    new Headers(
+      options.headers,
+    );
+
+  headers.set(
+    "Accept",
+    "application/json",
+  );
+
+  headers.set(
+    "Authorization",
+    `Token ${token}`,
+  );
+
+
+  // ----------------------------------------------------------
+  // CONTENT TYPE
+  // ----------------------------------------------------------
+
+  const body =
+    options.body;
+
+  const isFormData =
+    isFormDataBody(
+      body
+    );
+
+  /*
+   * IMPORTANT :
+   *
+   * Quand le body est un FormData,
+   * il ne faut JAMAIS dÃ©finir Content-Type
+   * manuellement.
+   *
+   * Node/Next doit gÃ©nÃ©rer automatiquement :
+   *
+   * multipart/form-data;
+   * boundary=----------------...
+   *
+   * Sinon Django/DRF peut essayer de lire
+   * une image PNG/JPEG comme du JSON.
+   */
+
+  if (isFormData) {
+    headers.delete(
+      "Content-Type",
+    );
+  }
+  else if (
+    typeof body === "string"
+    &&
+    !headers.has(
+      "Content-Type",
+    )
+  ) {
+    headers.set(
+      "Content-Type",
+      "application/json",
+    );
+  }
+
+
+  // ----------------------------------------------------------
+  // REQUÃŠTE
+  // ----------------------------------------------------------
+
+  const response =
+    await fetch(
+      `${API_URL}${path}`,
+      {
+        ...options,
+
+        headers,
+
+        cache:
+          "no-store",
+      },
+    );
+
+
+  // ----------------------------------------------------------
+  // AUTHENTIFICATION
+  // ----------------------------------------------------------
+
+  if (
+    response.status === 401
+    ||
+    response.status === 403
+  ) {
+    redirect(
+      "/login",
+    );
+  }
+
+
+  // ----------------------------------------------------------
+  // ERREUR API
+  // ----------------------------------------------------------
+
+  if (!response.ok) {
+    let message =
+      `Erreur API ${response.status}.`;
+
+    const contentType =
+      response.headers.get(
+        "content-type"
+      ) ?? "";
+
+    try {
+      if (
+        contentType.includes(
+          "application/json"
+        )
+      ) {
+        const data:
+          unknown =
+          await response.json();
+
+        message =
+          extractApiError(
+            data
+          );
+      }
+      else {
+        const text =
+          await response.text();
+
+        if (text.trim()) {
+          message =
+            text.trim();
+        }
+      }
+    }
+    catch {
+      message =
+        `Erreur API ${response.status}.`;
+    }
+
+    console.error(
+      `[SUGU KURA OWNER API] ${options.method ?? "GET"} ${path}`,
+      {
+        status:
+          response.status,
+
+        message,
+      },
+    );
+
+    throw new Error(
+      message
+    );
+  }
+
+
+  // ----------------------------------------------------------
+  // PAS DE CONTENU
+  // ----------------------------------------------------------
+
+  if (
+    response.status ===
+    204
+  ) {
+    return undefined as T;
+  }
+
+
+  // ----------------------------------------------------------
+  // RÃ‰PONSE JSON
+  // ----------------------------------------------------------
+
+  const contentType =
+    response.headers.get(
+      "content-type"
+    ) ?? "";
+
+  if (
+    !contentType.includes(
+      "application/json"
+    )
+  ) {
+    return undefined as T;
+  }
+
+  return (
+    await response.json()
+  ) as T;
+}
+
+
+===== LISTE PRODUITS =====
+import Link from "next/link";
+
+import {
+  PackagePlus,
+  Pencil,
+  Search,
+} from "lucide-react";
+
+import {
+  ownerFetch,
+} from "@/lib/backend";
+
+import {
+  formatMoney,
+} from "@/lib/format";
+
+import type {
+  CatalogMetadata,
+  OwnerPaginatedProducts,
+} from "@/types/catalogue";
+
+
+interface ProductsPageProps {
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    brand?: string;
+    status?: string;
+    page?: string;
+  }>;
+}
+
+
+export default async function ProductsPage({
+  searchParams,
+}: ProductsPageProps) {
+  const params =
+    await searchParams;
+
+  const query =
+    new URLSearchParams();
+
+
+  query.set(
+    "page",
+    params.page ?? "1",
+  );
+
+
+  if (params.q) {
+    query.set(
+      "q",
+      params.q,
+    );
+  }
+
+
+  if (params.category) {
+    query.set(
+      "category",
+      params.category,
+    );
+  }
+
+
+  if (params.brand) {
+    query.set(
+      "brand",
+      params.brand,
+    );
+  }
+
+
+  if (params.status) {
+    query.set(
+      "status",
+      params.status,
+    );
+  }
+
+
+  const [
+    data,
+    metadata,
+  ] = await Promise.all([
+    ownerFetch<
+      OwnerPaginatedProducts
+    >(
+      `/owner/catalog/products/?${query.toString()}`,
+    ),
+
+    ownerFetch<
+      CatalogMetadata
+    >(
+      "/owner/catalog/metadata/",
+    ),
+  ]);
+
+
+  return (
+    <>
+      {/* =========================================
+          EN-TÃŠTE
+      ========================================= */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+            Catalogue
+          </p>
+
+          <h1 className="mt-2 text-3xl font-black">
+            Produits
+          </h1>
+
+          <p className="mt-2 text-sm text-slate-500">
+            {data.count} produit(s)
+            dans votre catalogue.
+          </p>
+        </div>
+
+
+        <Link
+          href="/catalogue/produits/nouveau"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#ff6b00] px-4 text-xs font-black text-white transition hover:bg-[#e65f00]"
+        >
+          <PackagePlus
+            size={16}
+          />
+
+          Nouveau produit
+        </Link>
+      </div>
+
+
+      {/* =========================================
+          FILTRES
+      ========================================= */}
+      <form className="mt-7 grid gap-3 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-5">
+
+        {/* RECHERCHE */}
+        <label className="relative sm:col-span-2 xl:col-span-2">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+
+          <input
+            name="q"
+            defaultValue={
+              params.q ?? ""
+            }
+            placeholder="Nom, SKU ou code-barres..."
+            className="h-11 w-full rounded-xl border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#ff6b00]"
+          />
+        </label>
+
+
+        {/* CATÃ‰GORIE */}
+        <select
+          name="category"
+          defaultValue={
+            params.category ?? ""
+          }
+          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold outline-none focus:border-[#ff6b00]"
+        >
+          <option value="">
+            Toutes catÃ©gories
+          </option>
+
+          {metadata.categories.map(
+            (
+              category,
+            ) => (
+              <option
+                key={
+                  category.id
+                }
+                value={
+                  category.id
+                }
+              >
+                {
+                  category.name
+                }
+              </option>
+            ),
+          )}
+        </select>
+
+
+        {/* MARQUE */}
+        <select
+          name="brand"
+          defaultValue={
+            params.brand ?? ""
+          }
+          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold outline-none focus:border-[#ff6b00]"
+        >
+          <option value="">
+            Toutes marques
+          </option>
+
+          {metadata.brands.map(
+            (
+              brand,
+            ) => (
+              <option
+                key={
+                  brand.id
+                }
+                value={
+                  brand.id
+                }
+              >
+                {
+                  brand.name
+                }
+              </option>
+            ),
+          )}
+        </select>
+
+
+        {/* RECHERCHER */}
+        <button
+          type="submit"
+          className="h-11 rounded-xl bg-slate-950 px-4 text-xs font-black text-white transition hover:bg-slate-800"
+        >
+          Rechercher
+        </button>
+      </form>
+
+
+      {/* =========================================
+          LISTE PRODUITS
+      ========================================= */}
+      <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+        {data.results.map(
+          (
+            product,
+          ) => (
+            <article
+              key={
+                product.id
+              }
+              className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+            >
+
+              {/* =================================
+                  PHOTO
+              ================================= */}
+              <div className="aspect-[16/8] bg-slate-100">
+
+                {product.primary_image_url ? (
+                  <div
+                    role="img"
+                    aria-label={
+                      product.name
+                    }
+                    className="h-full w-full bg-contain bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage:
+                        `url("${product.primary_image_url}")`,
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
+                    Aucune photo
+                  </div>
+                )}
+              </div>
+
+
+              {/* =================================
+                  INFORMATIONS
+              ================================= */}
+              <div className="p-4">
+
+                <div className="flex items-start justify-between gap-3">
+
+                  <div className="min-w-0">
+
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[#0b4da2]">
+                      {
+                        product.category_name
+                      }
+                    </p>
+
+                    <h2 className="mt-1 line-clamp-2 font-black text-slate-950">
+                      {
+                        product.name
+                      }
+                    </h2>
+
+                    <p className="mt-1 text-[10px] text-slate-400">
+                      SKU :{" "}
+                      {
+                        product.sku
+                      }
+                    </p>
+
+                    {product.brand_name && (
+                      <p className="mt-1 text-[10px] font-bold text-slate-500">
+                        Marque :{" "}
+                        {
+                          product.brand_name
+                        }
+                      </p>
+                    )}
+                  </div>
+
+
+                  {/* STATUT */}
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black">
+                    {
+                      product.status
+                    }
+                  </span>
+                </div>
+
+
+                {/* =================================
+                    PRIX
+                ================================= */}
+                <strong className="mt-4 block text-xl text-[#ff6b00]">
+                  {formatMoney(
+                    product.base_price,
+                  )}
+                </strong>
+
+
+                {/* =================================
+                    STATISTIQUES
+                ================================= */}
+                <div className="mt-4 grid grid-cols-3 gap-2">
+
+                  {/* STOCK */}
+                  <div className="rounded-xl bg-slate-50 p-2 text-center">
+                    <span className="block text-[9px] text-slate-400">
+                      Dispo
+                    </span>
+
+                    <strong className="text-sm">
+                      {
+                        product.stock_available
+                      }
+                    </strong>
+                  </div>
+
+
+                  {/* VARIANTES */}
+                  <div className="rounded-xl bg-slate-50 p-2 text-center">
+                    <span className="block text-[9px] text-slate-400">
+                      Variantes
+                    </span>
+
+                    <strong className="text-sm">
+                      {
+                        product.variants_count
+                      }
+                    </strong>
+                  </div>
+
+
+                  {/* PHOTOS */}
+                  <div className="rounded-xl bg-slate-50 p-2 text-center">
+                    <span className="block text-[9px] text-slate-400">
+                      Photos
+                    </span>
+
+                    <strong className="text-sm">
+                      {
+                        product.images_count
+                      }
+                    </strong>
+                  </div>
+                </div>
+
+
+                {/* =================================
+                    BOUTON MODIFIER
+                ================================= */}
+                <Link
+                  href={`/catalogue/produits/${product.id}/modifier`}
+                  className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-black text-[#0b4da2] transition hover:border-blue-200 hover:bg-blue-50"
+                >
+                  <Pencil
+                    size={15}
+                  />
+
+                  Modifier
+                </Link>
+              </div>
+            </article>
+          ),
+        )}
+      </section>
+
+
+      {/* =========================================
+          AUCUN PRODUIT
+      ========================================= */}
+      {data.results.length === 0 && (
+        <div className="mt-5 rounded-[20px] border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+          Aucun produit trouvÃ©.
+        </div>
+      )}
+    </>
+  );
+}
+
+
+===== NOUVEAU PRODUIT =====
+import {
+  Images,
+  PackagePlus,
+} from "lucide-react";
+
+import {
+  createProductAction,
+} from "@/actions/catalogue";
+
+import {
+  ownerFetch,
+} from "@/lib/backend";
+
+import type {
+  CatalogMetadata,
+} from "@/types/catalogue";
+
+
+export default async function NewProductPage() {
+  const metadata =
+    await ownerFetch<
+      CatalogMetadata
+    >(
+      "/owner/catalog/metadata/",
+    );
+
+
+  return (
+    <>
+      <div>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+          Catalogue
+        </p>
+
+        <h1 className="mt-2 text-3xl font-black">
+          Nouveau produit
+        </h1>
+
+        <p className="mt-2 text-sm text-slate-500">
+          Ajoutez un produit complet
+          depuis votre tÃ©lÃ©phone,
+          tablette ou ordinateur.
+        </p>
+      </div>
+
+
+      <form
+        action={
+          createProductAction
+        }
+        className="mt-7 grid gap-5"
+      >
+
+        {/* =========================================
+            INFORMATIONS PRINCIPALES
+        ========================================= */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <div className="flex items-center gap-3">
+            <PackagePlus
+              className="text-[#ff6b00]"
+            />
+
+            <h2 className="font-black">
+              Informations principales
+            </h2>
+          </div>
+
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+
+            <label>
+              <span className="text-xs font-black">
+                Nom du produit *
+              </span>
+
+              <input
+                name="name"
+                required
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-[#ff6b00]"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                SKU *
+              </span>
+
+              <input
+                name="sku"
+                required
+                placeholder="Ex: SAM-A26"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 uppercase outline-none"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                CatÃ©gorie *
+              </span>
+
+              <select
+                name="category"
+                required
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+              >
+                <option value="">
+                  Choisir
+                </option>
+
+                {metadata.categories.map(
+                  (
+                    category,
+                  ) => (
+                    <option
+                      key={
+                        category.id
+                      }
+                      value={
+                        category.id
+                      }
+                    >
+                      {
+                        category.name
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Marque
+              </span>
+
+              <select
+                name="brand"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+              >
+                <option value="">
+                  Sans marque
+                </option>
+
+                {metadata.brands.map(
+                  (
+                    brand,
+                  ) => (
+                    <option
+                      key={
+                        brand.id
+                      }
+                      value={
+                        brand.id
+                      }
+                    >
+                      {
+                        brand.name
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Code-barres
+              </span>
+
+              <input
+                name="barcode"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Statut *
+              </span>
+
+              <select
+                name="status"
+                required
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+              >
+                {metadata.product_statuses.map(
+                  (
+                    item,
+                  ) => (
+                    <option
+                      key={
+                        item.value
+                      }
+                      value={
+                        item.value
+                      }
+                    >
+                      {
+                        item.label
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+          </div>
+        </section>
+
+
+        {/* =========================================
+            PRIX
+        ========================================= */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <h2 className="font-black">
+            Prix
+          </h2>
+
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
+            <label>
+              <span className="text-xs font-black">
+                Prix de vente *
+              </span>
+
+              <input
+                name="base_price"
+                type="number"
+                min="0"
+                step="1"
+                required
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Prix d&apos;achat
+              </span>
+
+              <input
+                name="purchase_price"
+                type="number"
+                min="0"
+                step="1"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+          </div>
+        </section>
+
+
+        {/* =========================================
+            PRÃ‰SENTATION
+        ========================================= */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <h2 className="font-black">
+            PrÃ©sentation
+          </h2>
+
+
+          <div className="mt-5 grid gap-4">
+
+            <label>
+              <span className="text-xs font-black">
+                Description courte
+              </span>
+
+              <input
+                name="short_description"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Description complÃ¨te
+              </span>
+
+              <textarea
+                name="description"
+                rows={7}
+                className="mt-2 w-full rounded-xl border border-slate-200 p-4"
+              />
+            </label>
+
+
+            {/* =====================================
+                PHOTOS MULTIPLES
+            ===================================== */}
+            <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 sm:p-5">
+
+              <div className="flex items-start gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0b4da2] text-white">
+                  <Images
+                    size={19}
+                  />
+                </div>
+
+
+                <div>
+                  <h3 className="text-sm font-black text-slate-950">
+                    Photos du produit
+                  </h3>
+
+                  <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                    Vous pouvez sÃ©lectionner
+                    plusieurs photos en une
+                    seule fois.
+                  </p>
+                </div>
+              </div>
+
+
+              <label className="mt-4 block">
+                <span className="text-xs font-black">
+                  SÃ©lectionner les photos
+                </span>
+
+                <input
+                  name="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="mt-2 block w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-xs"
+                />
+              </label>
+
+
+              <div className="mt-3 rounded-xl bg-white p-3 text-[10px] leading-5 text-slate-500">
+                <strong className="text-[#0b4da2]">
+                  Important :
+                </strong>{" "}
+                la premiÃ¨re photo
+                sÃ©lectionnÃ©e sera utilisÃ©e
+                comme photo principale.
+                Toutes les autres seront
+                automatiquement ajoutÃ©es
+                Ã  la galerie.
+              </div>
+            </div>
+
+
+            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4">
+              <input
+                name="is_featured"
+                type="checkbox"
+              />
+
+              <span className="text-xs font-black">
+                Mettre ce produit en avant
+              </span>
+            </label>
+          </div>
+        </section>
+
+
+        {/* =========================================
+            SEO
+        ========================================= */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <h2 className="font-black">
+            SEO
+          </h2>
+
+
+          <div className="mt-5 grid gap-4">
+
+            <label>
+              <span className="text-xs font-black">
+                Titre SEO
+              </span>
+
+              <input
+                name="seo_title"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Description SEO
+              </span>
+
+              <input
+                name="seo_description"
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+          </div>
+        </section>
+
+
+        <button
+          type="submit"
+          className="min-h-13 w-full rounded-xl bg-[#ff6b00] px-6 text-sm font-black text-white transition hover:bg-[#e86100] sm:w-fit"
+        >
+          CrÃ©er le produit
+        </button>
+      </form>
+    </>
+  );
+}
+
+
+===== MODIFIER PRODUIT =====
+import Link from "next/link";
+
+import {
+  ArrowLeft,
+  Archive,
+  CheckCircle2,
+  ImagePlus,
+  Images,
+  PackageOpen,
+  Save,
+  Star,
+  Trash2,
+} from "lucide-react";
+
+import {
+  addProductImageAction,
+  archiveProductAction,
+  deleteProductImageAction,
+  makePrimaryProductImageAction,
+  updateProductAction,
+} from "@/actions/catalogue";
+
+import {
+  ownerFetch,
+} from "@/lib/backend";
+
+import {
+  formatMoney,
+} from "@/lib/format";
+
+import type {
+  CatalogMetadata,
+  OwnerProduct,
+  OwnerProductImage,
+} from "@/types/catalogue";
+
+
+interface EditProductPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+
+  searchParams: Promise<{
+    updated?: string;
+    archived?: string;
+  }>;
+}
+
+
+export default async function EditProductPage({
+  params,
+  searchParams,
+}: EditProductPageProps) {
+  const resolvedParams =
+    await params;
+
+  const messages =
+    await searchParams;
+
+  const productId =
+    Number(
+      resolvedParams.id,
+    );
+
+
+  const [
+    product,
+    metadata,
+    images,
+  ] = await Promise.all([
+    ownerFetch<OwnerProduct>(
+      `/owner/catalog/products/${productId}/`,
+    ),
+
+    ownerFetch<CatalogMetadata>(
+      "/owner/catalog/metadata/",
+    ),
+
+    ownerFetch<OwnerProductImage[]>(
+      `/owner/catalog/products/${productId}/images/`,
+    ),
+  ]);
+
+
+  const updateAction =
+    updateProductAction.bind(
+      null,
+      productId,
+    );
+
+  const addImageAction =
+    addProductImageAction.bind(
+      null,
+      productId,
+    );
+
+  const archiveAction =
+    archiveProductAction.bind(
+      null,
+      productId,
+    );
+
+
+  return (
+    <>
+      {/* =========================================
+          EN-TÃŠTE
+      ========================================= */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+
+        <div>
+          <Link
+            href="/catalogue/produits"
+            className="inline-flex items-center gap-2 text-xs font-black text-[#0b4da2]"
+          >
+            <ArrowLeft
+              size={15}
+            />
+
+            Retour aux produits
+          </Link>
+
+
+          <p className="mt-5 text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+            Catalogue
+          </p>
+
+
+          <h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">
+            Modifier le produit
+          </h1>
+
+
+          <p className="mt-2 text-sm text-slate-500">
+            {product.name}
+          </p>
+        </div>
+
+
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <span className="block text-[10px] font-bold uppercase text-slate-400">
+            Prix actuel
+          </span>
+
+          <strong className="mt-1 block text-lg font-black text-[#ff6b00]">
+            {formatMoney(
+              product.base_price,
+            )}
+          </strong>
+        </div>
+      </div>
+
+
+      {/* =========================================
+          MESSAGES
+      ========================================= */}
+      {messages.updated ===
+        "1" && (
+        <div className="mt-5 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
+          <CheckCircle2
+            size={18}
+          />
+
+          Produit modifiÃ© avec succÃ¨s.
+        </div>
+      )}
+
+
+      {messages.archived ===
+        "1" && (
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-700">
+          Produit archivÃ©.
+        </div>
+      )}
+
+
+      {/* =========================================
+          FORMULAIRE PRODUIT
+      ========================================= */}
+      <form
+        action={
+          updateAction
+        }
+        className="mt-7 grid gap-5"
+      >
+
+        {/* INFORMATIONS */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <div className="flex items-center gap-3">
+            <PackageOpen
+              className="text-[#ff6b00]"
+            />
+
+            <h2 className="font-black">
+              Informations principales
+            </h2>
+          </div>
+
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+
+            <label>
+              <span className="text-xs font-black">
+                Nom du produit *
+              </span>
+
+              <input
+                name="name"
+                required
+                defaultValue={
+                  product.name
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-[#ff6b00]"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                SKU *
+              </span>
+
+              <input
+                name="sku"
+                required
+                defaultValue={
+                  product.sku
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 uppercase outline-none focus:border-[#ff6b00]"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                CatÃ©gorie *
+              </span>
+
+              <select
+                name="category"
+                required
+                defaultValue={
+                  String(
+                    product.category,
+                  )
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+              >
+                {metadata.categories.map(
+                  (
+                    category,
+                  ) => (
+                    <option
+                      key={
+                        category.id
+                      }
+                      value={
+                        category.id
+                      }
+                    >
+                      {
+                        category.name
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Marque
+              </span>
+
+              <select
+                name="brand"
+                defaultValue={
+                  product.brand
+                    ? String(
+                        product.brand,
+                      )
+                    : ""
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+              >
+                <option value="">
+                  Sans marque
+                </option>
+
+                {metadata.brands.map(
+                  (
+                    brand,
+                  ) => (
+                    <option
+                      key={
+                        brand.id
+                      }
+                      value={
+                        brand.id
+                      }
+                    >
+                      {
+                        brand.name
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Code-barres
+              </span>
+
+              <input
+                name="barcode"
+                defaultValue={
+                  product.barcode ??
+                  ""
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Statut
+              </span>
+
+              <select
+                name="status"
+                defaultValue={
+                  product.status
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+              >
+                {metadata.product_statuses.map(
+                  (
+                    item,
+                  ) => (
+                    <option
+                      key={
+                        item.value
+                      }
+                      value={
+                        item.value
+                      }
+                    >
+                      {
+                        item.label
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+          </div>
+        </section>
+
+
+        {/* =====================================
+            PRIX
+        ===================================== */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <h2 className="font-black">
+            Prix
+          </h2>
+
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
+            <label>
+              <span className="text-xs font-black">
+                Prix de vente *
+              </span>
+
+              <input
+                name="base_price"
+                type="number"
+                min="0"
+                step="1"
+                required
+                defaultValue={
+                  product.base_price
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Prix d&apos;achat
+              </span>
+
+              <input
+                name="purchase_price"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={
+                  product.purchase_price ??
+                  ""
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+          </div>
+        </section>
+
+
+        {/* =====================================
+            PRÃ‰SENTATION
+        ===================================== */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <h2 className="font-black">
+            PrÃ©sentation
+          </h2>
+
+
+          <div className="mt-5 grid gap-4">
+
+            <label>
+              <span className="text-xs font-black">
+                Description courte
+              </span>
+
+              <input
+                name="short_description"
+                defaultValue={
+                  product.short_description
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Description complÃ¨te
+              </span>
+
+              <textarea
+                name="description"
+                rows={7}
+                defaultValue={
+                  product.description
+                }
+                className="mt-2 w-full rounded-xl border border-slate-200 p-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Remplacer uniquement
+                la photo principale
+              </span>
+
+              <input
+                name="primary_image"
+                type="file"
+                accept="image/*"
+                className="mt-2 block w-full rounded-xl border border-slate-200 bg-white p-3 text-xs"
+              />
+
+              <span className="mt-2 block text-[10px] text-slate-400">
+                Laissez vide pour
+                conserver la photo
+                principale actuelle.
+              </span>
+            </label>
+
+
+            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4">
+              <input
+                name="is_featured"
+                type="checkbox"
+                defaultChecked={
+                  product.is_featured
+                }
+              />
+
+              <span className="text-xs font-black">
+                Mettre ce produit en avant
+              </span>
+            </label>
+          </div>
+        </section>
+
+
+        {/* =====================================
+            SEO
+        ===================================== */}
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+          <h2 className="font-black">
+            SEO
+          </h2>
+
+
+          <div className="mt-5 grid gap-4">
+
+            <label>
+              <span className="text-xs font-black">
+                Titre SEO
+              </span>
+
+              <input
+                name="seo_title"
+                defaultValue={
+                  product.seo_title
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4"
+              />
+            </label>
+
+
+            <label>
+              <span className="text-xs font-black">
+                Description SEO
+              </span>
+
+              <textarea
+                name="seo_description"
+                rows={4}
+                defaultValue={
+                  product.seo_description
+                }
+                className="mt-2 w-full rounded-xl border border-slate-200 p-4"
+              />
+            </label>
+          </div>
+        </section>
+
+
+        <button
+          type="submit"
+          className="flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-[#ff6b00] px-6 text-sm font-black text-white sm:w-fit"
+        >
+          <Save
+            size={17}
+          />
+
+          Enregistrer les modifications
+        </button>
+      </form>
+
+
+      {/* =========================================
+          GALERIE
+      ========================================= */}
+      <section className="mt-8 overflow-hidden rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+        <div className="flex flex-wrap items-start justify-between gap-3">
+
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#0b4da2]">
+              MÃ©dias
+            </p>
+
+            <h2 className="mt-2 text-xl font-black">
+              Photos du produit
+            </h2>
+
+            <p className="mt-2 text-xs text-slate-500">
+              {images.length} photo(s)
+            </p>
+          </div>
+
+
+          <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-[10px] font-bold text-slate-500">
+            <Images
+              size={15}
+              className="text-[#0b4da2]"
+            />
+
+            DÃ©filement manuel uniquement
+          </div>
+        </div>
+
+
+        {/* =========================================
+            RAIL HORIZONTAL
+
+            - aucun scrollIntoView
+            - aucun scrollTo
+            - aucun scroll automatique
+            - l'utilisateur contrÃ´le le scroll
+        ========================================= */}
+        {images.length >
+        0 ? (
+          <div
+            className="
+              mt-5
+              flex
+              touch-pan-x
+              gap-4
+              overflow-x-auto
+              overscroll-x-contain
+              scroll-auto
+              pb-3
+              [overflow-anchor:none]
+              [scrollbar-width:thin]
+            "
+          >
+            {images.map(
+              (
+                image,
+              ) => {
+                const primaryAction =
+                  makePrimaryProductImageAction.bind(
+                    null,
+                    productId,
+                    image.id,
+                  );
+
+                const deleteAction =
+                  deleteProductImageAction.bind(
+                    null,
+                    productId,
+                    image.id,
+                  );
+
+
+                return (
+                  <article
+                    key={
+                      image.id
+                    }
+                    className="w-[220px] shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:w-[250px]"
+                  >
+
+                    {/* PHOTO */}
+                    <div className="relative aspect-square bg-slate-100">
+
+                      {image.image_url ? (
+                        <div
+                          role="img"
+                          aria-label={
+                            image.alt_text ||
+                            product.name
+                          }
+                          className="h-full w-full bg-contain bg-center bg-no-repeat"
+                          style={{
+                            backgroundImage:
+                              `url("${image.image_url}")`,
+                          }}
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
+                          Aucune image
+                        </div>
+                      )}
+
+
+                      {image.is_primary && (
+                        <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-[#ff6b00] px-2.5 py-1 text-[9px] font-black text-white shadow">
+                          <Star
+                            size={11}
+                          />
+
+                          Principale
+                        </span>
+                      )}
+                    </div>
+
+
+                    {/* ACTIONS */}
+                    <div className="p-3">
+
+                      <p className="truncate text-xs font-bold text-slate-700">
+                        {
+                          image.alt_text ||
+                          product.name
+                        }
+                      </p>
+
+
+                      <div className="mt-3 grid gap-2">
+
+                        {!image.is_primary && (
+                          <form
+                            action={
+                              primaryAction
+                            }
+                          >
+                            <button
+                              type="submit"
+                              className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-[10px] font-black text-[#0b4da2] transition hover:bg-blue-100"
+                            >
+                              <Star
+                                size={14}
+                              />
+
+                              DÃ©finir principale
+                            </button>
+                          </form>
+                        )}
+
+
+                        <form
+                          action={
+                            deleteAction
+                          }
+                        >
+                          <button
+                            type="submit"
+                            className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 text-[10px] font-black text-red-600 transition hover:bg-red-100"
+                          >
+                            <Trash2
+                              size={14}
+                            />
+
+                            Supprimer la photo
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </article>
+                );
+              },
+            )}
+          </div>
+        ) : (
+          <div className="mt-5 flex min-h-32 items-center justify-center rounded-2xl bg-slate-50 text-xs font-bold text-slate-400">
+            Aucune photo pour ce produit.
+          </div>
+        )}
+
+
+        {/* =====================================
+            AJOUTER PLUSIEURS PHOTOS
+        ===================================== */}
+        <form
+          action={
+            addImageAction
+          }
+          className="mt-6 grid gap-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 md:grid-cols-2"
+        >
+
+          <div className="flex items-center gap-2 md:col-span-2">
+            <ImagePlus
+              size={18}
+              className="text-[#ff6b00]"
+            />
+
+            <div>
+              <strong className="block text-sm">
+                Ajouter des photos
+              </strong>
+
+              <span className="mt-1 block text-[10px] text-slate-500">
+                SÃ©lectionnez plusieurs
+                images en une seule fois
+                si nÃ©cessaire.
+              </span>
+            </div>
+          </div>
+
+
+          <label className="md:col-span-2">
+            <span className="text-xs font-black">
+              Images *
+            </span>
+
+            <input
+              name="images"
+              type="file"
+              accept="image/*"
+              multiple
+              required
+              className="mt-2 block w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-xs"
+            />
+
+            <span className="mt-2 block text-[10px] leading-5 text-slate-400">
+              Sur ordinateur :
+              sÃ©lection multiple avec
+              Ctrl ou Shift.
+              Sur tÃ©lÃ©phone :
+              sÃ©lectionnez plusieurs
+              photos dans votre galerie.
+            </span>
+          </label>
+
+
+          <label>
+            <span className="text-xs font-black">
+              Texte alternatif
+            </span>
+
+            <input
+              name="alt_text"
+              defaultValue={
+                product.name
+              }
+              className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+            />
+          </label>
+
+
+          <label>
+            <span className="text-xs font-black">
+              Ordre de dÃ©part
+            </span>
+
+            <input
+              name="display_order"
+              type="number"
+              min="0"
+              defaultValue={
+                images.length
+              }
+              className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
+            />
+
+            <span className="mt-2 block text-[10px] text-slate-400">
+              Les autres photos
+              suivent automatiquement :
+              +1, +2, +3...
+            </span>
+          </label>
+
+
+          <label className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 md:col-span-2">
+            <input
+              name="is_primary"
+              type="checkbox"
+            />
+
+            <span className="text-xs font-black">
+              Utiliser la premiÃ¨re
+              photo sÃ©lectionnÃ©e comme
+              photo principale
+            </span>
+          </label>
+
+
+          <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-[10px] leading-5 text-[#0b4da2] md:col-span-2">
+            AprÃ¨s l&apos;ajout ou la
+            suppression d&apos;une photo,
+            aucune redirection vers le haut
+            de la page n&apos;est effectuÃ©e.
+            Le rail ne dÃ©file pas
+            automatiquement.
+          </div>
+
+
+          <button
+            type="submit"
+            className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#0b4da2] px-5 text-xs font-black text-white transition hover:bg-[#083b7f] md:col-span-2 md:w-fit"
+          >
+            <ImagePlus
+              size={16}
+            />
+
+            Ajouter les photos
+          </button>
+        </form>
+      </section>
+
+
+      {/* =========================================
+          ARCHIVAGE
+      ========================================= */}
+      <section className="mt-8 rounded-[24px] border border-amber-200 bg-amber-50 p-5 sm:p-6">
+
+        <h2 className="font-black text-amber-900">
+          Gestion du statut
+        </h2>
+
+
+        <p className="mt-2 max-w-2xl text-xs leading-5 text-amber-700">
+          Archiver masque le produit
+          sans supprimer son historique,
+          ses commandes ou ses donnÃ©es
+          liÃ©es.
+        </p>
+
+
+        {product.status !==
+          "ARCHIVED" && (
+          <form
+            action={
+              archiveAction
+            }
+            className="mt-4"
+          >
+            <button
+              type="submit"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-300 bg-white px-4 text-xs font-black text-amber-700"
+            >
+              <Archive
+                size={16}
+              />
+
+              Archiver le produit
+            </button>
+          </form>
+        )}
+      </section>
+    </>
+  );
+}
