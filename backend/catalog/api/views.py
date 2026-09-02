@@ -1,4 +1,8 @@
-from django.db.models import Prefetch
+from django.db.models import (
+    Count,
+    Prefetch,
+    Sum,
+)
 
 from django_filters.rest_framework import (
     DjangoFilterBackend,
@@ -8,6 +12,14 @@ from rest_framework import (
     filters,
     permissions,
     viewsets,
+)
+
+from rest_framework.decorators import (
+    action,
+)
+
+from rest_framework.response import (
+    Response,
 )
 
 from catalog.models import (
@@ -22,6 +34,11 @@ from catalog.models import (
 
 from inventory.models import (
     InventoryItem,
+)
+
+from orders.models import (
+    Order,
+    OrderItem,
 )
 
 from promotions.models import (
@@ -305,3 +322,166 @@ class ProductViewSet(
         ] = promotions
 
         return context
+
+    @action(
+        detail=True,
+        methods=[
+            "get",
+        ],
+        url_path=(
+            "frequently-bought-together"
+        ),
+    )
+    def frequently_bought_together(
+        self,
+        request,
+        slug=None,
+    ):
+        """
+        Retourne les produits réellement achetés
+        dans les mêmes commandes que le produit courant.
+
+        Seules les commandes commerciales valides sont
+        prises en compte. Les commandes en attente et
+        annulées ne servent pas aux recommandations.
+        """
+
+        product = self.get_object()
+
+        raw_limit = (
+            request.query_params.get(
+                "limit",
+                "4",
+            )
+        )
+
+        try:
+            limit = int(raw_limit)
+        except (
+            TypeError,
+            ValueError,
+        ):
+            limit = 4
+
+        limit = max(
+            1,
+            min(
+                limit,
+                8,
+            ),
+        )
+
+        valid_order_statuses = [
+            Order.Status.CONFIRMED,
+            Order.Status.PREPARING,
+            Order.Status.READY,
+            Order.Status.SHIPPED,
+            Order.Status.DELIVERED,
+        ]
+
+        order_ids = (
+            OrderItem.objects
+            .filter(
+                product=product,
+                order__status__in=(
+                    valid_order_statuses
+                ),
+            )
+            .values_list(
+                "order_id",
+                flat=True,
+            )
+        )
+
+        ranking = list(
+            OrderItem.objects
+            .filter(
+                order_id__in=order_ids,
+                product__status=(
+                    Product.Status.ACTIVE
+                ),
+            )
+            .exclude(
+                product=product
+            )
+            .values(
+                "product_id"
+            )
+            .annotate(
+                orders_count=Count(
+                    "order_id",
+                    distinct=True,
+                ),
+                quantity_total=Sum(
+                    "quantity"
+                ),
+            )
+            .order_by(
+                "-orders_count",
+                "-quantity_total",
+                "product_id",
+            )[
+                : limit * 3
+            ]
+        )
+
+        if not ranking:
+            return Response([])
+
+        ranked_ids = [
+            item[
+                "product_id"
+            ]
+            for item in ranking
+        ]
+
+        candidates = (
+            self.get_queryset()
+            .filter(
+                pk__in=ranked_ids
+            )
+        )
+
+        by_id = {
+            candidate.pk:
+                candidate
+            for candidate
+            in candidates
+        }
+
+        ordered_products = [
+            by_id[product_id]
+            for product_id
+            in ranked_ids
+            if product_id in by_id
+        ]
+
+        serializer = (
+            ProductListSerializer(
+                ordered_products,
+                many=True,
+                context=(
+                    self
+                    .get_serializer_context()
+                ),
+            )
+        )
+
+        available_products = [
+            item
+            for item
+            in serializer.data
+            if (
+                item.get(
+                    "available_quantity",
+                    0,
+                )
+                > 0
+            )
+        ]
+
+        return Response(
+            available_products[
+                :limit
+            ]
+        )
