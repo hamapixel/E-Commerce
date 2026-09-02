@@ -301,7 +301,12 @@ export function AdvertisementForm({
                   }
                   alt="Aperçu publicité desktop"
                   fill
-                  unoptimized
+                  unoptimized={
+                    desktopPreview
+                      .startsWith(
+                        "blob:",
+                      )
+                  }
                   className="object-contain p-2"
                 />
               )
@@ -357,7 +362,12 @@ export function AdvertisementForm({
                   }
                   alt="Aperçu publicité mobile"
                   fill
-                  unoptimized
+                  unoptimized={
+                    mobilePreview
+                      .startsWith(
+                        "blob:",
+                      )
+                  }
                   className="object-contain p-2"
                 />
               )
