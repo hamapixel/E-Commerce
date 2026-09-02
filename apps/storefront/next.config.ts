@@ -11,6 +11,21 @@ const isDevelopment =
 const nextConfig:
   NextConfig = {
 
+  /*
+   * Autorise explicitement l'accès au serveur de
+   * développement Next.js depuis le téléphone sur
+   * le réseau local.
+   *
+   * Sans cela, les ressources internes /_next/*
+   * peuvent être considérées comme venant d'une
+   * origine de développement différente.
+   */
+  allowedDevOrigins: [
+    "localhost",
+    "127.0.0.1",
+    "192.168.1.6",
+  ],
+
   images: {
     /*
      * Next.js 16 bloque par sécurité
