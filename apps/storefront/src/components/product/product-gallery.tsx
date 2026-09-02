@@ -139,7 +139,6 @@ export function ProductGallery({
           }
           fill
           priority
-          unoptimized
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-contain p-3 sm:p-4"
         />
@@ -215,7 +214,6 @@ export function ProductGallery({
                       image.alt
                     }
                     fill
-                    unoptimized
                     sizes="80px"
                     className="object-contain p-1"
                   />
