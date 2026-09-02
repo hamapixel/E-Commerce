@@ -219,8 +219,11 @@ export default function RootLayout({
     React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body>
+    <html
+      lang="fr"
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>
         <CartHydrator />
 
         <PwaManager />
