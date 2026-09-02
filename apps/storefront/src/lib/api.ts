@@ -109,6 +109,84 @@ export async function getProduct(
   }
 }
 
+export async function getSimilarProducts(
+  product: ProductDetail,
+  limit = 5,
+): Promise<Product[]> {
+  const category =
+    encodeURIComponent(
+      product.category.slug,
+    );
+
+  const brand =
+    product.brand?.slug
+      ? encodeURIComponent(
+          product.brand.slug,
+        )
+      : null;
+
+  const categoryQuery =
+    `category=${category}&page_size=16&ordering=-created_at`;
+
+  const sameBrandPromise =
+    brand
+      ? getProducts(
+          `category=${category}&brand=${brand}&page_size=12&ordering=-created_at`,
+        )
+      : Promise.resolve({
+          count: 0,
+          next: null,
+          previous: null,
+          results: [] as Product[],
+        });
+
+  const [
+    sameBrand,
+    sameCategory,
+  ] = await Promise.all([
+    sameBrandPromise,
+    getProducts(
+      categoryQuery,
+    ),
+  ]);
+
+  const candidates = [
+    ...sameBrand.results,
+    ...sameCategory.results,
+  ];
+
+  const unique =
+    new Map<number, Product>();
+
+  for (const candidate of candidates) {
+    if (
+      candidate.id === product.id
+      || candidate.slug === product.slug
+      || candidate.available_quantity <= 0
+    ) {
+      continue;
+    }
+
+    if (!unique.has(candidate.id)) {
+      unique.set(
+        candidate.id,
+        candidate,
+      );
+    }
+
+    if (unique.size >= limit) {
+      break;
+    }
+  }
+
+  return Array.from(
+    unique.values(),
+  ).slice(
+    0,
+    limit,
+  );
+}
+
 export async function getCategory(
   slug: string,
 ): Promise<Category | null> {
