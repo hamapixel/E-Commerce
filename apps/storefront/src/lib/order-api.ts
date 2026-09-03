@@ -3,11 +3,6 @@ import type {
 } from "@/types/order";
 
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000/api/v1";
-
-
 export type PaymentMethod =
   | "CASH_ON_DELIVERY"
   | "PAY_AT_PICKUP";
@@ -46,7 +41,7 @@ export async function createOrder(
 ): Promise<Order> {
   const response =
     await fetch(
-      `${API_URL}/orders/`,
+      "/api/orders",
       {
         method: "POST",
 
