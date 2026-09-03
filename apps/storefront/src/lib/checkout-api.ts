@@ -4,11 +4,6 @@ import type {
 } from "@/types/checkout";
 
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000/api/v1";
-
-
 async function readError(
   response: Response,
 ): Promise<string> {
@@ -71,7 +66,7 @@ export async function createCheckout(
   payload: CheckoutCreatePayload,
 ): Promise<CheckoutSession> {
   const response = await fetch(
-    `${API_URL}/checkout/sessions/`,
+    "/api/checkout",
     {
       method: "POST",
 
@@ -108,7 +103,7 @@ export async function cancelCheckout(
   detail: string;
 }> {
   const response = await fetch(
-    `${API_URL}/checkout/sessions/${encodeURIComponent(id)}/`,
+    `/api/checkout/${encodeURIComponent(id)}`,
     {
       method: "DELETE",
 
