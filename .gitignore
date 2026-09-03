@@ -26,6 +26,11 @@ credentials*.json
 secrets*.json
 
 # =========================
+# TEMP CONTEXT / AUDIT FILES
+# =========================
+*_context*.txt
+
+# =========================
 # NEXT / NODE
 # =========================
 node_modules/
