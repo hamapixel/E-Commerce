@@ -15,6 +15,7 @@ const nextConfig:
     "localhost",
     "127.0.0.1",
     "192.168.1.6",
+    "192.168.1.23",
   ],
 
   images: {
@@ -59,6 +60,20 @@ const nextConfig:
 
         hostname:
           "192.168.1.6",
+
+        port:
+          "8000",
+
+        pathname:
+          "/media/**",
+      },
+
+      {
+        protocol:
+          "http",
+
+        hostname:
+          "192.168.1.23",
 
         port:
           "8000",
