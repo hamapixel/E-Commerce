@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -251,19 +252,19 @@ export default async function ProductsPage({
               {/* =================================
                   PHOTO
               ================================= */}
-              <div className="aspect-[16/8] bg-slate-100">
+              <div className="relative aspect-[16/8] bg-slate-100">
 
                 {product.primary_image_url ? (
-                  <div
-                    role="img"
-                    aria-label={
+                  <Image
+                    src={
+                      product.primary_image_url
+                    }
+                    alt={
                       product.name
                     }
-                    className="h-full w-full bg-contain bg-center bg-no-repeat"
-                    style={{
-                      backgroundImage:
-                        `url("${product.primary_image_url}")`,
-                    }}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    className="object-contain p-2"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
