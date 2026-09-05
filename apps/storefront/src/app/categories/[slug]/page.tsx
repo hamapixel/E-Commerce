@@ -11,6 +11,10 @@ import {
 } from "@/components/product/product-grid";
 
 import {
+  SearchPagination,
+} from "@/components/search/search-pagination";
+
+import {
   getCategory,
   getProducts,
 } from "@/lib/api";
@@ -26,15 +30,46 @@ import {
 } from "@/lib/seo";
 
 
+const PRODUCTS_PER_PAGE = 16;
+
+
 interface PageProps {
   params: Promise<{
     slug: string;
   }>;
+  searchParams: Promise<
+    Record<
+      string,
+      string |
+      string[] |
+      undefined
+    >
+  >;
 }
 
 
 export const dynamic =
   "force-dynamic";
+
+
+function readPage(
+  value:
+    | string
+    | string[]
+    | undefined,
+) {
+  const raw =
+    Array.isArray(value)
+      ? value[0]
+      : value;
+
+  return Math.max(
+    1,
+    Number(
+      raw || "1",
+    ) || 1,
+  );
+}
 
 
 export async function generateMetadata({
@@ -148,10 +183,19 @@ export async function generateMetadata({
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: PageProps) {
   const {
     slug,
   } = await params;
+
+  const rawSearchParams =
+    await searchParams;
+
+  const page =
+    readPage(
+      rawSearchParams.page,
+    );
 
   const [
     category,
@@ -162,7 +206,7 @@ export default async function CategoryPage({
     getProducts(
       `category=${encodeURIComponent(
         slug,
-      )}&page_size=100`,
+      )}&page_size=${PRODUCTS_PER_PAGE}&page=${page}&ordering=-created_at`,
     ),
   ]);
 
@@ -208,7 +252,7 @@ export default async function CategoryPage({
         "ItemList",
 
       numberOfItems:
-        products.results.length,
+        products.count,
 
       itemListElement:
         products.results.map(
@@ -220,7 +264,12 @@ export default async function CategoryPage({
               "ListItem",
 
             position:
-              index + 1,
+              (
+                page - 1
+              ) *
+                PRODUCTS_PER_PAGE +
+              index +
+              1,
 
             name:
               product.name,
@@ -310,13 +359,38 @@ export default async function CategoryPage({
           )}
         </div>
 
-        <div className="mt-8">
+        <section
+          id="catalogue-results"
+          className="mt-8 scroll-mt-36"
+        >
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <p className="text-sm font-black text-slate-700">
+              {products.count} produit
+              {products.count !== 1
+                ? "s"
+                : ""}
+            </p>
+
+            <p className="text-xs font-semibold text-slate-400">
+              Page {page}
+            </p>
+          </div>
+
           <ProductGrid
-            products={
-              products.results
+            products={products.results}
+          />
+
+          <SearchPagination
+            count={products.count}
+            page={page}
+            pageSize={
+              PRODUCTS_PER_PAGE
+            }
+            basePath={
+              `/categories/${category.slug}`
             }
           />
-        </div>
+        </section>
       </div>
     </>
   );
