@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import {
   Grid2X2,
   Heart,
@@ -11,10 +12,15 @@ import {
   ShoppingCart,
   X,
 } from "lucide-react";
+
 import {
   useEffect,
   useState,
 } from "react";
+
+import {
+  HeaderInstantSearch,
+} from "@/components/search/header-instant-search";
 
 import {
   useCartStore,
@@ -315,31 +321,9 @@ export function Header() {
             </div>
           </Link>
 
-          <form
-            action="/recherche"
-            method="get"
-            className="hidden flex-1 md:block"
-          >
-            <div className="flex h-12 overflow-hidden rounded-2xl border-2 border-slate-200 bg-slate-50 transition focus-within:border-[#ff6b00] focus-within:bg-white">
-              <div className="flex items-center pl-4 text-slate-400">
-                <Search size={20} />
-              </div>
-
-              <input
-                type="search"
-                name="search"
-                placeholder="Rechercher téléphone, ampoule, casque, ventilateur..."
-                className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
-              />
-
-              <button
-                type="submit"
-                className="bg-[#ff6b00] px-6 text-sm font-bold text-white transition hover:bg-[#e85f00]"
-              >
-                Rechercher
-              </button>
-            </div>
-          </form>
+          <HeaderInstantSearch
+            variant="desktop"
+          />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <Link
@@ -368,40 +352,11 @@ export function Header() {
           </div>
         </div>
 
-        <form
-          action="/recherche"
-          method="get"
-          className="px-4 pb-3 md:hidden"
-        >
-          <div className="flex h-11 items-center rounded-xl bg-slate-100 px-3">
-            <Search
-              size={18}
-              className="text-slate-400"
-            />
-
-            <input
-              type="search"
-              name="search"
-              placeholder="Que recherchez-vous ?"
-              className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
-            />
-
-            <button
-              type="submit"
-              className="text-xs font-black text-[#ff6b00]"
-            >
-              Chercher
-            </button>
-          </div>
-        </form>
+        <HeaderInstantSearch
+          variant="mobile"
+        />
       </header>
 
-      {/*
-        Le drawer reste toujours monté dans le DOM.
-        On change uniquement ses classes d'affichage.
-        Cela évite les removeChild lors d'une ouverture/
-        fermeture et rend le menu plus robuste sur mobile.
-      */}
       <div
         id="mobile-menu"
         aria-hidden={!menuOpen}
