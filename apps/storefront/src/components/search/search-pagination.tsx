@@ -39,8 +39,38 @@ function createHref(
     query.toString();
 
   return value
-    ? `/recherche?${value}`
-    : "/recherche";
+    ? `/recherche?${value}#catalogue-results`
+    : "/recherche#catalogue-results";
+}
+
+
+function getVisiblePages(
+  page: number,
+  totalPages: number,
+) {
+  const candidates =
+    new Set<number>([
+      1,
+      totalPages,
+      page - 2,
+      page - 1,
+      page,
+      page + 1,
+      page + 2,
+    ]);
+
+  return Array.from(
+    candidates,
+  )
+    .filter(
+      (value) =>
+        value >= 1 &&
+        value <= totalPages,
+    )
+    .sort(
+      (a, b) =>
+        a - b,
+    );
 }
 
 
@@ -61,33 +91,90 @@ export function SearchPagination({
     return null;
   }
 
+  const visiblePages =
+    getVisiblePages(
+      page,
+      totalPages,
+    );
+
   return (
-    <nav className="mt-10 flex items-center justify-center gap-3">
+    <nav
+      aria-label="Pagination des produits"
+      className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:mt-10"
+    >
       {page > 1 ? (
         <Link
           href={createHref(
             params,
             page - 1,
           )}
-          className="flex h-11 items-center gap-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:border-[#0b4da2]"
+          aria-label="Page précédente"
+          className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-[#0b4da2] sm:h-11 sm:px-4 sm:text-sm"
         >
           <ChevronLeft
             size={17}
           />
-          Précédent
+          <span className="hidden sm:inline">
+            Précédent
+          </span>
         </Link>
       ) : (
-        <span className="flex h-11 cursor-not-allowed items-center gap-1 rounded-xl border border-slate-100 bg-slate-100 px-4 text-sm font-bold text-slate-300">
+        <span className="flex h-10 cursor-not-allowed items-center rounded-xl border border-slate-100 bg-slate-100 px-3 text-slate-300 sm:h-11">
           <ChevronLeft
             size={17}
           />
-          Précédent
         </span>
       )}
 
-      <span className="rounded-xl bg-[#0b4da2] px-4 py-3 text-xs font-black text-white">
-        {page} / {totalPages}
-      </span>
+      <div className="flex items-center gap-1.5">
+        {visiblePages.map(
+          (
+            pageNumber,
+            index,
+          ) => {
+            const previous =
+              visiblePages[
+                index - 1
+              ];
+
+            const needsEllipsis =
+              previous !== undefined &&
+              pageNumber - previous > 1;
+
+            return (
+              <div
+                key={pageNumber}
+                className="flex items-center gap-1.5"
+              >
+                {needsEllipsis && (
+                  <span className="px-1 text-xs font-bold text-slate-400">
+                    …
+                  </span>
+                )}
+
+                {pageNumber === page ? (
+                  <span
+                    aria-current="page"
+                    className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-[#0b4da2] px-3 text-xs font-black text-white shadow-sm sm:h-11 sm:min-w-11"
+                  >
+                    {pageNumber}
+                  </span>
+                ) : (
+                  <Link
+                    href={createHref(
+                      params,
+                      pageNumber,
+                    )}
+                    className="flex h-10 min-w-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 transition hover:border-[#ff6b00] hover:text-[#ff6b00] sm:h-11 sm:min-w-11"
+                  >
+                    {pageNumber}
+                  </Link>
+                )}
+              </div>
+            );
+          },
+        )}
+      </div>
 
       {page < totalPages ? (
         <Link
@@ -95,21 +182,27 @@ export function SearchPagination({
             params,
             page + 1,
           )}
-          className="flex h-11 items-center gap-1 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:border-[#0b4da2]"
+          aria-label="Page suivante"
+          className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-[#0b4da2] sm:h-11 sm:px-4 sm:text-sm"
         >
-          Suivant
+          <span className="hidden sm:inline">
+            Suivant
+          </span>
           <ChevronRight
             size={17}
           />
         </Link>
       ) : (
-        <span className="flex h-11 cursor-not-allowed items-center gap-1 rounded-xl border border-slate-100 bg-slate-100 px-4 text-sm font-bold text-slate-300">
-          Suivant
+        <span className="flex h-10 cursor-not-allowed items-center rounded-xl border border-slate-100 bg-slate-100 px-3 text-slate-300 sm:h-11">
           <ChevronRight
             size={17}
           />
         </span>
       )}
+
+      <p className="w-full pt-1 text-center text-[10px] font-semibold text-slate-400 sm:text-xs">
+        Page {page} sur {totalPages}
+      </p>
     </nav>
   );
 }
