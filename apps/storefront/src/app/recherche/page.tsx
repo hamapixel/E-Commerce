@@ -265,6 +265,7 @@ export default async function SearchPage({
 
       <div className="mt-7 grid gap-7 lg:grid-cols-[280px_minmax(0,1fr)]">
         <SearchFilters
+          key={values.search}
           categories={categories}
           brands={brands}
           values={values}
