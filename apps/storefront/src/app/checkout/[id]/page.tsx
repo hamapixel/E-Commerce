@@ -73,11 +73,6 @@ export default async function CheckoutDetailPage({
             <h1 className="mt-2 text-3xl font-black">
               Vérification finale
             </h1>
-
-            <p className="mt-2 break-all text-xs text-slate-400">
-              Checkout :{" "}
-              {checkout.id}
-            </p>
           </div>
 
           <span
@@ -101,7 +96,7 @@ export default async function CheckoutDetailPage({
 
             <div>
               <p className="text-xs font-bold">
-                Stock réservé encore
+                Temps restant pour confirmer
               </p>
 
               <p className="text-lg font-black">
@@ -193,7 +188,7 @@ export default async function CheckoutDetailPage({
         <div className="my-7 border-t border-slate-200" />
 
         <h2 className="text-xl font-black">
-          Articles vérifiés
+          Articles de ma commande
         </h2>
 
         <div className="mt-4 space-y-3">
@@ -300,8 +295,8 @@ export default async function CheckoutDetailPage({
         ) : (
           <div className="mt-6 rounded-2xl bg-slate-100 p-5 text-center">
             <p className="font-black text-slate-700">
-              Cette session n&apos;est
-              plus active.
+              Cette commande n&apos;est
+              plus disponible.
             </p>
 
             <Link
@@ -320,9 +315,7 @@ export default async function CheckoutDetailPage({
           />
 
           <p className="text-[11px] leading-5 text-emerald-800">
-            Une fois la commande confirmée,
-            le stock réservé devient une
-            sortie de stock réelle.
+            Vérifiez vos articles puis confirmez votre commande avant la fin du délai.
           </p>
         </div>
       </section>
