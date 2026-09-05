@@ -22,6 +22,10 @@ import {
 } from "@/lib/format";
 
 import {
+  toStorefrontMediaUrl,
+} from "@/lib/storefront-media";
+
+import {
   useFavoritesStore,
 } from "@/store/favorites-store";
 
@@ -190,12 +194,15 @@ export function FavoritesPageClient() {
                   ? (
                     <Image
                       src={
-                        item.image
+                        toStorefrontMediaUrl(
+                          item.image,
+                        ) ?? item.image
                       }
                       alt={
                         item.name
                       }
                       fill
+                      unoptimized
                       sizes="(max-width: 640px) 50vw, 25vw"
                       className="object-contain p-3"
                     />
@@ -269,7 +276,9 @@ export function FavoritesPageClient() {
                       item.sku
                     }
                     image={
-                      item.image
+                      toStorefrontMediaUrl(
+                        item.image,
+                      )
                     }
                     currentPrice={
                       item.currentPrice
