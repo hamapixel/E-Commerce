@@ -20,6 +20,10 @@ import {
 } from "@/components/home/hero-ad-slider";
 
 import {
+  HomeInstantSearch,
+} from "@/components/home/home-instant-search";
+
+import {
   PartnerSlider,
 } from "@/components/home/partner-slider";
 
@@ -110,6 +114,13 @@ export default async function Home() {
           advertisements
         }
       />
+
+
+      {/* =====================================
+          RECHERCHE INSTANTANÉE
+      ===================================== */}
+
+      <HomeInstantSearch />
 
 
       {/* =====================================
