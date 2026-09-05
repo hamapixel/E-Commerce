@@ -97,8 +97,7 @@ const nextConfig:
   allowedDevOrigins: [
     "localhost",
     "127.0.0.1",
-    "192.168.1.6",
-    "192.168.1.23",
+    "192.168.1.*",
   ],
 
   experimental: {
