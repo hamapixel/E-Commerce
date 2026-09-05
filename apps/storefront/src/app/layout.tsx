@@ -22,6 +22,10 @@ import {
 } from "@/components/layout/mobile-nav";
 
 import {
+  BackNavigation,
+} from "@/components/navigation/back-navigation";
+
+import {
   PwaManager,
 } from "@/components/pwa/pwa-manager";
 
@@ -229,6 +233,8 @@ export default function RootLayout({
         <PwaManager />
 
         <Header />
+
+        <BackNavigation />
 
         <main>
           {children}
