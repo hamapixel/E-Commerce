@@ -63,7 +63,7 @@ export function CheckoutSessionActions({
           instanceof Error
           ? caughtError.message
           : (
-              "Impossible d'annuler le checkout."
+              "Impossible d'annuler. Réessayez."
             ),
       );
     }
@@ -87,7 +87,7 @@ export function CheckoutSessionActions({
 
         {loading
           ? "Annulation..."
-          : "Annuler le checkout"}
+          : "Annuler et retourner au panier"}
       </button>
 
       {error && (
