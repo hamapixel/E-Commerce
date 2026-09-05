@@ -307,15 +307,6 @@ export function SearchFilters({
 
   useEffect(
     () => {
-      setSearch(
-        values.search,
-      );
-    },
-    [values.search],
-  );
-
-  useEffect(
-    () => {
       const normalized =
         search.trim();
 
