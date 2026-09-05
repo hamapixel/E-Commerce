@@ -193,7 +193,7 @@ export function CheckoutForm() {
           instanceof Error
           ? caughtError.message
           : (
-              "Impossible de créer le checkout."
+              "Impossible de préparer la commande. Réessayez."
             ),
       );
 
@@ -248,9 +248,7 @@ export function CheckoutForm() {
         </h1>
 
         <p className="mt-2 text-sm text-slate-500">
-          Renseignez vos informations.
-          Les prix et le stock seront
-          revérifiés par le serveur.
+          Renseignez vos informations pour continuer.
         </p>
       </div>
 
@@ -486,13 +484,6 @@ export function CheckoutForm() {
             </strong>
           </div>
 
-          <p className="mt-2 text-[10px] leading-5 text-slate-400">
-            Ce montant est indicatif.
-            Django recalculera les vrais
-            prix et promotions avant de
-            réserver le stock.
-          </p>
-
           {error && (
             <div className="mt-4 rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600">
               {error}
@@ -508,7 +499,7 @@ export function CheckoutForm() {
           >
             {submitting
               ? "Vérification..."
-              : "Réserver et continuer"}
+              : "Continuer"}
           </button>
 
           <div className="mt-4 flex gap-2 rounded-xl bg-emerald-50 p-3">
@@ -518,9 +509,7 @@ export function CheckoutForm() {
             />
 
             <p className="text-[10px] leading-5 text-emerald-800">
-              Prix, variante et stock
-              contrôlés par le serveur
-              avant validation.
+              Vérifiez vos informations avant de continuer.
             </p>
           </div>
 
