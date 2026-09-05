@@ -10,16 +10,18 @@ interface SearchPaginationProps {
   count: number;
   page: number;
   pageSize: number;
-  params: Record<
+  params?: Record<
     string,
     string
   >;
+  basePath?: string;
 }
 
 
 function createHref(
   params: Record<string, string>,
   page: number,
+  basePath: string,
 ) {
   const query =
     new URLSearchParams(
@@ -39,8 +41,8 @@ function createHref(
     query.toString();
 
   return value
-    ? `/recherche?${value}#catalogue-results`
-    : "/recherche#catalogue-results";
+    ? `${basePath}?${value}#catalogue-results`
+    : `${basePath}#catalogue-results`;
 }
 
 
@@ -78,7 +80,8 @@ export function SearchPagination({
   count,
   page,
   pageSize,
-  params,
+  params = {},
+  basePath = "/recherche",
 }: SearchPaginationProps) {
   const totalPages = Math.max(
     1,
@@ -107,6 +110,7 @@ export function SearchPagination({
           href={createHref(
             params,
             page - 1,
+            basePath,
           )}
           aria-label="Page précédente"
           className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-[#0b4da2] sm:h-11 sm:px-4 sm:text-sm"
@@ -164,6 +168,7 @@ export function SearchPagination({
                     href={createHref(
                       params,
                       pageNumber,
+                      basePath,
                     )}
                     className="flex h-10 min-w-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 transition hover:border-[#ff6b00] hover:text-[#ff6b00] sm:h-11 sm:min-w-11"
                   >
@@ -181,6 +186,7 @@ export function SearchPagination({
           href={createHref(
             params,
             page + 1,
+            basePath,
           )}
           aria-label="Page suivante"
           className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-[#0b4da2] sm:h-11 sm:px-4 sm:text-sm"
