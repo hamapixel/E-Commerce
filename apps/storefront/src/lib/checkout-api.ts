@@ -4,59 +4,90 @@ import type {
 } from "@/types/checkout";
 
 
+function customerSafeMessage(
+  value: unknown,
+): string | null {
+  if (
+    typeof value !== "string"
+  ) {
+    return null;
+  }
+
+  const message =
+    value.trim();
+
+  if (!message) {
+    return null;
+  }
+
+  const technicalWords =
+    /\b(django|checkout|backend|server|serveur|api)\b/i;
+
+  if (
+    technicalWords.test(
+      message,
+    )
+  ) {
+    return null;
+  }
+
+  return message;
+}
+
+
 async function readError(
   response: Response,
 ): Promise<string> {
   try {
     const data = await response.json();
 
-    if (
-      typeof data.detail ===
-      "string"
-    ) {
-      return data.detail;
+    const detail =
+      customerSafeMessage(
+        data.detail,
+      );
+
+    if (detail) {
+      return detail;
     }
 
     if (data.address) {
-      if (
-        Array.isArray(
-          data.address,
-        )
-      ) {
-        return String(
-          data.address[0],
+      const addressMessage =
+        customerSafeMessage(
+          Array.isArray(
+            data.address,
+          )
+            ? data.address[0]
+            : data.address,
         );
-      }
 
-      return String(
-        data.address,
-      );
+      if (addressMessage) {
+        return addressMessage;
+      }
     }
 
     if (
       data.non_field_errors
     ) {
-      if (
-        Array.isArray(
-          data.non_field_errors,
-        )
-      ) {
-        return String(
-          data.non_field_errors[0],
+      const fieldMessage =
+        customerSafeMessage(
+          Array.isArray(
+            data.non_field_errors,
+          )
+            ? data.non_field_errors[0]
+            : data.non_field_errors,
         );
-      }
 
-      return String(
-        data.non_field_errors,
-      );
+      if (fieldMessage) {
+        return fieldMessage;
+      }
     }
 
     return (
-      "Les informations du checkout sont invalides."
+      "Vérifiez vos informations puis réessayez."
     );
   } catch {
     return (
-      "Une erreur est survenue pendant le checkout."
+      "Une erreur est survenue. Réessayez."
     );
   }
 }
