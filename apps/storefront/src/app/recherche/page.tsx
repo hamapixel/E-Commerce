@@ -37,6 +37,9 @@ export const dynamic =
   "force-dynamic";
 
 
+const PRODUCTS_PER_PAGE = 16;
+
+
 interface PageProps {
   searchParams: Promise<
     Record<
@@ -141,7 +144,9 @@ export default async function SearchPage({
 
   apiParams.set(
     "page_size",
-    "24",
+    String(
+      PRODUCTS_PER_PAGE,
+    ),
   );
 
   apiParams.set(
@@ -250,7 +255,7 @@ export default async function SearchPage({
 
         {values.search && (
           <p className="mt-4 text-sm text-blue-100">
-            Résultats pour :{" "}
+            Résultats pour:{" "}
             <strong className="text-white">
               “{values.search}”
             </strong>
@@ -260,14 +265,15 @@ export default async function SearchPage({
 
       <div className="mt-7 grid gap-7 lg:grid-cols-[280px_minmax(0,1fr)]">
         <SearchFilters
-          categories={
-            categories
-          }
+          categories={categories}
           brands={brands}
           values={values}
         />
 
-        <section>
+        <section
+          id="catalogue-results"
+          className="scroll-mt-36"
+        >
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ff6b00]">
@@ -284,25 +290,21 @@ export default async function SearchPage({
             </div>
 
             <p className="text-xs font-semibold text-slate-400">
-              Page {page}
+              {PRODUCTS_PER_PAGE} produits maximum par page
             </p>
           </div>
 
           <ProductGrid
-            products={
-              products.results
-            }
+            products={products.results}
           />
 
           <SearchPagination
-            count={
-              products.count
-            }
+            count={products.count}
             page={page}
-            pageSize={24}
-            params={
-              browserParams
+            pageSize={
+              PRODUCTS_PER_PAGE
             }
+            params={browserParams}
           />
         </section>
       </div>
