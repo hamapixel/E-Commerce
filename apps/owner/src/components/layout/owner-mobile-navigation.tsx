@@ -7,6 +7,7 @@ import {
   BadgeDollarSign,
   Bell,
   Boxes,
+  Handshake,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -64,6 +65,11 @@ const navigation = [
     href: "/publicites",
     label: "Publicités",
     icon: Megaphone,
+  },
+  {
+    href: "/partenaires",
+    label: "Partenaires",
+    icon: Handshake,
   },
   {
     href: "/avis",
