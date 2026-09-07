@@ -130,7 +130,7 @@ export function ProductCard({
         <div className="absolute left-1.5 top-1.5 flex max-w-[76%] flex-col items-start gap-1 sm:left-2 sm:top-2">
           {product.is_featured && (
             <span className="rounded-md bg-emerald-600 px-1.5 py-0.5 text-[8px] font-black text-white shadow-sm sm:px-2 sm:py-1 sm:text-[9px]">
-              NOUVEL ARRIVAGE
+              NOUVEAU
             </span>
           )}
 
