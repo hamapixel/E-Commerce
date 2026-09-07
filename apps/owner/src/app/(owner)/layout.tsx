@@ -4,6 +4,7 @@ import {
   BadgeDollarSign,
   Bell,
   Boxes,
+  Handshake,
   LayoutDashboard,
   LogOut,
   Megaphone,
@@ -71,6 +72,11 @@ export default async function OwnerLayout({
       href: "/publicites",
       label: "Publicités",
       icon: Megaphone,
+    },
+    {
+      href: "/partenaires",
+      label: "Partenaires",
+      icon: Handshake,
     },
     {
       href: "/avis",
