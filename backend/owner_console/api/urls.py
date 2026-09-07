@@ -27,6 +27,11 @@ from .promotion_views import (
     owner_product_promotion,
 )
 
+from .review_views import (
+    owner_review_detail,
+    owner_reviews,
+)
+
 from .views import (
     OwnerOrderViewSet,
     OwnerPaymentViewSet,
@@ -213,6 +218,23 @@ urlpatterns = [
         "marketing/summary/",
         marketing_summary,
         name="owner-marketing-summary",
+    ),
+
+
+    # ========================================================
+    # AVIS CLIENTS
+    # ========================================================
+
+    path(
+        "reviews/",
+        owner_reviews,
+        name="owner-reviews",
+    ),
+
+    path(
+        "reviews/<int:review_id>/",
+        owner_review_detail,
+        name="owner-review-detail",
     ),
 
 
