@@ -5,12 +5,14 @@ import {
 } from "next/cache";
 
 import {
-  redirect,
-} from "next/navigation";
-
-import {
   ownerFetch,
 } from "@/lib/backend";
+
+
+export interface ProductPromotionActionState {
+  error: string;
+  success: string;
+}
 
 
 function value(
@@ -26,10 +28,38 @@ function value(
 }
 
 
+function isNextRedirectError(
+  error: unknown,
+) {
+  if (
+    !error
+    ||
+    typeof error !== "object"
+    ||
+    !("digest" in error)
+  ) {
+    return false;
+  }
+
+  return String(
+    (
+      error as {
+        digest?: unknown;
+      }
+    ).digest ?? "",
+  ).startsWith(
+    "NEXT_REDIRECT",
+  );
+}
+
+
 export async function updateProductPromotionAction(
   productId: number,
+  previousState: ProductPromotionActionState,
   formData: FormData,
-) {
+): Promise<ProductPromotionActionState> {
+  void previousState;
+
   const enabled =
     formData.get(
       "promotion_enabled",
@@ -38,6 +68,11 @@ export async function updateProductPromotionAction(
   const price = value(
     formData,
     "promotion_price",
+  );
+
+  const normalPrice = value(
+    formData,
+    "promotion_normal_price",
   );
 
   const startAt = value(
@@ -52,39 +87,122 @@ export async function updateProductPromotionAction(
 
   if (enabled) {
     if (!price) {
-      throw new Error(
-        "Saisissez le prix promotionnel.",
-      );
+      return {
+        error:
+          "Saisissez le nouveau prix promotionnel.",
+        success: "",
+      };
+    }
+
+    const parsedPrice =
+      Number(price);
+
+    const parsedNormalPrice =
+      Number(normalPrice);
+
+    if (
+      !Number.isFinite(parsedPrice)
+      ||
+      parsedPrice <= 0
+    ) {
+      return {
+        error:
+          "Le prix promotionnel doit être supérieur à 0.",
+        success: "",
+      };
+    }
+
+    if (
+      Number.isFinite(
+        parsedNormalPrice,
+      )
+      &&
+      parsedNormalPrice > 0
+      &&
+      parsedPrice >= parsedNormalPrice
+    ) {
+      return {
+        error:
+          "Le nouveau prix doit être inférieur au prix normal.",
+        success: "",
+      };
     }
 
     if (!startAt || !endAt) {
-      throw new Error(
-        "Choisissez la date de début et la date de fin.",
-      );
+      return {
+        error:
+          "Choisissez la date de début et la date de fin.",
+        success: "",
+      };
+    }
+
+    const startTime =
+      new Date(startAt).getTime();
+
+    const endTime =
+      new Date(endAt).getTime();
+
+    if (
+      !Number.isFinite(startTime)
+      ||
+      !Number.isFinite(endTime)
+    ) {
+      return {
+        error:
+          "Les dates de promotion sont invalides.",
+        success: "",
+      };
+    }
+
+    if (endTime <= startTime) {
+      return {
+        error:
+          "La date de fin doit être après la date de début.",
+        success: "",
+      };
     }
   }
 
-  await ownerFetch(
-    `/owner/catalog/products/${productId}/promotion/`,
-    {
-      method: "PUT",
-      body: JSON.stringify({
-        enabled,
-        price:
-          enabled
-            ? price
-            : null,
-        start_at:
-          enabled
-            ? startAt
-            : null,
-        end_at:
-          enabled
-            ? endAt
-            : null,
-      }),
-    },
-  );
+  try {
+    await ownerFetch(
+      `/owner/catalog/products/${productId}/promotion/`,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          enabled,
+          price:
+            enabled
+              ? price
+              : null,
+          start_at:
+            enabled
+              ? startAt
+              : null,
+          end_at:
+            enabled
+              ? endAt
+              : null,
+        }),
+      },
+    );
+  }
+  catch (error) {
+    if (
+      isNextRedirectError(
+        error,
+      )
+    ) {
+      throw error;
+    }
+
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Impossible d'enregistrer la promotion.",
+      success: "",
+    };
+  }
 
   revalidatePath(
     `/catalogue/produits/${productId}`,
@@ -94,7 +212,11 @@ export async function updateProductPromotionAction(
     `/catalogue/produits/${productId}/modifier`,
   );
 
-  redirect(
-    `/catalogue/produits/${productId}/modifier?promo=1`,
-  );
+  return {
+    error: "",
+    success:
+      enabled
+        ? "Promotion enregistrée avec succès."
+        : "Promotion désactivée. Le prix normal est de nouveau actif.",
+  };
 }
