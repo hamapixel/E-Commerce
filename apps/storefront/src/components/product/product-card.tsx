@@ -66,12 +66,13 @@ export function ProductCard({
   product,
 }: ProductCardProps) {
   const discountPercent =
-    product.has_promotion
-      ? getDiscountPercent(
-          product.normal_price,
-          product.current_price,
-        )
-      : null;
+    getDiscountPercent(
+      product.normal_price,
+      product.current_price,
+    );
+
+  const hasVisibleDiscount =
+    discountPercent !== null;
 
   return (
     <article className="group relative flex w-full flex-col overflow-hidden rounded-[14px] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg sm:rounded-[18px]">
@@ -127,16 +128,17 @@ export function ProductCard({
           </div>
         )}
 
-        <div className="absolute left-1.5 top-1.5 flex max-w-[76%] flex-col items-start gap-1 sm:left-2 sm:top-2">
+        <div className="absolute left-1.5 top-1.5 z-10 flex max-w-[76%] flex-col items-start gap-1 sm:left-2 sm:top-2">
           {product.is_featured && (
             <span className="rounded-md bg-emerald-600 px-1.5 py-0.5 text-[8px] font-black text-white shadow-sm sm:px-2 sm:py-1 sm:text-[9px]">
               NOUVEAU
             </span>
           )}
 
-          {product.has_promotion && (
+          {(hasVisibleDiscount ||
+            product.has_promotion) && (
             <span className="rounded-md bg-red-500 px-1.5 py-0.5 text-[8px] font-black text-white shadow-sm sm:px-2 sm:py-1 sm:text-[9px]">
-              {discountPercent
+              {hasVisibleDiscount
                 ? `-${discountPercent}%`
                 : product.promotion?.badge || "PROMO"}
             </span>
@@ -179,7 +181,8 @@ export function ProductCard({
         )}
 
         <div className="mt-1.5 sm:mt-2">
-          {product.has_promotion && (
+          {(hasVisibleDiscount ||
+            product.has_promotion) && (
             <div className="text-[9px] font-semibold text-slate-400 line-through sm:text-xs">
               {formatMoney(
                 product.normal_price,
