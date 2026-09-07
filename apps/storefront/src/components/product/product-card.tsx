@@ -33,9 +33,6 @@ interface ProductCardProps {
 }
 
 
-const NEW_PRODUCT_DAYS = 21;
-
-
 function getDiscountPercent(
   normalPrice: string,
   currentPrice: string,
@@ -65,24 +62,6 @@ function getDiscountPercent(
 }
 
 
-function isRecentProduct(
-  createdAt: string,
-) {
-  const created = Date.parse(
-    createdAt,
-  );
-
-  if (!Number.isFinite(created)) {
-    return false;
-  }
-
-  return (
-    Date.now() - created <=
-    NEW_PRODUCT_DAYS * 24 * 60 * 60 * 1000
-  );
-}
-
-
 export function ProductCard({
   product,
 }: ProductCardProps) {
@@ -93,15 +72,6 @@ export function ProductCard({
           product.current_price,
         )
       : null;
-
-  const arrivalBadge =
-    product.is_featured
-      ? "NOUVEL ARRIVAGE"
-      : isRecentProduct(
-          product.created_at,
-        )
-        ? "NOUVEAU"
-        : null;
 
   return (
     <article className="group relative flex w-full flex-col overflow-hidden rounded-[14px] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg sm:rounded-[18px]">
@@ -158,9 +128,9 @@ export function ProductCard({
         )}
 
         <div className="absolute left-1.5 top-1.5 flex max-w-[76%] flex-col items-start gap-1 sm:left-2 sm:top-2">
-          {arrivalBadge && (
+          {product.is_featured && (
             <span className="rounded-md bg-emerald-600 px-1.5 py-0.5 text-[8px] font-black text-white shadow-sm sm:px-2 sm:py-1 sm:text-[9px]">
-              {arrivalBadge}
+              NOUVEL ARRIVAGE
             </span>
           )}
 
