@@ -23,6 +23,10 @@ from .advertisement_views import (
     OwnerAdvertisementViewSet,
 )
 
+from .partner_views import (
+    OwnerPartnerViewSet,
+)
+
 from .promotion_views import (
     owner_product_promotion,
 )
@@ -90,6 +94,17 @@ router.register(
     r"advertisements",
     OwnerAdvertisementViewSet,
     basename="owner-advertisement",
+)
+
+
+# ============================================================
+# PARTENAIRES
+# ============================================================
+
+router.register(
+    r"partners",
+    OwnerPartnerViewSet,
+    basename="owner-partner",
 )
 
 
