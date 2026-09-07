@@ -59,6 +59,14 @@ class PromotionAdmin(admin.ModelAdmin):
         self,
         obj,
     ):
+        if (
+            not obj
+            or not obj.pk
+            or not obj.start_at
+            or not obj.end_at
+        ):
+            return "À définir"
+
         if obj.is_current:
             return "ACTIVE"
 
@@ -71,6 +79,14 @@ class PromotionAdmin(admin.ModelAdmin):
         self,
         obj,
     ):
+        if (
+            not obj
+            or not obj.pk
+            or not obj.start_at
+            or not obj.end_at
+        ):
+            return 0
+
         return obj.remaining_seconds
 
 
@@ -128,6 +144,14 @@ class AdvertisementAdmin(
         self,
         obj,
     ):
+        if (
+            not obj
+            or not obj.pk
+            or not obj.start_at
+            or not obj.end_at
+        ):
+            return "À définir"
+
         if obj.is_current:
             return "ACTIVE"
 
