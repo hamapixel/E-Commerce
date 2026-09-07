@@ -63,3 +63,38 @@ img {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes partner-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.partner-marquee-track {
+  animation:
+    partner-marquee-scroll
+    28s
+    linear
+    infinite;
+  will-change: transform;
+}
+
+.partner-marquee:hover .partner-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (max-width: 640px) {
+  .partner-marquee-track {
+    animation-duration: 20s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-marquee-track {
+    animation-duration: 60s;
+  }
+}
