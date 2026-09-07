@@ -23,6 +23,10 @@ from .advertisement_views import (
     OwnerAdvertisementViewSet,
 )
 
+from .promotion_views import (
+    owner_product_promotion,
+)
+
 from .views import (
     OwnerOrderViewSet,
     OwnerPaymentViewSet,
@@ -209,6 +213,17 @@ urlpatterns = [
         "marketing/summary/",
         marketing_summary,
         name="owner-marketing-summary",
+    ),
+
+
+    # ========================================================
+    # PROMOTION RAPIDE PRODUIT
+    # ========================================================
+
+    path(
+        "catalog/products/<int:product_id>/promotion/",
+        owner_product_promotion,
+        name="owner-product-promotion",
     ),
 
 
