@@ -243,7 +243,7 @@ export function ProductPromotionForm({
       </div>
 
       <p className="mt-3 text-[10px] leading-5 text-slate-500">
-        Pour une promotion immédiate, saisissez le nouveau prix et la date de fin puis cliquez sur « Démarrer maintenant ». SUGU KURA utilise l'heure réelle du serveur et évite ainsi les décalages d'heure. Pour une promotion future, choisissez Début + Fin puis cliquez sur « Enregistrer / planifier ».
+        Pour une promotion immédiate, saisissez le nouveau prix et la date de fin puis cliquez sur « Démarrer maintenant ». SUGU KURA utilise l&apos;heure réelle du serveur et évite ainsi les décalages d&apos;heure. Pour une promotion future, choisissez Début + Fin puis cliquez sur « Enregistrer / planifier ».
       </p>
     </form>
   );
