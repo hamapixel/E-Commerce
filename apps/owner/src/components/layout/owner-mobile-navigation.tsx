@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   Megaphone,
+  MessageSquareText,
   MoreHorizontal,
   PackageCheck,
   ShoppingCart,
@@ -63,6 +64,11 @@ const navigation = [
     href: "/publicites",
     label: "Publicités",
     icon: Megaphone,
+  },
+  {
+    href: "/avis",
+    label: "Avis clients",
+    icon: MessageSquareText,
   },
   {
     href: "/notifications",
