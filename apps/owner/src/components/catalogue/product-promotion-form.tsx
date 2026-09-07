@@ -2,10 +2,16 @@
 
 import {
   useActionState,
+  useEffect,
 } from "react";
 
 import {
+  useRouter,
+} from "next/navigation";
+
+import {
   CalendarClock,
+  Play,
   Tag,
 } from "lucide-react";
 
@@ -48,6 +54,9 @@ export function ProductPromotionForm({
   startValue,
   endValue,
 }: ProductPromotionFormProps) {
+  const router =
+    useRouter();
+
   const action =
     updateProductPromotionAction.bind(
       null,
@@ -61,6 +70,18 @@ export function ProductPromotionForm({
   ] = useActionState(
     action,
     INITIAL_STATE,
+  );
+
+  useEffect(
+    () => {
+      if (state.success) {
+        router.refresh();
+      }
+    },
+    [
+      router,
+      state.success,
+    ],
   );
 
   const normal =
@@ -136,6 +157,10 @@ export function ProductPromotionForm({
             defaultValue={startValue}
             className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-xs outline-none focus:border-[#ff6b00]"
           />
+
+          <span className="mt-1.5 block text-[10px] text-slate-400">
+            Utilisé seulement pour une promotion planifiée.
+          </span>
         </label>
 
         <label>
@@ -187,7 +212,7 @@ export function ProductPromotionForm({
           </div>
         </label>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {promotion.percentage !== null && (
             <span className="rounded-lg bg-red-500 px-3 py-2 text-xs font-black text-white">
               -{promotion.percentage}%
@@ -196,18 +221,29 @@ export function ProductPromotionForm({
 
           <button
             type="submit"
+            name="promotion_start_now"
+            value="1"
             disabled={isPending}
-            className="min-h-11 rounded-xl bg-[#ff6b00] px-5 text-xs font-black text-white transition hover:bg-[#e86100] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#ff6b00] px-5 text-xs font-black text-white transition hover:bg-[#e86100] disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <Play size={14} />
             {isPending
               ? "Enregistrement..."
-              : "Enregistrer la promotion"}
+              : "Démarrer maintenant"}
+          </button>
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="min-h-11 rounded-xl border border-slate-300 bg-white px-5 text-xs font-black text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Enregistrer / planifier
           </button>
         </div>
       </div>
 
       <p className="mt-3 text-[10px] leading-5 text-slate-500">
-        SUGU KURA calcule automatiquement le pourcentage à partir du prix normal et du nouveau prix. À la date de fin, le prix normal redevient automatiquement actif.
+        Pour une promotion immédiate, saisissez le nouveau prix et la date de fin puis cliquez sur « Démarrer maintenant ». SUGU KURA utilise l'heure réelle du serveur et évite ainsi les décalages d'heure. Pour une promotion future, choisissez Début + Fin puis cliquez sur « Enregistrer / planifier ».
       </p>
     </form>
   );
