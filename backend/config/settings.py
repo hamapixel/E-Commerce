@@ -51,6 +51,7 @@ LOCAL_APPS = [
     "orders",
     "owner_console",
     "notifications",
+    "reviews",
 ]
 
 
