@@ -65,6 +65,11 @@ export async function updateProductPromotionAction(
       "promotion_enabled",
     ) === "on";
 
+  const startNow =
+    formData.get(
+      "promotion_start_now",
+    ) === "1";
+
   const price = value(
     formData,
     "promotion_price",
@@ -84,6 +89,22 @@ export async function updateProductPromotionAction(
     formData,
     "promotion_end_at",
   );
+
+  let effectiveStartAt =
+    startAt;
+
+  if (
+    enabled
+    && startNow
+  ) {
+    // On envoie une date ISO absolue afin d'éviter
+    // tout décalage entre le navigateur, Next.js
+    // et le fuseau horaire de Django.
+    effectiveStartAt =
+      new Date(
+        Date.now() - 30_000,
+      ).toISOString();
+  }
 
   if (enabled) {
     if (!price) {
@@ -128,16 +149,20 @@ export async function updateProductPromotionAction(
       };
     }
 
-    if (!startAt || !endAt) {
+    if (!effectiveStartAt || !endAt) {
       return {
         error:
-          "Choisissez la date de début et la date de fin.",
+          startNow
+            ? "Choisissez la date de fin de la promotion."
+            : "Choisissez la date de début et la date de fin.",
         success: "",
       };
     }
 
     const startTime =
-      new Date(startAt).getTime();
+      new Date(
+        effectiveStartAt,
+      ).getTime();
 
     const endTime =
       new Date(endAt).getTime();
@@ -157,7 +182,7 @@ export async function updateProductPromotionAction(
     if (endTime <= startTime) {
       return {
         error:
-          "La date de fin doit être après la date de début.",
+          "La date de fin doit être après le début de la promotion.",
         success: "",
       };
     }
@@ -176,7 +201,7 @@ export async function updateProductPromotionAction(
               : null,
           start_at:
             enabled
-              ? startAt
+              ? effectiveStartAt
               : null,
           end_at:
             enabled
@@ -216,7 +241,11 @@ export async function updateProductPromotionAction(
     error: "",
     success:
       enabled
-        ? "Promotion enregistrée avec succès."
+        ? (
+            startNow
+              ? "Promotion démarrée immédiatement avec succès."
+              : "Promotion enregistrée avec succès."
+          )
         : "Promotion désactivée. Le prix normal est de nouveau actif.",
   };
 }
