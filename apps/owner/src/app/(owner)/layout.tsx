@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   Megaphone,
+  MessageSquareText,
   PackageCheck,
   ShoppingCart,
   Store,
@@ -72,6 +73,11 @@ export default async function OwnerLayout({
       icon: Megaphone,
     },
     {
+      href: "/avis",
+      label: "Avis clients",
+      icon: MessageSquareText,
+    },
+    {
       href: "/notifications",
       label: "Notifications",
       icon: Bell,
@@ -106,7 +112,7 @@ export default async function OwnerLayout({
           </div>
         </div>
 
-        <nav className="mt-8 space-y-2">
+        <nav className="mt-8 space-y-2 overflow-y-auto pb-4">
           {navigation.map(
             ({
               href,
