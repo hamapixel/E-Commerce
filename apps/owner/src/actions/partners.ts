@@ -38,9 +38,14 @@ function redirectWith(
 
 function normalizedFormData(
   source: FormData,
-  *,
-  requireLogo: boolean,
+  options: {
+    requireLogo: boolean;
+  },
 ) {
+  const {
+    requireLogo,
+  } = options;
+
   const data = new FormData();
 
   const name = String(
