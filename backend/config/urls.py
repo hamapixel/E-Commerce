@@ -28,6 +28,13 @@ urlpatterns = [
     ),
 
     path(
+        "api/v1/reviews/",
+        include(
+            "reviews.api.urls"
+        ),
+    ),
+
+    path(
         "api/v1/marketing/",
         include(
             "promotions.api.urls"
