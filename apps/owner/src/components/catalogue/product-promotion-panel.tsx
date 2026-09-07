@@ -1,20 +1,14 @@
 import {
   BadgePercent,
-  CalendarClock,
-  Tag,
 } from "lucide-react";
 
 import {
-  updateProductPromotionAction,
-} from "@/actions/product-promotions";
+  ProductPromotionForm,
+} from "@/components/catalogue/product-promotion-form";
 
 import {
   ownerFetch,
 } from "@/lib/backend";
-
-import {
-  formatMoney,
-} from "@/lib/format";
 
 
 interface OwnerProductMini {
@@ -78,12 +72,6 @@ export async function ProductPromotionPanel({
     ),
   ]);
 
-  const updateAction =
-    updateProductPromotionAction.bind(
-      null,
-      productId,
-    );
-
   const startValue =
     toDateTimeLocal(
       promotion.start_at,
@@ -142,121 +130,13 @@ export async function ProductPromotionPanel({
         </span>
       </div>
 
-      <form
-        action={updateAction}
-        className="p-5 sm:p-6"
-      >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <label>
-            <span className="flex items-center gap-1.5 text-xs font-black text-slate-700">
-              <Tag size={14} />
-              Prix normal
-            </span>
-
-            <div className="mt-2 flex h-12 items-center rounded-xl border border-slate-200 bg-slate-50 px-4 font-black text-slate-700">
-              {formatMoney(
-                product.base_price,
-              )}
-            </div>
-
-            <span className="mt-1.5 block text-[10px] text-slate-400">
-              Ancien prix affiché barré.
-            </span>
-          </label>
-
-          <label>
-            <span className="text-xs font-black text-slate-700">
-              Nouveau prix promo
-            </span>
-
-            <input
-              name="promotion_price"
-              type="number"
-              min="1"
-              step="1"
-              defaultValue={
-                promotion.price ?? ""
-              }
-              placeholder="Ex. 120000"
-              className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 font-bold outline-none focus:border-[#ff6b00]"
-            />
-
-            <span className="mt-1.5 block text-[10px] text-slate-400">
-              Doit être inférieur au prix normal.
-            </span>
-          </label>
-
-          <label>
-            <span className="flex items-center gap-1.5 text-xs font-black text-slate-700">
-              <CalendarClock size={14} />
-              Début
-            </span>
-
-            <input
-              name="promotion_start_at"
-              type="datetime-local"
-              defaultValue={startValue}
-              className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-xs outline-none focus:border-[#ff6b00]"
-            />
-          </label>
-
-          <label>
-            <span className="flex items-center gap-1.5 text-xs font-black text-slate-700">
-              <CalendarClock size={14} />
-              Fin
-            </span>
-
-            <input
-              name="promotion_end_at"
-              type="datetime-local"
-              defaultValue={endValue}
-              className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 text-xs outline-none focus:border-[#ff6b00]"
-            />
-          </label>
-        </div>
-
-        <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <label className="flex cursor-pointer items-center gap-3">
-            <input
-              name="promotion_enabled"
-              type="checkbox"
-              defaultChecked={
-                promotion.enabled
-              }
-              className="h-5 w-5 accent-[#ff6b00]"
-            />
-
-            <div>
-              <span className="block text-sm font-black text-slate-900">
-                Activer la promotion
-              </span>
-
-              <span className="text-[10px] text-slate-500">
-                Décochez puis enregistrez pour remettre le prix normal.
-              </span>
-            </div>
-          </label>
-
-          <div className="flex items-center gap-3">
-            {promotion.percentage !== null && (
-              <span className="rounded-lg bg-red-500 px-3 py-2 text-xs font-black text-white">
-                -{promotion.percentage}%
-              </span>
-            )}
-
-            <button
-              type="submit"
-              className="min-h-11 rounded-xl bg-[#ff6b00] px-5 text-xs font-black text-white transition hover:bg-[#e86100]"
-            >
-              Enregistrer la promotion
-            </button>
-          </div>
-        </div>
-
-        <p className="mt-3 text-[10px] leading-5 text-slate-500">
-          SUGU KURA calcule automatiquement le pourcentage à partir du prix normal et du nouveau prix. À la date de fin, le prix normal redevient automatiquement actif.
-        </p>
-      </form>
+      <ProductPromotionForm
+        productId={productId}
+        basePrice={product.base_price}
+        promotion={promotion}
+        startValue={startValue}
+        endValue={endValue}
+      />
     </section>
   );
 }
