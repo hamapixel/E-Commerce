@@ -69,10 +69,10 @@ export function ProductCardCartButton({
         href={`/produits/${slug}`}
         aria-label="Choisir les options"
         title="Choisir une variante"
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0b4da2] text-white transition hover:bg-[#083b7f]"
+        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0b4da2] text-white transition hover:bg-[#083b7f] sm:h-9 sm:w-9 sm:rounded-xl"
       >
         <ShoppingCart
-          size={17}
+          size={15}
         />
       </Link>
     );
@@ -135,17 +135,17 @@ export function ProductCardCartButton({
           ? "Ajouter au panier"
           : "Rupture de stock"
       }
-      className={`flex h-9 w-9 items-center justify-center rounded-xl text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
+      className={`flex h-8 w-8 items-center justify-center rounded-lg text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 sm:h-9 sm:w-9 sm:rounded-xl ${
         added
           ? "bg-emerald-600"
           : "bg-[#0b4da2] hover:bg-[#083b7f]"
       }`}
     >
       {added ? (
-        <Check size={17} />
+        <Check size={15} />
       ) : (
         <ShoppingCart
-          size={17}
+          size={15}
         />
       )}
     </button>
