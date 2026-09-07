@@ -63,6 +63,40 @@ class OwnerPartnerViewSet(
             )
         )
 
+    def perform_update(self, serializer):
+        partner = self.get_object()
+        old_storage = None
+        old_logo_name = ""
+
+        if partner.logo and partner.logo.name:
+            old_storage = partner.logo.storage
+            old_logo_name = partner.logo.name
+
+        updated = serializer.save()
+
+        new_logo_name = (
+            updated.logo.name
+            if updated.logo
+            else ""
+        )
+
+        if (
+            old_storage
+            and old_logo_name
+            and old_logo_name != new_logo_name
+        ):
+            def remove_old_logo():
+                if old_storage.exists(
+                    old_logo_name
+                ):
+                    old_storage.delete(
+                        old_logo_name
+                    )
+
+            transaction.on_commit(
+                remove_old_logo
+            )
+
     @action(
         detail=True,
         methods=["post"],
