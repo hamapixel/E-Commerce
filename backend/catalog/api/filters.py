@@ -2,29 +2,28 @@ from django.db.models import (
     Exists,
     F,
     OuterRef,
+    Q,
 )
 
 from django_filters import rest_framework as filters
 
-from catalog.models import Product
+from catalog.models import (
+    Category,
+    Product,
+)
+
 from inventory.models import InventoryItem
+
+from promotions.models import Promotion
 
 
 class ProductFilter(filters.FilterSet):
     """
     Filtres publics du catalogue SUGU KURA.
-
-    La recherche textuelle reste gérée par
-    DRF SearchFilter avec le paramètre :
-
-        ?search=samsung
-
-    Ici nous gérons les filtres structurés.
     """
 
     category = filters.CharFilter(
-        field_name="category__slug",
-        lookup_expr="iexact",
+        method="filter_category",
     )
 
     brand = filters.CharFilter(
@@ -54,6 +53,10 @@ class ProductFilter(filters.FilterSet):
         method="filter_in_stock",
     )
 
+    promotion = filters.BooleanFilter(
+        method="filter_promotion",
+    )
+
     class Meta:
         model = Product
 
@@ -63,7 +66,187 @@ class ProductFilter(filters.FilterSet):
             "featured",
             "has_variants",
             "in_stock",
+            "promotion",
         ]
+
+    def filter_category(
+        self,
+        queryset,
+        name,
+        value,
+    ):
+        category = (
+            Category.objects
+            .filter(
+                slug__iexact=value,
+                is_active=True,
+            )
+            .first()
+        )
+
+        if not category:
+            return queryset.none()
+
+        category_ids = {
+            category.pk
+        }
+
+        pending_ids = {
+            category.pk
+        }
+
+        while pending_ids:
+            children = set(
+                Category.objects
+                .filter(
+                    parent_id__in=pending_ids,
+                    is_active=True,
+                )
+                .values_list(
+                    "id",
+                    flat=True,
+                )
+            )
+
+            children -= category_ids
+
+            if not children:
+                break
+
+            category_ids.update(
+                children
+            )
+
+            pending_ids = children
+
+        return queryset.filter(
+            category_id__in=category_ids
+        )
+
+    def filter_promotion(
+        self,
+        queryset,
+        name,
+        value,
+    ):
+        """
+        Permet :
+
+            ?promotion=true
+
+        Retourne tous les produits ciblés par
+        au moins une promotion actuellement active.
+        """
+
+        active_promotions = (
+            Promotion.objects
+            .active_now()
+        )
+
+        has_global_promotion = (
+            active_promotions
+            .filter(
+                target_mode=(
+                    Promotion.TargetMode.ALL
+                )
+            )
+            .exists()
+        )
+
+        if has_global_promotion:
+            promoted_queryset = queryset
+
+        else:
+            category_ids = list(
+                active_promotions
+                .filter(
+                    target_mode=(
+                        Promotion
+                        .TargetMode
+                        .CATEGORY
+                    ),
+                    target_category__isnull=False,
+                )
+                .values_list(
+                    "target_category_id",
+                    flat=True,
+                )
+            )
+
+            brand_ids = list(
+                active_promotions
+                .filter(
+                    target_mode=(
+                        Promotion
+                        .TargetMode
+                        .BRAND
+                    ),
+                    target_brand__isnull=False,
+                )
+                .values_list(
+                    "target_brand_id",
+                    flat=True,
+                )
+            )
+
+            product_ids = list(
+                active_promotions
+                .filter(
+                    target_mode=(
+                        Promotion
+                        .TargetMode
+                        .PRODUCTS
+                    )
+                )
+                .values_list(
+                    "products__id",
+                    flat=True,
+                )
+            )
+
+            promotion_query = Q(
+                pk__in=[]
+            )
+
+            if category_ids:
+                promotion_query |= Q(
+                    category_id__in=(
+                        category_ids
+                    )
+                )
+
+            if brand_ids:
+                promotion_query |= Q(
+                    brand_id__in=(
+                        brand_ids
+                    )
+                )
+
+            if product_ids:
+                promotion_query |= Q(
+                    pk__in=product_ids
+                )
+
+            promoted_queryset = (
+                queryset
+                .filter(
+                    promotion_query
+                )
+                .distinct()
+            )
+
+        if value is True:
+            return promoted_queryset
+
+        if value is False:
+            return queryset.exclude(
+                pk__in=(
+                    promoted_queryset
+                    .values("pk")
+                )
+            )
+
+        return queryset
 
     def filter_has_variants(
         self,
@@ -97,18 +280,6 @@ class ProductFilter(filters.FilterSet):
         name,
         value,
     ):
-        """
-        Un produit est considéré disponible lorsqu'au
-        moins une ligne InventoryItem possède :
-
-            quantity_on_hand > quantity_reserved
-
-        Cela fonctionne pour :
-
-        - produits simples ;
-        - produits avec variantes.
-        """
-
         available_stock = (
             InventoryItem.objects
             .filter(

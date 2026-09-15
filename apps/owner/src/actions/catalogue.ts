@@ -381,6 +381,104 @@ export async function createCategoryAction(
 }
 
 
+
+export async function updateCategoryAction(
+  categoryId: number,
+  formData: FormData,
+) {
+  cleanFile(
+    formData,
+    "image",
+  );
+
+  formData.set(
+    "is_active",
+    String(
+      checkbox(
+        formData,
+        "is_active",
+      ),
+    ),
+  );
+
+  formData.set(
+    "is_featured_home",
+    String(
+      checkbox(
+        formData,
+        "is_featured_home",
+      ),
+    ),
+  );
+
+  cleanOptionalField(
+    formData,
+    "parent",
+  );
+
+  await ownerFetch(
+    `/owner/catalog/categories/${categoryId}/`,
+    {
+      method: "PATCH",
+      body: formData,
+    },
+  );
+
+  revalidatePath(
+    "/catalogue",
+  );
+
+  revalidatePath(
+    "/catalogue/categories",
+  );
+}
+
+
+export async function toggleCategoryAction(
+  categoryId: number,
+  currentState: boolean,
+) {
+  await ownerFetch(
+    `/owner/catalog/categories/${categoryId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        is_active:
+          !currentState,
+      }),
+    },
+  );
+
+  revalidatePath(
+    "/catalogue",
+  );
+
+  revalidatePath(
+    "/catalogue/categories",
+  );
+}
+
+
+export async function deleteCategoryAction(
+  categoryId: number,
+) {
+  await ownerFetch(
+    `/owner/catalog/categories/${categoryId}/`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  revalidatePath(
+    "/catalogue",
+  );
+
+  revalidatePath(
+    "/catalogue/categories",
+  );
+}
+
+
 // ============================================================
 // MARQUES
 // ============================================================

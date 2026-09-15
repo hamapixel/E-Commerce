@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 import type {
@@ -15,7 +15,8 @@ export function CategoryGrid({
   const visible =
     categories.filter(
       (category) =>
-        !category.parent,
+        !category.parent &&
+        category.is_featured_home,
     );
 
   if (!visible.length) {
@@ -23,45 +24,42 @@ export function CategoryGrid({
   }
 
   return (
-    <section
-      id="categories"
-      className="mt-10"
-    >
-      <div className="mb-4 flex items-end justify-between gap-4 sm:mb-5">
+    <div className="mt-8">
+      <div className="mb-3 flex items-end justify-between gap-4 sm:mb-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b00] sm:text-xs">
             Explorer
           </p>
 
-          <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
+          <h2 className="mt-1 text-xl font-black text-slate-950 sm:text-2xl">
             Nos catégories
           </h2>
         </div>
 
-        <span className="shrink-0 text-[10px] font-bold text-slate-400 sm:hidden">
+        <span className="shrink-0 text-[10px] font-bold text-slate-400">
           Glissez →
         </span>
       </div>
 
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-visible sm:px-0 sm:pb-0 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6">
         {visible.map(
           (category) => (
             <Link
               key={category.id}
               href={`/categories/${category.slug}`}
-              className="group w-[108px] shrink-0 snap-start rounded-2xl border border-slate-200 bg-white p-2 text-center shadow-sm transition active:scale-[0.98] sm:w-auto sm:shrink hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg"
+              className="group w-[86px] shrink-0 snap-start rounded-[14px] border border-slate-200 bg-white p-1.5 text-center shadow-sm transition duration-300 active:scale-[0.98] hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:w-[96px] sm:p-2 md:w-[104px]"
             >
-              <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-xl bg-slate-50">
+              <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-[10px] bg-slate-50">
                 {category.image ? (
                   <Image
                     src={category.image}
                     alt={category.name}
                     fill
-                    sizes="(max-width: 640px) 108px, 150px"
-                    className="object-contain p-2 transition duration-300 group-hover:scale-105"
+                    sizes="104px"
+                    className="object-contain p-1.5 transition duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-2xl font-black text-[#0b4da2]">
+                  <div className="flex h-full items-center justify-center text-xl font-black text-[#0b4da2]">
                     {category.name
                       .charAt(0)
                       .toUpperCase()}
@@ -69,13 +67,13 @@ export function CategoryGrid({
                 )}
               </div>
 
-              <p className="mt-2 line-clamp-2 min-h-8 text-[11px] font-bold leading-4 text-slate-800 sm:text-xs">
+              <p className="mt-1.5 line-clamp-2 min-h-[28px] text-[10px] font-bold leading-[14px] text-slate-800 sm:text-[11px]">
                 {category.name}
               </p>
             </Link>
           ),
         )}
       </div>
-    </section>
+    </div>
   );
 }

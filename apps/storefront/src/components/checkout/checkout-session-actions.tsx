@@ -1,5 +1,7 @@
 "use client";
 
+import Swal from "sweetalert2";
+
 import {
   XCircle,
 } from "lucide-react";
@@ -39,6 +41,24 @@ export function CheckoutSessionActions({
   ] = useState("");
 
   async function handleCancel() {
+    const confirmation =
+      await Swal.fire({
+        icon: "warning",
+        title: "Annuler cette commande ?",
+        text:
+          "La préparation de cette commande sera annulée et vous retournerez au panier.",
+        showCancelButton: true,
+        confirmButtonText: "Oui, annuler",
+        cancelButtonText: "Continuer",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#0b4da2",
+        reverseButtons: true,
+      });
+
+    if (!confirmation.isConfirmed) {
+      return;
+    }
+
     setLoading(true);
 
     setError("");

@@ -11,6 +11,10 @@ import {
 } from "@/components/product/product-grid";
 
 import {
+  SubcategoryStrip,
+} from "@/components/home/subcategory-strip";
+
+import {
   SearchPagination,
 } from "@/components/search/search-pagination";
 
@@ -358,6 +362,12 @@ export default async function CategoryPage({
             </p>
           )}
         </div>
+
+        <SubcategoryStrip
+          subcategories={
+            category.subcategories
+          }
+        />
 
         <section
           id="catalogue-results"

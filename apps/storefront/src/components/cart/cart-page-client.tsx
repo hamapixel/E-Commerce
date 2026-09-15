@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import Swal from "sweetalert2";
+
 import {
   ArrowLeft,
   Minus,
@@ -68,6 +70,74 @@ export function CartPageClient() {
       ) =>
         state.clearCart,
     );
+
+
+  async function confirmRemove(
+    key: string,
+    name: string,
+  ) {
+    const result =
+      await Swal.fire({
+        icon: "warning",
+        title: "Supprimer cet article ?",
+        text: name,
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#64748b",
+        reverseButtons: true,
+      });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    removeItem(key);
+
+    await Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Article supprimé",
+      showConfirmButton: false,
+      timer: 1400,
+      timerProgressBar: true,
+    });
+  }
+
+
+  async function confirmClearCart() {
+    const result =
+      await Swal.fire({
+        icon: "warning",
+        title: "Vider tout le panier ?",
+        text:
+          "Tous les articles seront retirés du panier.",
+        showCancelButton: true,
+        confirmButtonText: "Oui, vider",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#64748b",
+        reverseButtons: true,
+      });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    clearCart();
+
+    await Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Panier vidé",
+      showConfirmButton: false,
+      timer: 1400,
+      timerProgressBar: true,
+    });
+  }
 
 
   if (!hasHydrated) {
@@ -190,7 +260,7 @@ export function CartPageClient() {
 
         <button
           type="button"
-          onClick={clearCart}
+          onClick={() => void confirmClearCart()}
           className="text-xs font-bold text-red-500 transition hover:text-red-700"
         >
           Vider le panier
@@ -252,8 +322,9 @@ export function CartPageClient() {
                         <button
                           type="button"
                           onClick={() =>
-                            removeItem(
+                            void confirmRemove(
                               item.key,
+                              item.name,
                             )
                           }
                           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-red-50 hover:text-red-600"

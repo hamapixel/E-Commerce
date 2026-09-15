@@ -125,6 +125,10 @@ def optimize_uploaded_image(uploaded_file):
     if not safe_stem:
         safe_stem = "product"
 
+    # Évite les noms de fichiers excessivement longs,
+    # même lorsque la photo originale possède un très long nom.
+    safe_stem = safe_stem[:120]
+
     filename = (
         f"{safe_stem}-"
         f"{uuid4().hex[:12]}.webp"

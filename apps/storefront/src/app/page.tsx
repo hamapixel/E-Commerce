@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Metadata,
 } from "next";
 
@@ -22,6 +22,10 @@ import {
 import {
   HomeInstantSearch,
 } from "@/components/home/home-instant-search";
+
+import {
+  PromotionBanner,
+} from "@/components/home/promotion-banner";
 
 import {
   PartnerSlider,
@@ -52,7 +56,7 @@ export const dynamic =
 export const metadata:
   Metadata = {
   title:
-    "Téléphones, électronique, maison et technologie",
+    "TÃ©lÃ©phones, Ã©lectronique, maison et technologie",
 
   description:
     SITE_DESCRIPTION,
@@ -73,7 +77,7 @@ export const metadata:
       SITE_NAME,
 
     title:
-      "SUGU KURA — votre boutique en ligne",
+      "SUGU KURA â€” votre boutique en ligne",
 
     description:
       SITE_DESCRIPTION,
@@ -84,7 +88,7 @@ export const metadata:
       "summary_large_image",
 
     title:
-      "SUGU KURA — votre boutique en ligne",
+      "SUGU KURA â€” votre boutique en ligne",
 
     description:
       SITE_DESCRIPTION,
@@ -106,7 +110,7 @@ export default async function Home() {
     <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:py-7">
 
       {/* =====================================
-          PUBLICITÉS
+          PUBLICITÃ‰S
       ===================================== */}
 
       <HeroAdSlider
@@ -117,7 +121,7 @@ export default async function Home() {
 
 
       {/* =====================================
-          RECHERCHE INSTANTANÉE
+          RECHERCHE INSTANTANÃ‰E
       ===================================== */}
 
       <HomeInstantSearch />
@@ -127,47 +131,11 @@ export default async function Home() {
           PROMOTIONS EN COURS
       ===================================== */}
 
-      {promotions.length >
-        0 && (
-        <section className="mt-4 flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-[#ff6b00] to-[#ff8a2a] px-4 py-3 text-white shadow-lg shadow-orange-100">
-
-          <BadgePercent
-            className="shrink-0"
-            size={
-              22
-            }
-          />
-
-
-          <div className="min-w-0 flex-1">
-
-            <p className="text-xs font-bold uppercase tracking-wider">
-              Promotions en cours
-            </p>
-
-
-            <p className="truncate text-sm font-black">
-              {
-                promotions[
-                  0
-                ].name
-              }
-            </p>
-
-          </div>
-
-
-          <span className="shrink-0 rounded-lg bg-white/20 px-3 py-1.5 text-xs font-bold backdrop-blur">
-
-            {
-              promotions.length
-            }{" "}
-            offre(s)
-
-          </span>
-
-        </section>
-      )}
+      <PromotionBanner
+        promotions={
+          promotions
+        }
+      />
 
 
       {/* =====================================
@@ -207,7 +175,7 @@ export default async function Home() {
         </div>
 
 
-        {/* QUALITÉ */}
+        {/* QUALITÃ‰ */}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:flex sm:items-center sm:gap-3 sm:p-4">
 
@@ -272,7 +240,7 @@ export default async function Home() {
 
 
       {/* =====================================
-          CATÉGORIES
+          CATÃ‰GORIES
 
           IMPORTANT :
           Ce ID permet au bouton mobile :
@@ -313,7 +281,7 @@ export default async function Home() {
 
 
             <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
-              Découvrez nos produits
+              Decouvrez nos produits
             </h2>
 
           </div>
@@ -347,7 +315,7 @@ export default async function Home() {
 
 
       {/* =====================================
-          RÉCEMMENT CONSULTÉS
+          RÃ‰CEMMENT CONSULTÃ‰S
       ===================================== */}
 
       <RecentlyViewedProducts />

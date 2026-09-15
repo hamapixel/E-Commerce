@@ -81,6 +81,7 @@ class Category(models.Model):
 
     image = models.ImageField(
         upload_to="catalog/categories/",
+        max_length=255,
         null=True,
         blank=True,
         verbose_name="Image",
@@ -251,6 +252,7 @@ class Brand(models.Model):
 
     logo = models.ImageField(
         upload_to="catalog/brands/",
+        max_length=255,
         null=True,
         blank=True,
         verbose_name="Logo",
@@ -586,6 +588,7 @@ class ProductImage(models.Model):
 
     image = models.ImageField(
         upload_to="catalog/products/",
+        max_length=255,
         validators=[
             validate_catalog_image
         ],

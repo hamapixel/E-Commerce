@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Product,
 } from "@/types/api";
 
@@ -8,10 +8,12 @@ import {
 
 interface ProductGridProps {
   products: Product[];
+  variant?: "grid" | "carousel";
 }
 
 export function ProductGrid({
   products,
+  variant = "grid",
 }: ProductGridProps) {
   if (!products.length) {
     return (
@@ -19,6 +21,25 @@ export function ProductGrid({
         <p className="font-bold text-slate-700">
           Aucun produit disponible pour le moment.
         </p>
+      </div>
+    );
+  }
+
+  if (variant === "carousel") {
+    return (
+      <div className="-mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6">
+        {products.map(
+          (product) => (
+            <div
+              key={product.id}
+              className="w-[158px] shrink-0 snap-start sm:w-[180px] md:w-[190px]"
+            >
+              <ProductCard
+                product={product}
+              />
+            </div>
+          ),
+        )}
       </div>
     );
   }
