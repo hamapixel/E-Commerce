@@ -11,6 +11,7 @@ const API_URL =
 
 export async function getOrder(
   id: string,
+  accessToken: string,
 ): Promise<Order | null> {
   try {
     const response =
@@ -22,6 +23,8 @@ export async function getOrder(
           headers: {
             Accept:
               "application/json",
+            "X-Order-Access-Token":
+              accessToken,
           },
         },
       );
