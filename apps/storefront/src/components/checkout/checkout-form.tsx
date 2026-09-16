@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -24,6 +25,7 @@ import {
 
 import {
   createCheckout,
+  getDeliveryZones,
 } from "@/lib/checkout-api";
 
 import {
@@ -33,6 +35,10 @@ import {
 import {
   useCartStore,
 } from "@/store/cart-store";
+
+import type {
+  DeliveryZone,
+} from "@/types/checkout";
 
 
 export function CheckoutForm() {
@@ -59,6 +65,21 @@ export function CheckoutForm() {
   >("DELIVERY");
 
   const [
+    deliveryZones,
+    setDeliveryZones,
+  ] = useState<DeliveryZone[]>([]);
+
+  const [
+    selectedDeliveryZoneId,
+    setSelectedDeliveryZoneId,
+  ] = useState("");
+
+  const [
+    zonesLoading,
+    setZonesLoading,
+  ] = useState(true);
+
+  const [
     submitting,
     setSubmitting,
   ] = useState(false);
@@ -67,6 +88,49 @@ export function CheckoutForm() {
     error,
     setError,
   ] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadZones() {
+      try {
+        const zones =
+          await getDeliveryZones();
+
+        if (!active) {
+          return;
+        }
+
+        setDeliveryZones(
+          zones,
+        );
+
+        if (
+          zones.length === 1
+        ) {
+          setSelectedDeliveryZoneId(
+            String(
+              zones[0].id,
+            ),
+          );
+        }
+      } catch {
+        if (active) {
+          setDeliveryZones([]);
+        }
+      } finally {
+        if (active) {
+          setZonesLoading(false);
+        }
+      }
+    }
+
+    void loadZones();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const subtotal =
     items.reduce(
@@ -82,6 +146,24 @@ export function CheckoutForm() {
       0,
     );
 
+  const selectedDeliveryZone =
+    deliveryZones.find(
+      (zone) =>
+        String(zone.id) ===
+        selectedDeliveryZoneId,
+    ) ?? null;
+
+  const deliveryFee =
+    deliveryMethod === "DELIVERY"
+    && selectedDeliveryZone
+      ? Number(
+          selectedDeliveryZone.fee,
+        )
+      : 0;
+
+  const total =
+    subtotal + deliveryFee;
+
   async function handleSubmit(
     event:
       FormEvent<HTMLFormElement>,
@@ -96,10 +178,29 @@ export function CheckoutForm() {
       return;
     }
 
+    if (
+      deliveryMethod === "DELIVERY"
+      && deliveryZones.length > 0
+      && !selectedDeliveryZone
+    ) {
+      setError(
+        "Choisissez votre zone de livraison.",
+      );
+
+      return;
+    }
+
     const form =
       new FormData(
         event.currentTarget,
       );
+
+    const fallbackZone =
+      String(
+        form.get(
+          "delivery_zone",
+        ) ?? "",
+      ).trim();
 
     setSubmitting(true);
 
@@ -140,18 +241,28 @@ export function CheckoutForm() {
             deliveryMethod,
 
           city:
+            selectedDeliveryZone
+              ?.city ??
             String(
               form.get(
                 "city",
               ) ?? "Bamako",
             ).trim(),
 
+          delivery_zone_id:
+            deliveryMethod === "DELIVERY"
+            && selectedDeliveryZone
+              ? selectedDeliveryZone.id
+              : null,
+
           delivery_zone:
-            String(
-              form.get(
-                "delivery_zone",
-              ) ?? "",
-            ).trim(),
+            deliveryMethod === "DELIVERY"
+              ? (
+                  selectedDeliveryZone
+                    ?.name ??
+                  fallbackZone
+                )
+              : "",
 
           address:
             String(
@@ -319,11 +430,12 @@ export function CheckoutForm() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   setDeliveryMethod(
                     "DELIVERY",
-                  )
-                }
+                  );
+                  setError("");
+                }}
                 className={`rounded-2xl border-2 p-4 text-left transition ${
                   deliveryMethod ===
                   "DELIVERY"
@@ -341,17 +453,18 @@ export function CheckoutForm() {
                 </strong>
 
                 <span className="mt-1 block text-xs text-slate-500">
-                  Livraison à votre adresse.
+                  Tarif calculé selon votre zone.
                 </span>
               </button>
 
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   setDeliveryMethod(
                     "PICKUP",
-                  )
-                }
+                  );
+                  setError("");
+                }}
                 className={`rounded-2xl border-2 p-4 text-left transition ${
                   deliveryMethod ===
                   "PICKUP"
@@ -369,32 +482,110 @@ export function CheckoutForm() {
                 </strong>
 
                 <span className="mt-1 block text-xs text-slate-500">
-                  Retrait chez SUGU KURA.
+                  Retrait chez SUGU KURA sans frais de livraison.
                 </span>
               </button>
             </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <label className="text-sm font-bold">
-                Ville
+            {deliveryMethod ===
+            "DELIVERY" && (
+              <div className="mt-5">
+                {zonesLoading ? (
+                  <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+                ) : deliveryZones.length > 0 ? (
+                  <label className="block text-sm font-bold">
+                    Zone de livraison *
 
-                <input
-                  name="city"
-                  defaultValue="Bamako"
-                  className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-[#ff6b00]"
-                />
-              </label>
+                    <select
+                      value={
+                        selectedDeliveryZoneId
+                      }
+                      onChange={
+                        (event) => {
+                          setSelectedDeliveryZoneId(
+                            event.target.value,
+                          );
+                          setError("");
+                        }
+                      }
+                      required
+                      className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-[#ff6b00]"
+                    >
+                      <option value="">
+                        Choisissez votre zone
+                      </option>
 
-              <label className="text-sm font-bold">
-                Quartier / zone
+                      {deliveryZones.map(
+                        (zone) => (
+                          <option
+                            key={
+                              zone.id
+                            }
+                            value={
+                              zone.id
+                            }
+                          >
+                            {zone.name}
+                            {" — "}
+                            {zone.city}
+                            {" — "}
+                            {formatMoney(
+                              Number(
+                                zone.fee,
+                              ),
+                            )}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </label>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="text-sm font-bold">
+                      Ville
 
-                <input
-                  name="delivery_zone"
-                  placeholder="Ex. Bozola"
-                  className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-[#ff6b00]"
-                />
-              </label>
-            </div>
+                      <input
+                        name="city"
+                        defaultValue="Bamako"
+                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-[#ff6b00]"
+                      />
+                    </label>
+
+                    <label className="text-sm font-bold">
+                      Quartier / zone
+
+                      <input
+                        name="delivery_zone"
+                        placeholder="Ex. Bozola"
+                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-[#ff6b00]"
+                      />
+                    </label>
+                  </div>
+                )}
+
+                {selectedDeliveryZone && (
+                  <div className="mt-3 rounded-xl border border-orange-100 bg-orange-50 p-3 text-xs text-slate-700">
+                    <strong className="text-[#ff6b00]">
+                      Livraison :{" "}
+                      {formatMoney(
+                        deliveryFee,
+                      )}
+                    </strong>
+
+                    {selectedDeliveryZone
+                      .estimated_delivery && (
+                      <span className="ml-2 text-slate-500">
+                        • Délai :{" "}
+                        {
+                          selectedDeliveryZone
+                            .estimated_delivery
+                        }
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <label className="mt-4 block text-sm font-bold">
               Adresse
@@ -477,9 +668,37 @@ export function CheckoutForm() {
               Sous-total
             </span>
 
-            <strong className="text-xl text-[#ff6b00]">
+            <strong>
               {formatMoney(
                 subtotal,
+              )}
+            </strong>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-sm">
+            <span className="font-bold text-slate-500">
+              Livraison
+            </span>
+
+            <strong className="text-[#0b4da2]">
+              {deliveryMethod === "PICKUP"
+                ? "Gratuit"
+                : selectedDeliveryZone
+                  ? formatMoney(
+                      deliveryFee,
+                    )
+                  : "À définir"}
+            </strong>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
+            <span className="text-lg font-black">
+              Total
+            </span>
+
+            <strong className="text-2xl text-[#ff6b00]">
+              {formatMoney(
+                total,
               )}
             </strong>
           </div>
@@ -494,6 +713,7 @@ export function CheckoutForm() {
             type="submit"
             disabled={
               submitting
+              || zonesLoading
             }
             className="mt-5 flex h-14 w-full items-center justify-center rounded-2xl bg-[#ff6b00] text-sm font-black text-white transition hover:bg-[#e85f00] disabled:cursor-wait disabled:opacity-60"
           >
@@ -509,7 +729,7 @@ export function CheckoutForm() {
             />
 
             <p className="text-[10px] leading-5 text-emerald-800">
-              Vérifiez vos informations avant de continuer.
+              Le tarif de livraison est recalculé et sécurisé par le serveur avant validation.
             </p>
           </div>
 
