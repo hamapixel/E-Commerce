@@ -6,7 +6,7 @@ import {
   Grid2X2,
   Heart,
   Home,
-  Search,
+  PackageSearch,
   ShoppingCart,
 } from "lucide-react";
 
@@ -86,17 +86,20 @@ export function MobileNav() {
 
     {
       label:
-        "Recherche",
+        "Commande",
 
       href:
-        "/recherche",
+        "/suivi-commande",
 
       icon:
-        Search,
+        PackageSearch,
 
       active:
         pathname ===
-        "/recherche",
+        "/suivi-commande"
+        || pathname.startsWith(
+          "/commande/",
+        ),
     },
 
     {
