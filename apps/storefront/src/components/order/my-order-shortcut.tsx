@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import {
   useEffect,
-  useState,
+  useMemo,
+  useSyncExternalStore,
 } from "react";
 import {
   useRouter,
@@ -23,44 +24,83 @@ interface StoredOrder {
   savedAt?: string;
 }
 
+function subscribeToLastOrder(
+  callback: () => void,
+) {
+  window.addEventListener(
+    "storage",
+    callback,
+  );
+
+  return () => {
+    window.removeEventListener(
+      "storage",
+      callback,
+    );
+  };
+}
+
+function getLastOrderSnapshot() {
+  return window.localStorage.getItem(
+    LAST_ORDER_STORAGE_KEY,
+  ) ?? "";
+}
+
+function getServerLastOrderSnapshot() {
+  return "";
+}
+
 export function MyOrderShortcut() {
   const router = useRouter();
-  const [loading, setLoading] =
-    useState(true);
-  const [orderNumber, setOrderNumber] =
-    useState("");
+
+  const rawStoredOrder =
+    useSyncExternalStore(
+      subscribeToLastOrder,
+      getLastOrderSnapshot,
+      getServerLastOrderSnapshot,
+    );
+
+  const storedOrder = useMemo(
+    () => {
+      if (!rawStoredOrder) {
+        return null;
+      }
+
+      try {
+        const parsed =
+          JSON.parse(
+            rawStoredOrder,
+          ) as StoredOrder;
+
+        if (
+          typeof parsed.id !== "string"
+          || !parsed.id.trim()
+        ) {
+          return null;
+        }
+
+        return parsed;
+      } catch {
+        return null;
+      }
+    },
+    [rawStoredOrder],
+  );
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(
-        LAST_ORDER_STORAGE_KEY,
-      );
-
-      if (!raw) {
-        setLoading(false);
-        return;
-      }
-
-      const stored = JSON.parse(raw) as StoredOrder;
-
-      if (!stored.id) {
-        setLoading(false);
-        return;
-      }
-
-      setOrderNumber(
-        stored.orderNumber ?? "",
-      );
-
-      router.replace(
-        `/commande/${stored.id}`,
-      );
-    } catch {
-      setLoading(false);
+    if (!storedOrder?.id) {
+      return;
     }
-  }, [router]);
 
-  if (loading) {
+    router.replace(
+      `/commande/${storedOrder.id}`,
+    );
+  }, [
+    router,
+    storedOrder?.id,
+  ]);
+
+  if (storedOrder?.id) {
     return (
       <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-sm">
         <LoaderCircle
@@ -73,9 +113,9 @@ export function MyOrderShortcut() {
         </h1>
 
         <p className="mt-2 text-sm text-slate-500">
-          {orderNumber
-            ? `Ouverture de ${orderNumber}...`
-            : "Recherche de votre dernière commande sur cet appareil..."}
+          {storedOrder.orderNumber
+            ? `Ouverture de ${storedOrder.orderNumber}...`
+            : "Ouverture de votre dernière commande..."}
         </p>
       </div>
     );
