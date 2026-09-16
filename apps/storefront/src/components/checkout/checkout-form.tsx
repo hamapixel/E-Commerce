@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   MapPin,
@@ -9,110 +9,76 @@ import {
   ShieldCheck,
   Truck,
 } from "lucide-react";
-
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
-
-import type {
-  FormEvent,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
+import type { FormEvent } from "react";
 
 import {
   createCheckout,
   getDeliveryZones,
 } from "@/lib/checkout-api";
-
-import {
-  formatMoney,
-} from "@/lib/format";
-
-import {
-  useCartStore,
-} from "@/store/cart-store";
-
-import type {
-  DeliveryZone,
-} from "@/types/checkout";
-
+import { formatMoney } from "@/lib/format";
+import { useCartStore } from "@/store/cart-store";
+import type { DeliveryZone } from "@/types/checkout";
 
 export function CheckoutForm() {
-  const router =
-    useRouter();
+  const router = useRouter();
+  const items = useCartStore((state) => state.items);
+  const hasHydrated = useCartStore((state) => state.hasHydrated);
 
-  const items =
-    useCartStore(
-      (state) =>
-        state.items,
-    );
+  const [deliveryMethod, setDeliveryMethod] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedDeliveryZoneId, setSelectedDeliveryZoneId] = useState("");
+  const [zonesLoading, setZonesLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const hasHydrated =
-    useCartStore(
-      (state) =>
-        state.hasHydrated,
-    );
+  const cities = useMemo(
+    () => Array.from(
+      new Set(
+        deliveryZones.map((zone) => zone.city.trim()).filter(Boolean),
+      ),
+    ).sort((a, b) => a.localeCompare(b, "fr")),
+    [deliveryZones],
+  );
 
-  const [
-    deliveryMethod,
-    setDeliveryMethod,
-  ] = useState<
-    "DELIVERY" | "PICKUP"
-  >("DELIVERY");
+  const zonesForCity = useMemo(
+    () => deliveryZones.filter((zone) => zone.city === selectedCity),
+    [deliveryZones, selectedCity],
+  );
 
-  const [
-    deliveryZones,
-    setDeliveryZones,
-  ] = useState<DeliveryZone[]>([]);
-
-  const [
-    selectedDeliveryZoneId,
-    setSelectedDeliveryZoneId,
-  ] = useState("");
-
-  const [
-    zonesLoading,
-    setZonesLoading,
-  ] = useState(true);
-
-  const [
-    submitting,
-    setSubmitting,
-  ] = useState(false);
-
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const selectedDeliveryZone =
+    deliveryZones.find((zone) => String(zone.id) === selectedDeliveryZoneId) ?? null;
 
   useEffect(() => {
     let active = true;
 
     async function loadZones() {
       try {
-        const zones =
-          await getDeliveryZones();
+        const zones = await getDeliveryZones();
 
         if (!active) {
           return;
         }
 
-        setDeliveryZones(
-          zones,
+        setDeliveryZones(zones);
+
+        const availableCities = Array.from(
+          new Set(zones.map((zone) => zone.city.trim()).filter(Boolean)),
         );
 
-        if (
-          zones.length === 1
-        ) {
-          setSelectedDeliveryZoneId(
-            String(
-              zones[0].id,
-            ),
-          );
+        if (availableCities.length === 1) {
+          const city = availableCities[0];
+          setSelectedCity(city);
+
+          const cityZones = zones.filter((zone) => zone.city === city);
+          if (cityZones.length === 1) {
+            setSelectedDeliveryZoneId(String(cityZones[0].id));
+          }
         }
       } catch {
         if (active) {
@@ -132,182 +98,89 @@ export function CheckoutForm() {
     };
   }, []);
 
-  const subtotal =
-    items.reduce(
-      (
-        total,
-        item,
-      ) =>
-        total +
-        (
-          item.unitPrice *
-          item.quantity
-        ),
-      0,
-    );
-
-  const selectedDeliveryZone =
-    deliveryZones.find(
-      (zone) =>
-        String(zone.id) ===
-        selectedDeliveryZoneId,
-    ) ?? null;
+  const subtotal = items.reduce(
+    (total, item) => total + item.unitPrice * item.quantity,
+    0,
+  );
 
   const deliveryFee =
-    deliveryMethod === "DELIVERY"
-    && selectedDeliveryZone
-      ? Number(
-          selectedDeliveryZone.fee,
-        )
+    deliveryMethod === "DELIVERY" && selectedDeliveryZone
+      ? Number(selectedDeliveryZone.fee)
       : 0;
 
-  const total =
-    subtotal + deliveryFee;
+  const total = subtotal + deliveryFee;
 
-  async function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  function handleCityChange(city: string) {
+    setSelectedCity(city);
+    setSelectedDeliveryZoneId("");
+    setError("");
+
+    const matchingZones = deliveryZones.filter((zone) => zone.city === city);
+    if (matchingZones.length === 1) {
+      setSelectedDeliveryZoneId(String(matchingZones[0].id));
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!items.length) {
-      setError(
-        "Votre panier est vide.",
-      );
-
+      setError("Votre panier est vide.");
       return;
     }
 
-    if (
-      deliveryMethod === "DELIVERY"
-      && deliveryZones.length > 0
-      && !selectedDeliveryZone
-    ) {
-      setError(
-        "Choisissez votre zone de livraison.",
-      );
+    if (deliveryMethod === "DELIVERY" && deliveryZones.length > 0) {
+      if (!selectedCity) {
+        setError("Choisissez votre ville de livraison.");
+        return;
+      }
 
-      return;
+      if (!selectedDeliveryZone) {
+        setError("Choisissez votre quartier de livraison.");
+        return;
+      }
     }
 
-    const form =
-      new FormData(
-        event.currentTarget,
-      );
-
-    const fallbackZone =
-      String(
-        form.get(
-          "delivery_zone",
-        ) ?? "",
-      ).trim();
+    const form = new FormData(event.currentTarget);
+    const fallbackZone = String(form.get("delivery_zone") ?? "").trim();
 
     setSubmitting(true);
-
     setError("");
 
     try {
-      const session =
-        await createCheckout({
-          customer_name:
-            String(
-              form.get(
-                "customer_name",
-              ) ?? "",
-            ).trim(),
+      const session = await createCheckout({
+        customer_name: String(form.get("customer_name") ?? "").trim(),
+        customer_phone: String(form.get("customer_phone") ?? "").trim(),
+        customer_whatsapp: String(form.get("customer_whatsapp") ?? "").trim(),
+        customer_email: String(form.get("customer_email") ?? "").trim(),
+        delivery_method: deliveryMethod,
+        city:
+          selectedDeliveryZone?.city
+          ?? String(form.get("city") ?? "Bamako").trim(),
+        delivery_zone_id:
+          deliveryMethod === "DELIVERY" && selectedDeliveryZone
+            ? selectedDeliveryZone.id
+            : null,
+        delivery_zone:
+          deliveryMethod === "DELIVERY"
+            ? selectedDeliveryZone?.name ?? fallbackZone
+            : "",
+        address: String(form.get("address") ?? "").trim(),
+        notes: String(form.get("notes") ?? "").trim(),
+        items: items.map((item) => ({
+          product_id: item.productId,
+          variant_id: item.variantId,
+          quantity: item.quantity,
+        })),
+      });
 
-          customer_phone:
-            String(
-              form.get(
-                "customer_phone",
-              ) ?? "",
-            ).trim(),
-
-          customer_whatsapp:
-            String(
-              form.get(
-                "customer_whatsapp",
-              ) ?? "",
-            ).trim(),
-
-          customer_email:
-            String(
-              form.get(
-                "customer_email",
-              ) ?? "",
-            ).trim(),
-
-          delivery_method:
-            deliveryMethod,
-
-          city:
-            selectedDeliveryZone
-              ?.city ??
-            String(
-              form.get(
-                "city",
-              ) ?? "Bamako",
-            ).trim(),
-
-          delivery_zone_id:
-            deliveryMethod === "DELIVERY"
-            && selectedDeliveryZone
-              ? selectedDeliveryZone.id
-              : null,
-
-          delivery_zone:
-            deliveryMethod === "DELIVERY"
-              ? (
-                  selectedDeliveryZone
-                    ?.name ??
-                  fallbackZone
-                )
-              : "",
-
-          address:
-            String(
-              form.get(
-                "address",
-              ) ?? "",
-            ).trim(),
-
-          notes:
-            String(
-              form.get(
-                "notes",
-              ) ?? "",
-            ).trim(),
-
-          items:
-            items.map(
-              (item) => ({
-                product_id:
-                  item.productId,
-
-                variant_id:
-                  item.variantId,
-
-                quantity:
-                  item.quantity,
-              }),
-            ),
-        });
-
-      router.push(
-        `/checkout/${session.id}`,
-      );
-    } catch (
-      caughtError
-    ) {
+      router.push(`/checkout/${session.id}`);
+    } catch (caughtError) {
       setError(
-        caughtError
-          instanceof Error
+        caughtError instanceof Error
           ? caughtError.message
-          : (
-              "Impossible de préparer la commande. Réessayez."
-            ),
+          : "Impossible de préparer la commande. Réessayez.",
       );
-
       setSubmitting(false);
     }
   }
@@ -323,20 +196,11 @@ export function CheckoutForm() {
   if (!items.length) {
     return (
       <div className="mx-auto max-w-[700px] px-4 py-16 text-center sm:px-6">
-        <PackageCheck
-          size={48}
-          className="mx-auto text-[#ff6b00]"
-        />
-
-        <h1 className="mt-5 text-3xl font-black">
-          Votre panier est vide
-        </h1>
-
+        <PackageCheck size={48} className="mx-auto text-[#ff6b00]" />
+        <h1 className="mt-5 text-3xl font-black">Votre panier est vide</h1>
         <p className="mt-2 text-sm text-slate-500">
-          Ajoutez des produits avant
-          de continuer.
+          Ajoutez des produits avant de continuer.
         </p>
-
         <Link
           href="/"
           className="mt-7 inline-flex rounded-xl bg-[#ff6b00] px-6 py-3 text-sm font-black text-white"
@@ -353,32 +217,25 @@ export function CheckoutForm() {
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
           SUGU KURA
         </p>
-
         <h1 className="mt-1 text-3xl font-black text-slate-950">
           Finaliser ma commande
         </h1>
-
         <p className="mt-2 text-sm text-slate-500">
           Renseignez vos informations pour continuer.
         </p>
       </div>
 
       <form
-        onSubmit={
-          handleSubmit
-        }
+        onSubmit={handleSubmit}
         className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_380px]"
       >
         <div className="space-y-5">
           <section className="rounded-[24px] border border-slate-200 bg-white p-5 sm:p-6">
-            <h2 className="text-lg font-black">
-              Coordonnées
-            </h2>
+            <h2 className="text-lg font-black">Coordonnées</h2>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-bold">
                 Nom complet *
-
                 <input
                   name="customer_name"
                   required
@@ -389,7 +246,6 @@ export function CheckoutForm() {
 
               <label className="text-sm font-bold">
                 Téléphone *
-
                 <input
                   name="customer_phone"
                   type="tel"
@@ -401,7 +257,6 @@ export function CheckoutForm() {
 
               <label className="text-sm font-bold">
                 WhatsApp
-
                 <input
                   name="customer_whatsapp"
                   type="tel"
@@ -411,7 +266,6 @@ export function CheckoutForm() {
 
               <label className="text-sm font-bold">
                 E-mail
-
                 <input
                   name="customer_email"
                   type="email"
@@ -423,127 +277,103 @@ export function CheckoutForm() {
           </section>
 
           <section className="rounded-[24px] border border-slate-200 bg-white p-5 sm:p-6">
-            <h2 className="text-lg font-black">
-              Mode de réception
-            </h2>
+            <h2 className="text-lg font-black">Mode de réception</h2>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => {
-                  setDeliveryMethod(
-                    "DELIVERY",
-                  );
+                  setDeliveryMethod("DELIVERY");
                   setError("");
                 }}
                 className={`rounded-2xl border-2 p-4 text-left transition ${
-                  deliveryMethod ===
-                  "DELIVERY"
+                  deliveryMethod === "DELIVERY"
                     ? "border-[#ff6b00] bg-orange-50"
                     : "border-slate-200 bg-white"
                 }`}
               >
-                <Truck
-                  size={22}
-                  className="text-[#ff6b00]"
-                />
-
-                <strong className="mt-3 block">
-                  Livraison
-                </strong>
-
+                <Truck size={22} className="text-[#ff6b00]" />
+                <strong className="mt-3 block">Livraison</strong>
                 <span className="mt-1 block text-xs text-slate-500">
-                  Tarif calculé selon votre zone.
+                  Choisissez votre ville puis votre quartier.
                 </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => {
-                  setDeliveryMethod(
-                    "PICKUP",
-                  );
+                  setDeliveryMethod("PICKUP");
                   setError("");
                 }}
                 className={`rounded-2xl border-2 p-4 text-left transition ${
-                  deliveryMethod ===
-                  "PICKUP"
+                  deliveryMethod === "PICKUP"
                     ? "border-[#0b4da2] bg-blue-50"
                     : "border-slate-200 bg-white"
                 }`}
               >
-                <MapPin
-                  size={22}
-                  className="text-[#0b4da2]"
-                />
-
-                <strong className="mt-3 block">
-                  Retrait
-                </strong>
-
+                <MapPin size={22} className="text-[#0b4da2]" />
+                <strong className="mt-3 block">Retrait</strong>
                 <span className="mt-1 block text-xs text-slate-500">
                   Retrait chez SUGU KURA sans frais de livraison.
                 </span>
               </button>
             </div>
 
-            {deliveryMethod ===
-            "DELIVERY" && (
+            {deliveryMethod === "DELIVERY" && (
               <div className="mt-5">
                 {zonesLoading ? (
-                  <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+                    <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+                  </div>
                 ) : deliveryZones.length > 0 ? (
-                  <label className="block text-sm font-bold">
-                    Zone de livraison *
-
-                    <select
-                      value={
-                        selectedDeliveryZoneId
-                      }
-                      onChange={
-                        (event) => {
-                          setSelectedDeliveryZoneId(
-                            event.target.value,
-                          );
-                          setError("");
-                        }
-                      }
-                      required
-                      className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-[#ff6b00]"
-                    >
-                      <option value="">
-                        Choisissez votre zone
-                      </option>
-
-                      {deliveryZones.map(
-                        (zone) => (
-                          <option
-                            key={
-                              zone.id
-                            }
-                            value={
-                              zone.id
-                            }
-                          >
-                            {zone.name}
-                            {" — "}
-                            {zone.city}
-                            {" — "}
-                            {formatMoney(
-                              Number(
-                                zone.fee,
-                              ),
-                            )}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="text-sm font-bold">
+                      Ville *
+                      <select
+                        value={selectedCity}
+                        onChange={(event) => handleCityChange(event.target.value)}
+                        required
+                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-[#ff6b00]"
+                      >
+                        <option value="">Choisissez votre ville</option>
+                        {cities.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
                           </option>
-                        ),
-                      )}
-                    </select>
-                  </label>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="text-sm font-bold">
+                      Quartier *
+                      <select
+                        value={selectedDeliveryZoneId}
+                        onChange={(event) => {
+                          setSelectedDeliveryZoneId(event.target.value);
+                          setError("");
+                        }}
+                        disabled={!selectedCity}
+                        required
+                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-[#ff6b00] disabled:cursor-not-allowed disabled:bg-slate-100"
+                      >
+                        <option value="">
+                          {selectedCity
+                            ? "Choisissez votre quartier"
+                            : "Choisissez d'abord la ville"}
+                        </option>
+                        {zonesForCity.map((zone) => (
+                          <option key={zone.id} value={zone.id}>
+                            {zone.name} — {formatMoney(Number(zone.fee))}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <label className="text-sm font-bold">
                       Ville
-
                       <input
                         name="city"
                         defaultValue="Bamako"
@@ -553,7 +383,6 @@ export function CheckoutForm() {
 
                     <label className="text-sm font-bold">
                       Quartier / zone
-
                       <input
                         name="delivery_zone"
                         placeholder="Ex. Bozola"
@@ -565,50 +394,42 @@ export function CheckoutForm() {
 
                 {selectedDeliveryZone && (
                   <div className="mt-3 rounded-xl border border-orange-100 bg-orange-50 p-3 text-xs text-slate-700">
-                    <strong className="text-[#ff6b00]">
-                      Livraison :{" "}
-                      {formatMoney(
-                        deliveryFee,
-                      )}
-                    </strong>
-
-                    {selectedDeliveryZone
-                      .estimated_delivery && (
-                      <span className="ml-2 text-slate-500">
-                        • Délai :{" "}
-                        {
-                          selectedDeliveryZone
-                            .estimated_delivery
-                        }
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span>
+                        {selectedDeliveryZone.city} · {selectedDeliveryZone.name}
                       </span>
+                      <strong className="text-sm text-[#ff6b00]">
+                        {formatMoney(deliveryFee)}
+                      </strong>
+                    </div>
+
+                    {selectedDeliveryZone.estimated_delivery && (
+                      <p className="mt-1 text-slate-500">
+                        Délai indicatif : {selectedDeliveryZone.estimated_delivery}
+                      </p>
                     )}
+
+                    <p className="mt-1 font-semibold text-slate-500">
+                      Tarif fixé par SUGU KURA. Il n&apos;est pas modifiable par le client.
+                    </p>
                   </div>
                 )}
               </div>
             )}
 
             <label className="mt-4 block text-sm font-bold">
-              Adresse
-              {deliveryMethod ===
-              "DELIVERY"
-                ? " *"
-                : ""}
-
+              Adresse{deliveryMethod === "DELIVERY" ? " *" : ""}
               <textarea
                 name="address"
-                required={
-                  deliveryMethod ===
-                  "DELIVERY"
-                }
+                required={deliveryMethod === "DELIVERY"}
                 rows={3}
-                placeholder="Rue, quartier, repère..."
+                placeholder="Rue, porte, repère utile..."
                 className="mt-2 w-full rounded-xl border border-slate-200 p-3 font-normal outline-none focus:border-[#ff6b00]"
               />
             </label>
 
             <label className="mt-4 block text-sm font-bold">
               Instructions
-
               <textarea
                 name="notes"
                 rows={3}
@@ -620,86 +441,52 @@ export function CheckoutForm() {
         </div>
 
         <aside className="h-fit rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-32">
-          <h2 className="text-xl font-black">
-            Votre commande
-          </h2>
+          <h2 className="text-xl font-black">Votre commande</h2>
 
           <div className="mt-5 max-h-72 space-y-3 overflow-y-auto">
-            {items.map(
-              (item) => (
-                <div
-                  key={
-                    item.key
-                  }
-                  className="flex justify-between gap-3 border-b border-slate-100 pb-3"
-                >
-                  <div className="min-w-0">
-                    <p className="line-clamp-2 text-xs font-bold">
-                      {item.name}
+            {items.map((item) => (
+              <div
+                key={item.key}
+                className="flex justify-between gap-3 border-b border-slate-100 pb-3"
+              >
+                <div className="min-w-0">
+                  <p className="line-clamp-2 text-xs font-bold">{item.name}</p>
+                  {item.variantLabel && (
+                    <p className="mt-1 text-[10px] text-slate-400">
+                      {item.variantLabel}
                     </p>
-
-                    {item.variantLabel && (
-                      <p className="mt-1 text-[10px] text-slate-400">
-                        {
-                          item.variantLabel
-                        }
-                      </p>
-                    )}
-
-                    <p className="mt-1 text-[10px] text-slate-500">
-                      Qté :{" "}
-                      {item.quantity}
-                    </p>
-                  </div>
-
-                  <strong className="shrink-0 text-xs">
-                    {formatMoney(
-                      item.unitPrice *
-                      item.quantity,
-                    )}
-                  </strong>
+                  )}
+                  <p className="mt-1 text-[10px] text-slate-500">
+                    Qté : {item.quantity}
+                  </p>
                 </div>
-              ),
-            )}
+                <strong className="shrink-0 text-xs">
+                  {formatMoney(item.unitPrice * item.quantity)}
+                </strong>
+              </div>
+            ))}
           </div>
 
           <div className="mt-5 flex items-center justify-between">
-            <span className="font-bold">
-              Sous-total
-            </span>
-
-            <strong>
-              {formatMoney(
-                subtotal,
-              )}
-            </strong>
+            <span className="font-bold">Sous-total</span>
+            <strong>{formatMoney(subtotal)}</strong>
           </div>
 
           <div className="mt-3 flex items-center justify-between text-sm">
-            <span className="font-bold text-slate-500">
-              Livraison
-            </span>
-
+            <span className="font-bold text-slate-500">Livraison</span>
             <strong className="text-[#0b4da2]">
               {deliveryMethod === "PICKUP"
                 ? "Gratuit"
                 : selectedDeliveryZone
-                  ? formatMoney(
-                      deliveryFee,
-                    )
+                  ? formatMoney(deliveryFee)
                   : "À définir"}
             </strong>
           </div>
 
           <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-            <span className="text-lg font-black">
-              Total
-            </span>
-
+            <span className="text-lg font-black">Total</span>
             <strong className="text-2xl text-[#ff6b00]">
-              {formatMoney(
-                total,
-              )}
+              {formatMoney(total)}
             </strong>
           </div>
 
@@ -711,25 +498,16 @@ export function CheckoutForm() {
 
           <button
             type="submit"
-            disabled={
-              submitting
-              || zonesLoading
-            }
+            disabled={submitting || zonesLoading}
             className="mt-5 flex h-14 w-full items-center justify-center rounded-2xl bg-[#ff6b00] text-sm font-black text-white transition hover:bg-[#e85f00] disabled:cursor-wait disabled:opacity-60"
           >
-            {submitting
-              ? "Vérification..."
-              : "Continuer"}
+            {submitting ? "Vérification..." : "Continuer"}
           </button>
 
           <div className="mt-4 flex gap-2 rounded-xl bg-emerald-50 p-3">
-            <ShieldCheck
-              size={18}
-              className="shrink-0 text-emerald-600"
-            />
-
+            <ShieldCheck size={18} className="shrink-0 text-emerald-600" />
             <p className="text-[10px] leading-5 text-emerald-800">
-              Le tarif de livraison est recalculé et sécurisé par le serveur avant validation.
+              Le tarif choisi correspond au quartier et est recalculé par le serveur avant validation. Le client ne peut pas le modifier.
             </p>
           </div>
 
@@ -738,7 +516,6 @@ export function CheckoutForm() {
             className="mt-4 flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600"
           >
             <ArrowLeft size={15} />
-
             Retour au panier
           </Link>
         </aside>
