@@ -34,7 +34,7 @@ export function Footer() {
       <div className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-blue-300/10 blur-3xl" />
 
       <div className="relative mx-auto max-w-[1440px] px-4 pt-12 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-[1.3fr_0.8fr_0.8fr_1fr]">
+        <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.3fr_0.7fr_0.9fr_0.9fr_1fr]">
           <div>
             <Link
               href="/"
@@ -47,7 +47,7 @@ export function Footer() {
             </Link>
 
             <p className="mt-5 max-w-md text-sm leading-7 text-blue-100/80">
-              Votre boutique moderne pour découvrir de bons produits, comparer les offres et commander simplement.
+              Votre boutique moderne pour découvrir de bons produits, comparer les offres et commander simplement, sans création de compte obligatoire.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -81,31 +81,19 @@ export function Footer() {
             </h3>
 
             <div className="mt-5 space-y-3 text-sm text-blue-100/80">
-              <Link
-                href="/#products"
-                className="block transition hover:text-white"
-              >
+              <Link href="/#products" className="block transition hover:text-white">
                 Produits
               </Link>
-
-              <Link
-                href="/#categories"
-                className="block transition hover:text-white"
-              >
+              <Link href="/#categories" className="block transition hover:text-white">
                 Catégories
               </Link>
-
-              <Link
-                href="/#partners"
-                className="block transition hover:text-white"
-              >
+              <Link href="/promotions" className="block transition hover:text-white">
+                Promotions
+              </Link>
+              <Link href="/#partners" className="block transition hover:text-white">
                 Partenaires
               </Link>
-
-              <Link
-                href="/favoris"
-                className="block transition hover:text-white"
-              >
+              <Link href="/favoris" className="block transition hover:text-white">
                 Mes favoris
               </Link>
             </div>
@@ -118,30 +106,40 @@ export function Footer() {
 
             <div className="mt-5 space-y-3 text-sm text-blue-100/80">
               <Link
-                href="/suivi-commande"
+                href="/ma-commande"
                 className="inline-flex items-center gap-2 font-bold text-white transition hover:text-orange-300"
               >
                 Suivre ma commande
                 <ArrowUpRight size={14} />
               </Link>
 
-              <br />
-
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 font-bold text-white transition hover:text-orange-300"
-              >
+              <Link href="/contact" className="block transition hover:text-white">
                 Nous contacter
-                <ArrowUpRight size={14} />
               </Link>
+              <Link href="/faq" className="block transition hover:text-white">
+                FAQ
+              </Link>
+              <Link href="/livraison-retours" className="block transition hover:text-white">
+                Livraison et retours
+              </Link>
+            </div>
+          </div>
 
-              <p>
-                Téléphone et WhatsApp disponibles depuis la page contact.
-              </p>
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-[0.16em] text-orange-300">
+              Informations
+            </h3>
 
-              <p>
-                Une question sur un produit ou une commande ? Notre équipe vous accompagne.
-              </p>
+            <div className="mt-5 space-y-3 text-sm text-blue-100/80">
+              <Link href="/a-propos" className="block transition hover:text-white">
+                À propos de nous
+              </Link>
+              <Link href="/conditions-generales" className="block transition hover:text-white">
+                Conditions générales
+              </Link>
+              <Link href="/confidentialite" className="block transition hover:text-white">
+                Confidentialité & cookies
+              </Link>
             </div>
           </div>
 
@@ -159,10 +157,10 @@ export function Footer() {
 
                 <div>
                   <p className="text-sm font-black">
-                    Livraison rapide
+                    Livraison claire
                   </p>
                   <p className="mt-1 text-xs leading-5 text-blue-100/65">
-                    Un parcours de commande simple et clair.
+                    Le tarif est affiché selon la ville et le quartier choisis.
                   </p>
                 </div>
               </div>
@@ -178,7 +176,7 @@ export function Footer() {
                     Achat en confiance
                   </p>
                   <p className="mt-1 text-xs leading-5 text-blue-100/65">
-                    Des informations produit lisibles et des avis clients.
+                    Produits lisibles, suivi de commande et assistance client.
                   </p>
                 </div>
               </div>
