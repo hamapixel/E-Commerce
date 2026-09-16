@@ -14,6 +14,10 @@ from .catalog_views import (
     owner_catalog_metadata,
 )
 
+from .delivery_views import (
+    OwnerDeliveryZoneViewSet,
+)
+
 from .inventory_views import (
     inventory_item_action,
     inventory_items,
@@ -83,6 +87,17 @@ router.register(
     r"payments",
     OwnerPaymentViewSet,
     basename="owner-payment",
+)
+
+
+# ============================================================
+# LIVRAISON
+# ============================================================
+
+router.register(
+    r"delivery-zones",
+    OwnerDeliveryZoneViewSet,
+    basename="owner-delivery-zone",
 )
 
 
