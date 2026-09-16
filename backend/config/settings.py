@@ -323,6 +323,11 @@ ORDER_CREATE_THROTTLE_RATE = config(
     default="60/hour",
 )
 
+ORDER_TRACKING_THROTTLE_RATE = config(
+    "ORDER_TRACKING_THROTTLE_RATE",
+    default="20/minute",
+)
+
 ADMIN_LOGIN_MAX_ATTEMPTS = config(
     "ADMIN_LOGIN_MAX_ATTEMPTS",
     default=5,
