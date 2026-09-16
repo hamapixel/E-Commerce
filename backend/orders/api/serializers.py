@@ -23,6 +23,44 @@ class OrderCreateSerializer(
     )
 
 
+class OrderTrackingInputSerializer(
+    serializers.Serializer
+):
+    order_number = serializers.CharField(
+        max_length=40,
+    )
+
+    customer_phone = serializers.CharField(
+        max_length=30,
+    )
+
+    def validate_order_number(
+        self,
+        value,
+    ):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Le numéro de commande est obligatoire."
+            )
+
+        return value
+
+    def validate_customer_phone(
+        self,
+        value,
+    ):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Le numéro de téléphone est obligatoire."
+            )
+
+        return value
+
+
 class OrderItemSerializer(
     serializers.ModelSerializer
 ):
