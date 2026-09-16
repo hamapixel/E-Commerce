@@ -16,6 +16,42 @@ const HIDDEN_PATHS = new Set([
 ]);
 
 
+function getSafeFallback(
+  pathname: string,
+) {
+  if (
+    pathname.startsWith(
+      "/commande/",
+    )
+  ) {
+    return "/ma-commande";
+  }
+
+  if (
+    pathname === "/suivi-commande"
+  ) {
+    return "/ma-commande";
+  }
+
+  if (
+    pathname === "/ma-commande"
+  ) {
+    return "/";
+  }
+
+  if (
+    pathname === "/checkout"
+    || pathname.startsWith(
+      "/checkout/",
+    )
+  ) {
+    return "/panier";
+  }
+
+  return "/";
+}
+
+
 export function BackNavigation() {
   const pathname =
     usePathname();
@@ -32,6 +68,11 @@ export function BackNavigation() {
   }
 
   function goBack() {
+    const fallback =
+      getSafeFallback(
+        pathname,
+      );
+
     const referrer =
       document.referrer;
 
@@ -40,19 +81,37 @@ export function BackNavigation() {
         const url =
           new URL(referrer);
 
-        if (
+        const sameOrigin =
           url.origin ===
-          window.location.origin
+          window.location.origin;
+
+        const referrerPath =
+          `${url.pathname}${url.search}`;
+
+        const unsafeOrderLoop =
+          pathname.startsWith(
+            "/commande/",
+          )
+          && referrerPath.startsWith(
+            "/checkout/",
+          );
+
+        if (
+          sameOrigin
+          && !unsafeOrderLoop
+          && referrerPath !== pathname
         ) {
           router.back();
           return;
         }
       } catch {
-        // On retombe vers l'accueil ci-dessous.
+        // Utilise la destination sûre ci-dessous.
       }
     }
 
-    router.push("/");
+    router.push(
+      fallback,
+    );
   }
 
   return (
