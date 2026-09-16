@@ -2,11 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  ArrowLeft,
   Eye,
   PackagePlus,
   Pencil,
-  Search,
 } from "lucide-react";
+
+import {
+  ProductCatalogFilters,
+} from "@/components/catalogue/product-catalog-filters";
 
 import {
   ownerFetch,
@@ -106,7 +110,18 @@ export default async function ProductsPage({
       ========================================= */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+          <Link
+            href="/catalogue"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] shadow-sm transition hover:bg-blue-100"
+          >
+            <ArrowLeft
+              size={15}
+            />
+
+            Retour au catalogue
+          </Link>
+
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
             Catalogue
           </p>
 
@@ -135,102 +150,23 @@ export default async function ProductsPage({
 
 
       {/* =========================================
-          FILTRES
+          RECHERCHE ET FILTRES INSTANTANES
       ========================================= */}
-      <form className="mt-7 grid gap-3 rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-5">
-
-        {/* RECHERCHE */}
-        <label className="relative sm:col-span-2 xl:col-span-2">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-
-          <input
-            name="q"
-            defaultValue={
-              params.q ?? ""
-            }
-            placeholder="Nom, SKU ou code-barres..."
-            className="h-11 w-full rounded-xl border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#ff6b00]"
-          />
-        </label>
-
-
-        {/* CATÉGORIE */}
-        <select
-          name="category"
-          defaultValue={
-            params.category ?? ""
-          }
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold outline-none focus:border-[#ff6b00]"
-        >
-          <option value="">
-            Toutes catégories
-          </option>
-
-          {metadata.categories.map(
-            (
-              category,
-            ) => (
-              <option
-                key={
-                  category.id
-                }
-                value={
-                  category.id
-                }
-              >
-                {
-                  category.name
-                }
-              </option>
-            ),
-          )}
-        </select>
-
-
-        {/* MARQUE */}
-        <select
-          name="brand"
-          defaultValue={
-            params.brand ?? ""
-          }
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold outline-none focus:border-[#ff6b00]"
-        >
-          <option value="">
-            Toutes marques
-          </option>
-
-          {metadata.brands.map(
-            (
-              brand,
-            ) => (
-              <option
-                key={
-                  brand.id
-                }
-                value={
-                  brand.id
-                }
-              >
-                {
-                  brand.name
-                }
-              </option>
-            ),
-          )}
-        </select>
-
-
-        {/* RECHERCHER */}
-        <button
-          type="submit"
-          className="h-11 rounded-xl bg-slate-950 px-4 text-xs font-black text-white transition hover:bg-slate-800"
-        >
-          Rechercher
-        </button>
-      </form>
+      <ProductCatalogFilters
+        metadata={metadata}
+        initialQuery={
+          params.q ?? ""
+        }
+        initialCategory={
+          params.category ?? ""
+        }
+        initialBrand={
+          params.brand ?? ""
+        }
+        initialStatus={
+          params.status ?? ""
+        }
+      />
 
 
       {/* =========================================

@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import {
+  ArrowLeft,
   Images,
   PackagePlus,
 } from "lucide-react";
@@ -41,7 +44,18 @@ export default async function NewProductPage() {
   return (
     <>
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+        <Link
+          href="/catalogue/produits"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] shadow-sm transition hover:bg-blue-100"
+        >
+          <ArrowLeft
+            size={15}
+          />
+
+          Retour aux produits
+        </Link>
+
+        <p className="mt-4 text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
           Catalogue
         </p>
 

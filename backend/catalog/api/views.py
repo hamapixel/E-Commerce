@@ -80,6 +80,8 @@ class CategoryViewSet(
         CategorySerializer
     )
 
+    pagination_class = None
+
     lookup_field = "slug"
 
     queryset = (
