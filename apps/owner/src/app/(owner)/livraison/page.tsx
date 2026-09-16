@@ -241,7 +241,7 @@ export default async function DeliveryPage({
 
         {zones.length === 0 ? (
           <div className="mt-4 rounded-[24px] border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            Aucune zone configurée. Tant qu'il n'y en a pas, le checkout reste compatible avec la saisie manuelle du quartier et applique 0 F de livraison.
+            Aucune zone configurée. Tant qu&apos;il n&apos;y en a pas, le checkout reste compatible avec la saisie manuelle du quartier et applique 0 F de livraison.
           </div>
         ) : (
           <div className="mt-4 space-y-4">
