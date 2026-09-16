@@ -22,9 +22,11 @@ from inventory.models import (
 
 from .models import (
     CheckoutSession,
+    DeliveryZone,
 )
 
 from .services import (
+    CheckoutError,
     CheckoutStockError,
     VariantRequiredError,
     cancel_checkout_session,
@@ -383,6 +385,36 @@ class CheckoutServiceTests(
             CheckoutSession
             .Status
             .EXPIRED,
+        )
+
+    def test_inactive_configured_zones_block_delivery(
+        self
+    ):
+        DeliveryZone.objects.create(
+            city="Bamako",
+            name="Bozola",
+            fee=Decimal("2000.00"),
+            is_active=False,
+        )
+
+        with self.assertRaisesMessage(
+            CheckoutError,
+            "Aucune zone de livraison n'est disponible actuellement.",
+        ):
+            create_checkout_session(
+                **self.checkout_data()
+            )
+
+        self.assertEqual(
+            CheckoutSession.objects.count(),
+            0,
+        )
+
+        self.inventory.refresh_from_db()
+
+        self.assertEqual(
+            self.inventory.quantity_reserved,
+            0,
         )
 
 
