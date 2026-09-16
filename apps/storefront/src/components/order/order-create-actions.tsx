@@ -19,6 +19,10 @@ import {
 } from "@/lib/order-api";
 
 import {
+  saveRecentOrder,
+} from "@/lib/recent-orders";
+
+import {
   useCartStore,
 } from "@/store/cart-store";
 
@@ -30,10 +34,6 @@ interface OrderCreateActionsProps {
     | "DELIVERY"
     | "PICKUP";
 }
-
-
-const LAST_ORDER_STORAGE_KEY =
-  "sugu-kura-last-order";
 
 
 export function OrderCreateActions({
@@ -84,19 +84,13 @@ export function OrderCreateActions({
         );
 
       try {
-        window.localStorage.setItem(
-          LAST_ORDER_STORAGE_KEY,
-          JSON.stringify({
-            id: order.id,
-            orderNumber:
-              order.order_number,
-            savedAt:
-              new Date().toISOString(),
-          }),
-        );
+        saveRecentOrder({
+          id: order.id,
+          orderNumber:
+            order.order_number,
+        });
       } catch {
-        // Le stockage local est un confort :
-        // la commande reste créée même s'il est indisponible.
+        // La commande reste créée si le stockage local est indisponible.
       }
 
       clearCart();
