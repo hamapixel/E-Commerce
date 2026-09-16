@@ -17,6 +17,7 @@ import {
   PackageCheck,
   ShoppingCart,
   Store,
+  Truck,
   X,
 } from "lucide-react";
 
@@ -60,6 +61,11 @@ const navigation = [
     href: "/stock",
     label: "Stock",
     icon: Boxes,
+  },
+  {
+    href: "/livraison",
+    label: "Livraison",
+    icon: Truck,
   },
   {
     href: "/publicites",
