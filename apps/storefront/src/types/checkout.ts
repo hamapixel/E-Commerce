@@ -1,3 +1,13 @@
+export interface DeliveryZone {
+  id: number;
+  name: string;
+  city: string;
+  fee: string;
+  estimated_delivery: string;
+  display_order: number;
+}
+
+
 export interface CheckoutLinePayload {
   product_id: number;
   variant_id: number | null;
@@ -16,6 +26,7 @@ export interface CheckoutCreatePayload {
     | "PICKUP";
 
   city: string;
+  delivery_zone_id: number | null;
   delivery_zone: string;
   address: string;
   notes: string;
