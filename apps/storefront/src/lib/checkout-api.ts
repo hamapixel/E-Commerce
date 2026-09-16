@@ -1,6 +1,7 @@
 import type {
   CheckoutCreatePayload,
   CheckoutSession,
+  DeliveryZone,
 } from "@/types/checkout";
 
 
@@ -90,6 +91,35 @@ async function readError(
       "Une erreur est survenue. Réessayez."
     );
   }
+}
+
+
+export async function getDeliveryZones(): Promise<DeliveryZone[]> {
+  const response = await fetch(
+    "/api/delivery-zones",
+    {
+      cache: "no-store",
+      headers: {
+        Accept:
+          "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await readError(
+        response,
+      ),
+    );
+  }
+
+  const data: unknown =
+    await response.json();
+
+  return Array.isArray(data)
+    ? data as DeliveryZone[]
+    : [];
 }
 
 
