@@ -10,7 +10,11 @@ import {
 } from "lucide-react";
 
 import {
-  notFound,
+  cookies,
+} from "next/headers";
+
+import {
+  redirect,
 } from "next/navigation";
 
 import {
@@ -44,13 +48,30 @@ export default async function OrderPage({
     id,
   } = await params;
 
+  const cookieStore =
+    await cookies();
+
+  const accessToken =
+    cookieStore.get(
+      `sugu-order-access-${id}`,
+    )?.value ?? "";
+
+  if (!accessToken) {
+    redirect(
+      "/suivi-commande",
+    );
+  }
+
   const order =
     await getOrder(
       id,
+      accessToken,
     );
 
   if (!order) {
-    notFound();
+    redirect(
+      "/suivi-commande",
+    );
   }
 
   const payment =
