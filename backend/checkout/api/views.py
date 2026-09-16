@@ -15,6 +15,7 @@ from core.throttles import (
 
 from checkout.models import (
     CheckoutSession,
+    DeliveryZone,
 )
 
 from checkout.services import (
@@ -27,7 +28,43 @@ from checkout.services import (
 from .serializers import (
     CheckoutCreateSerializer,
     CheckoutSessionSerializer,
+    DeliveryZoneSerializer,
 )
+
+
+class DeliveryZoneViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+    serializer_class = (
+        DeliveryZoneSerializer
+    )
+
+    pagination_class = None
+
+    http_method_names = [
+        "get",
+        "head",
+        "options",
+    ]
+
+    def get_queryset(self):
+        return (
+            DeliveryZone.objects
+            .filter(
+                is_active=True
+            )
+            .order_by(
+                "display_order",
+                "city",
+                "name",
+            )
+        )
 
 
 class CheckoutSessionViewSet(
@@ -40,7 +77,7 @@ class CheckoutSessionViewSet(
     API publique checkout.
 
     Pas de liste publique des sessions
-    pour protÃ©ger les informations clients.
+    pour protéger les informations clients.
     """
 
     permission_classes = [
@@ -138,6 +175,11 @@ class CheckoutSessionViewSet(
                         validated.get(
                             "city",
                             "Bamako",
+                        )
+                    ),
+                    delivery_zone_id=(
+                        validated.get(
+                            "delivery_zone_id"
                         )
                     ),
                     delivery_zone=(
@@ -282,7 +324,7 @@ class CheckoutSessionViewSet(
                     session.status
                 ),
                 "detail": (
-                    "Session checkout annulÃ©e."
+                    "Session checkout annulée."
                 ),
             },
             status=status.HTTP_200_OK,
