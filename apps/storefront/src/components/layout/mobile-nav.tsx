@@ -86,17 +86,19 @@ export function MobileNav() {
 
     {
       label:
-        "Commande",
+        "Ma commande",
 
       href:
-        "/suivi-commande",
+        "/ma-commande",
 
       icon:
         PackageSearch,
 
       active:
         pathname ===
-        "/suivi-commande"
+        "/ma-commande"
+        || pathname ===
+          "/suivi-commande"
         || pathname.startsWith(
           "/commande/",
         ),
