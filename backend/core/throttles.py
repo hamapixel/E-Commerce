@@ -93,3 +93,15 @@ class OrderCreateThrottle(
     )
 
     default_rate = "60/hour"
+
+
+class OrderTrackingThrottle(
+    ConfiguredIPThrottle
+):
+    scope = "order_tracking"
+
+    settings_name = (
+        "ORDER_TRACKING_THROTTLE_RATE"
+    )
+
+    default_rate = "20/minute"
