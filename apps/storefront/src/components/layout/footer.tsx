@@ -118,6 +118,16 @@ export function Footer() {
 
             <div className="mt-5 space-y-3 text-sm text-blue-100/80">
               <Link
+                href="/suivi-commande"
+                className="inline-flex items-center gap-2 font-bold text-white transition hover:text-orange-300"
+              >
+                Suivre ma commande
+                <ArrowUpRight size={14} />
+              </Link>
+
+              <br />
+
+              <Link
                 href="/contact"
                 className="inline-flex items-center gap-2 font-bold text-white transition hover:text-orange-300"
               >
