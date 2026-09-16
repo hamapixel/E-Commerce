@@ -5,12 +5,17 @@ import {
   CheckCircle2,
   PackageCheck,
   Phone,
+  Search,
   ShieldCheck,
 } from "lucide-react";
 
 import {
   notFound,
 } from "next/navigation";
+
+import {
+  OrderStatusTimeline,
+} from "@/components/order/order-status-timeline";
 
 import {
   formatMoney,
@@ -145,6 +150,17 @@ export default async function OrderPage({
               }
             </strong>
           </div>
+        </div>
+
+        <div className="mt-8">
+          <OrderStatusTimeline
+            status={
+              order.status
+            }
+            deliveryMethod={
+              order.delivery_method
+            }
+          />
         </div>
 
         <div className="my-8 border-t border-slate-200" />
@@ -322,12 +338,22 @@ export default async function OrderPage({
           </p>
         </div>
 
-        <Link
-          href="/"
-          className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-[#ff6b00] text-sm font-black text-white transition hover:bg-[#e85f00]"
-        >
-          Retour à la boutique
-        </Link>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/suivi-commande"
+            className="flex h-12 items-center justify-center gap-2 rounded-xl border border-[#0b4da2] bg-white text-sm font-black text-[#0b4da2] transition hover:bg-blue-50"
+          >
+            <Search size={16} />
+            Suivre une autre commande
+          </Link>
+
+          <Link
+            href="/"
+            className="flex h-12 items-center justify-center rounded-xl bg-[#ff6b00] text-sm font-black text-white transition hover:bg-[#e85f00]"
+          >
+            Retour à la boutique
+          </Link>
+        </div>
       </section>
     </div>
   );
