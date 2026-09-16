@@ -347,6 +347,10 @@ def _resolve_delivery_zone(
             delivery_fee,
         )
 
+    has_configured_zones = (
+        DeliveryZone.objects.exists()
+    )
+
     active_zones = (
         DeliveryZone.objects
         .filter(
@@ -354,8 +358,23 @@ def _resolve_delivery_zone(
         )
     )
 
+    has_active_zones = (
+        active_zones.exists()
+    )
+
+    if (
+        has_configured_zones
+        and not has_active_zones
+    ):
+        raise CheckoutError(
+            (
+                "Aucune zone de livraison "
+                "n'est disponible actuellement."
+            )
+        )
+
     if delivery_zone_id is None:
-        if active_zones.exists():
+        if has_active_zones:
             raise CheckoutError(
                 (
                     "Choisissez une zone de "
