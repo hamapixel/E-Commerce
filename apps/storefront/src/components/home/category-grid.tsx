@@ -158,21 +158,24 @@ export function CategoryGrid({
                 href={`/categories/${category.slug}`}
                 className={
                   normalizedQuery
-                    ? "group min-w-0 rounded-[14px] border border-slate-200 bg-white p-1.5 text-center shadow-sm transition duration-300 active:scale-[0.98] hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:p-2"
-                    : "group w-[86px] shrink-0 snap-start rounded-[14px] border border-slate-200 bg-white p-1.5 text-center shadow-sm transition duration-300 active:scale-[0.98] hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:w-[96px] sm:p-2 md:w-[104px]"
+                    ? "group min-w-0 overflow-hidden rounded-[16px] border border-slate-200 bg-white p-1.5 text-center shadow-sm transition duration-300 active:scale-[0.98] hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:p-2"
+                    : "group w-[86px] shrink-0 snap-start overflow-hidden rounded-[16px] border border-slate-200 bg-white p-1.5 text-center shadow-sm transition duration-300 active:scale-[0.98] hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:w-[96px] sm:p-2 md:w-[104px]"
                 }
               >
-                <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-[10px] bg-slate-50">
+                <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-[11px] bg-gradient-to-br from-slate-100 to-slate-50">
                   {category.image ? (
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      sizes="104px"
-                      className="object-contain p-1.5 transition duration-300 group-hover:scale-105"
-                    />
+                    <>
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        sizes="104px"
+                        className="object-cover transition duration-500 group-hover:scale-110"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/12 via-transparent to-white/5" />
+                    </>
                   ) : (
-                    <div className="flex h-full items-center justify-center text-xl font-black text-[#0b4da2]">
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-blue-50 via-white to-orange-50 text-2xl font-black text-[#0b4da2]">
                       {category.name
                         .charAt(0)
                         .toUpperCase()}
@@ -180,7 +183,7 @@ export function CategoryGrid({
                   )}
                 </div>
 
-                <p className="mt-1.5 line-clamp-2 min-h-[28px] text-[10px] font-bold leading-[14px] text-slate-800 sm:text-[11px]">
+                <p className="mt-1.5 line-clamp-2 min-h-[28px] text-[10px] font-black leading-[14px] text-slate-800 sm:text-[11px]">
                   {category.name}
                 </p>
 
