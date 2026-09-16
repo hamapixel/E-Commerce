@@ -1,8 +1,13 @@
+import re
+
 from rest_framework import (
     mixins,
     permissions,
     status,
     viewsets,
+)
+from rest_framework.decorators import (
+    action,
 )
 
 from rest_framework.response import (
@@ -11,6 +16,7 @@ from rest_framework.response import (
 
 from core.throttles import (
     OrderCreateThrottle,
+    OrderTrackingThrottle,
 )
 
 from orders.models import (
@@ -25,7 +31,18 @@ from orders.services import (
 from .serializers import (
     OrderCreateSerializer,
     OrderSerializer,
+    OrderTrackingInputSerializer,
 )
+
+
+def _normalize_phone(
+    value,
+):
+    return re.sub(
+        r"\D+",
+        "",
+        str(value or ""),
+    )
 
 
 class OrderViewSet(
@@ -50,6 +67,11 @@ class OrderViewSet(
                 OrderCreateThrottle()
             ]
 
+        if self.action == "track":
+            return [
+                OrderTrackingThrottle()
+            ]
+
         return super().get_throttles()
 
     def get_queryset(self):
@@ -68,6 +90,11 @@ class OrderViewSet(
     def get_serializer_class(self):
         if self.action == "create":
             return OrderCreateSerializer
+
+        if self.action == "track":
+            return (
+                OrderTrackingInputSerializer
+            )
 
         return OrderSerializer
 
@@ -135,4 +162,76 @@ class OrderViewSet(
                 if created
                 else status.HTTP_200_OK
             ),
+        )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="track",
+    )
+    def track(
+        self,
+        request,
+    ):
+        serializer = (
+            OrderTrackingInputSerializer(
+                data=request.data
+            )
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        data = serializer.validated_data
+
+        order = (
+            self.get_queryset()
+            .filter(
+                order_number__iexact=(
+                    data[
+                        "order_number"
+                    ]
+                )
+            )
+            .first()
+        )
+
+        supplied_phone = (
+            _normalize_phone(
+                data[
+                    "customer_phone"
+                ]
+            )
+        )
+
+        if (
+            not order
+            or _normalize_phone(
+                order.customer_phone
+            ) != supplied_phone
+        ):
+            return Response(
+                {
+                    "detail": (
+                        "Commande introuvable. "
+                        "Vérifiez le numéro de commande "
+                        "et le téléphone utilisé lors de l'achat."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_404_NOT_FOUND
+                ),
+            )
+
+        output = OrderSerializer(
+            order,
+            context={
+                "request": request
+            },
+        )
+
+        return Response(
+            output.data
         )
