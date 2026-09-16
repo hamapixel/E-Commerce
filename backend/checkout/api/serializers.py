@@ -3,7 +3,24 @@ from rest_framework import serializers
 from checkout.models import (
     CheckoutItem,
     CheckoutSession,
+    DeliveryZone,
 )
+
+
+class DeliveryZoneSerializer(
+    serializers.ModelSerializer
+):
+    class Meta:
+        model = DeliveryZone
+
+        fields = (
+            "id",
+            "name",
+            "city",
+            "fee",
+            "estimated_delivery",
+            "display_order",
+        )
 
 
 class CheckoutLineInputSerializer(
@@ -83,6 +100,14 @@ class CheckoutCreateSerializer(
         required=False,
         allow_blank=True,
         default="Bamako",
+    )
+
+    delivery_zone_id = (
+        serializers.IntegerField(
+            min_value=1,
+            required=False,
+            allow_null=True,
+        )
     )
 
     delivery_zone = (
