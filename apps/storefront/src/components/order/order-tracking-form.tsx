@@ -23,6 +23,10 @@ import type {
 } from "@/types/order";
 
 
+const LAST_ORDER_STORAGE_KEY =
+  "sugu-kura-last-order";
+
+
 export function OrderTrackingForm() {
   const router =
     useRouter();
@@ -121,6 +125,21 @@ export function OrderTrackingForm() {
 
       const order =
         await response.json() as Order;
+
+      try {
+        window.localStorage.setItem(
+          LAST_ORDER_STORAGE_KEY,
+          JSON.stringify({
+            id: order.id,
+            orderNumber:
+              order.order_number,
+            savedAt:
+              new Date().toISOString(),
+          }),
+        );
+      } catch {
+        // Le suivi reste disponible même si le stockage local est bloqué.
+      }
 
       router.push(
         `/commande/${order.id}`,
