@@ -19,6 +19,10 @@ from core.throttles import (
     OrderTrackingThrottle,
 )
 
+from orders.access import (
+    issue_order_access_token,
+    validate_order_access_token,
+)
 from orders.models import (
     Order,
 )
@@ -43,6 +47,27 @@ def _normalize_phone(
         "",
         str(value or ""),
     )
+
+
+def _serialize_order_with_access(
+    order,
+    request,
+):
+    output = OrderSerializer(
+        order,
+        context={
+            "request": request
+        },
+    )
+
+    data = dict(output.data)
+    data["access_token"] = (
+        issue_order_access_token(
+            order
+        )
+    )
+
+    return data
 
 
 class OrderViewSet(
@@ -148,6 +173,51 @@ class OrderViewSet(
             )
         )
 
+        return Response(
+            _serialize_order_with_access(
+                order,
+                request,
+            ),
+            status=(
+                status.HTTP_201_CREATED
+                if created
+                else status.HTTP_200_OK
+            ),
+        )
+
+    def retrieve(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        order = self.get_object()
+
+        access_token = (
+            request.headers.get(
+                "X-Order-Access-Token",
+                "",
+            )
+        )
+
+        if not validate_order_access_token(
+            access_token,
+            order.pk,
+        ):
+            return Response(
+                {
+                    "detail": (
+                        "Commande introuvable ou accès expiré. "
+                        "Vérifiez de nouveau la commande avec "
+                        "son numéro et le téléphone utilisé."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_404_NOT_FOUND
+                ),
+            )
+
         output = OrderSerializer(
             order,
             context={
@@ -156,12 +226,7 @@ class OrderViewSet(
         )
 
         return Response(
-            output.data,
-            status=(
-                status.HTTP_201_CREATED
-                if created
-                else status.HTTP_200_OK
-            ),
+            output.data
         )
 
     @action(
@@ -225,13 +290,9 @@ class OrderViewSet(
                 ),
             )
 
-        output = OrderSerializer(
-            order,
-            context={
-                "request": request
-            },
-        )
-
         return Response(
-            output.data
+            _serialize_order_with_access(
+                order,
+                request,
+            )
         )
