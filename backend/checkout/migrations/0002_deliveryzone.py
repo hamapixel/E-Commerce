@@ -110,7 +110,9 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="deliveryzone",
             constraint=models.CheckConstraint(
-                condition=models.Q(("fee__gte", 0)),
+                condition=models.Q(
+                    fee__gte=Decimal("0.00")
+                ),
                 name="checkout_zone_fee_gte_zero",
             ),
         ),
