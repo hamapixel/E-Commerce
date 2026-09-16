@@ -3,7 +3,40 @@ from django.contrib import admin
 from .models import (
     CheckoutItem,
     CheckoutSession,
+    DeliveryZone,
 )
+
+
+@admin.register(
+    DeliveryZone
+)
+class DeliveryZoneAdmin(
+    admin.ModelAdmin
+):
+    list_display = (
+        "name",
+        "city",
+        "fee",
+        "estimated_delivery",
+        "is_active",
+        "display_order",
+    )
+
+    list_filter = (
+        "is_active",
+        "city",
+    )
+
+    search_fields = (
+        "name",
+        "city",
+    )
+
+    ordering = (
+        "display_order",
+        "city",
+        "name",
+    )
 
 
 class CheckoutItemInline(
