@@ -32,6 +32,10 @@ interface OrderCreateActionsProps {
 }
 
 
+const LAST_ORDER_STORAGE_KEY =
+  "sugu-kura-last-order";
+
+
 export function OrderCreateActions({
   checkoutId,
   deliveryMethod,
@@ -78,6 +82,22 @@ export function OrderCreateActions({
           checkoutId,
           paymentMethod,
         );
+
+      try {
+        window.localStorage.setItem(
+          LAST_ORDER_STORAGE_KEY,
+          JSON.stringify({
+            id: order.id,
+            orderNumber:
+              order.order_number,
+            savedAt:
+              new Date().toISOString(),
+          }),
+        );
+      } catch {
+        // Le stockage local est un confort :
+        // la commande reste créée même s'il est indisponible.
+      }
 
       clearCart();
 
