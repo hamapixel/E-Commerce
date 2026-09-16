@@ -43,6 +43,9 @@ export function PartnerSlider({
     [partners],
   );
 
+  const compactDesktop =
+    uniquePartners.length <= 4;
+
   function move(direction: 1 | -1) {
     const scroller = scrollerRef.current;
 
@@ -64,7 +67,10 @@ export function PartnerSlider({
   }
 
   useEffect(() => {
-    if (uniquePartners.length <= 1) {
+    if (
+      compactDesktop
+      || uniquePartners.length <= 1
+    ) {
       return;
     }
 
@@ -106,7 +112,10 @@ export function PartnerSlider({
     return () => {
       window.clearInterval(interval);
     };
-  }, [uniquePartners.length]);
+  }, [
+    compactDesktop,
+    uniquePartners.length,
+  ]);
 
   if (!uniquePartners.length) {
     return null;
@@ -132,7 +141,7 @@ export function PartnerSlider({
           </p>
         </div>
 
-        {uniquePartners.length > 1 && (
+        {!compactDesktop && (
           <div className="hidden items-center gap-2 sm:flex">
             <button
               type="button"
@@ -155,10 +164,20 @@ export function PartnerSlider({
         )}
       </div>
 
-      <div className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-4 shadow-sm sm:px-4 sm:py-5">
+      <div
+        className={`relative overflow-hidden rounded-[24px] border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-4 shadow-sm sm:px-4 sm:py-5 ${
+          compactDesktop
+            ? "lg:mx-auto lg:max-w-4xl"
+            : ""
+        }`}
+      >
         <div
           ref={scrollerRef}
-          className="hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth sm:gap-4"
+          className={`hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth sm:gap-4 ${
+            compactDesktop
+              ? "lg:justify-center"
+              : ""
+          }`}
         >
           {uniquePartners.map(
             (partner) => (
