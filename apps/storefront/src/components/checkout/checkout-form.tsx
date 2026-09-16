@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   MapPin,
   PackageCheck,
+  Search,
   ShieldCheck,
   Truck,
 } from "lucide-react";
@@ -24,15 +25,25 @@ import { formatMoney } from "@/lib/format";
 import { useCartStore } from "@/store/cart-store";
 import type { DeliveryZone } from "@/types/checkout";
 
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const items = useCartStore((state) => state.items);
   const hasHydrated = useCartStore((state) => state.hasHydrated);
 
-  const [deliveryMethod, setDeliveryMethod] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
+  const [deliveryMethod, setDeliveryMethod] =
+    useState<"DELIVERY" | "PICKUP">("DELIVERY");
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedDeliveryZoneId, setSelectedDeliveryZoneId] = useState("");
+  const [neighborhoodQuery, setNeighborhoodQuery] = useState("");
   const [zonesLoading, setZonesLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -40,19 +51,42 @@ export function CheckoutForm() {
   const cities = useMemo(
     () => Array.from(
       new Set(
-        deliveryZones.map((zone) => zone.city.trim()).filter(Boolean),
+        deliveryZones
+          .map((zone) => zone.city.trim())
+          .filter(Boolean),
       ),
     ).sort((a, b) => a.localeCompare(b, "fr")),
     [deliveryZones],
   );
 
   const zonesForCity = useMemo(
-    () => deliveryZones.filter((zone) => zone.city === selectedCity),
+    () => deliveryZones.filter(
+      (zone) => zone.city.trim() === selectedCity,
+    ),
     [deliveryZones, selectedCity],
   );
 
+  const filteredZonesForCity = useMemo(
+    () => {
+      const query = normalizeSearchValue(neighborhoodQuery);
+
+      if (!query) {
+        return zonesForCity;
+      }
+
+      return zonesForCity.filter((zone) =>
+        normalizeSearchValue(
+          `${zone.name} ${zone.city}`,
+        ).includes(query),
+      );
+    },
+    [zonesForCity, neighborhoodQuery],
+  );
+
   const selectedDeliveryZone =
-    deliveryZones.find((zone) => String(zone.id) === selectedDeliveryZoneId) ?? null;
+    deliveryZones.find(
+      (zone) => String(zone.id) === selectedDeliveryZoneId,
+    ) ?? null;
 
   useEffect(() => {
     let active = true;
@@ -68,16 +102,25 @@ export function CheckoutForm() {
         setDeliveryZones(zones);
 
         const availableCities = Array.from(
-          new Set(zones.map((zone) => zone.city.trim()).filter(Boolean)),
+          new Set(
+            zones
+              .map((zone) => zone.city.trim())
+              .filter(Boolean),
+          ),
         );
 
         if (availableCities.length === 1) {
           const city = availableCities[0];
           setSelectedCity(city);
 
-          const cityZones = zones.filter((zone) => zone.city === city);
+          const cityZones = zones.filter(
+            (zone) => zone.city.trim() === city,
+          );
+
           if (cityZones.length === 1) {
-            setSelectedDeliveryZoneId(String(cityZones[0].id));
+            setSelectedDeliveryZoneId(
+              String(cityZones[0].id),
+            );
           }
         }
       } catch {
@@ -113,12 +156,24 @@ export function CheckoutForm() {
   function handleCityChange(city: string) {
     setSelectedCity(city);
     setSelectedDeliveryZoneId("");
+    setNeighborhoodQuery("");
     setError("");
 
-    const matchingZones = deliveryZones.filter((zone) => zone.city === city);
+    const matchingZones = deliveryZones.filter(
+      (zone) => zone.city.trim() === city,
+    );
+
     if (matchingZones.length === 1) {
-      setSelectedDeliveryZoneId(String(matchingZones[0].id));
+      setSelectedDeliveryZoneId(
+        String(matchingZones[0].id),
+      );
     }
+  }
+
+  function selectNeighborhood(zone: DeliveryZone) {
+    setSelectedDeliveryZoneId(String(zone.id));
+    setNeighborhoodQuery(zone.name);
+    setError("");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -142,17 +197,27 @@ export function CheckoutForm() {
     }
 
     const form = new FormData(event.currentTarget);
-    const fallbackZone = String(form.get("delivery_zone") ?? "").trim();
+    const fallbackZone = String(
+      form.get("delivery_zone") ?? "",
+    ).trim();
 
     setSubmitting(true);
     setError("");
 
     try {
       const session = await createCheckout({
-        customer_name: String(form.get("customer_name") ?? "").trim(),
-        customer_phone: String(form.get("customer_phone") ?? "").trim(),
-        customer_whatsapp: String(form.get("customer_whatsapp") ?? "").trim(),
-        customer_email: String(form.get("customer_email") ?? "").trim(),
+        customer_name: String(
+          form.get("customer_name") ?? "",
+        ).trim(),
+        customer_phone: String(
+          form.get("customer_phone") ?? "",
+        ).trim(),
+        customer_whatsapp: String(
+          form.get("customer_whatsapp") ?? "",
+        ).trim(),
+        customer_email: String(
+          form.get("customer_email") ?? "",
+        ).trim(),
         delivery_method: deliveryMethod,
         city:
           selectedDeliveryZone?.city
@@ -295,7 +360,7 @@ export function CheckoutForm() {
                 <Truck size={22} className="text-[#ff6b00]" />
                 <strong className="mt-3 block">Livraison</strong>
                 <span className="mt-1 block text-xs text-slate-500">
-                  Choisissez votre ville puis votre quartier.
+                  Choisissez votre ville puis recherchez votre quartier.
                 </span>
               </button>
 
@@ -327,12 +392,14 @@ export function CheckoutForm() {
                     <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
                   </div>
                 ) : deliveryZones.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
                     <label className="text-sm font-bold">
                       Ville *
                       <select
                         value={selectedCity}
-                        onChange={(event) => handleCityChange(event.target.value)}
+                        onChange={(event) =>
+                          handleCityChange(event.target.value)
+                        }
                         required
                         className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-[#ff6b00]"
                       >
@@ -345,30 +412,90 @@ export function CheckoutForm() {
                       </select>
                     </label>
 
-                    <label className="text-sm font-bold">
-                      Quartier *
-                      <select
-                        value={selectedDeliveryZoneId}
-                        onChange={(event) => {
-                          setSelectedDeliveryZoneId(event.target.value);
-                          setError("");
-                        }}
-                        disabled={!selectedCity}
-                        required
-                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-[#ff6b00] disabled:cursor-not-allowed disabled:bg-slate-100"
-                      >
-                        <option value="">
-                          {selectedCity
-                            ? "Choisissez votre quartier"
-                            : "Choisissez d'abord la ville"}
-                        </option>
-                        {zonesForCity.map((zone) => (
-                          <option key={zone.id} value={zone.id}>
-                            {zone.name} — {formatMoney(Number(zone.fee))}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                    <div>
+                      <span className="text-sm font-bold">
+                        Quartier *
+                      </span>
+
+                      <div className="relative mt-2">
+                        <Search
+                          size={17}
+                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+
+                        <input
+                          type="search"
+                          value={neighborhoodQuery}
+                          onChange={(event) => {
+                            setNeighborhoodQuery(event.target.value);
+
+                            if (selectedDeliveryZone) {
+                              setSelectedDeliveryZoneId("");
+                            }
+
+                            setError("");
+                          }}
+                          disabled={!selectedCity}
+                          placeholder={
+                            selectedCity
+                              ? "Rechercher votre quartier..."
+                              : "Choisissez d'abord la ville"
+                          }
+                          aria-label="Rechercher un quartier de livraison"
+                          className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 font-normal outline-none transition focus:border-[#ff6b00] focus:ring-4 focus:ring-orange-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                        />
+                      </div>
+
+                      {selectedCity && (
+                        <div className="mt-2 max-h-56 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+                          {filteredZonesForCity.length > 0 ? (
+                            <div className="space-y-1">
+                              {filteredZonesForCity.map((zone) => {
+                                const selected =
+                                  String(zone.id) === selectedDeliveryZoneId;
+
+                                return (
+                                  <button
+                                    key={zone.id}
+                                    type="button"
+                                    onClick={() => selectNeighborhood(zone)}
+                                    className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition ${
+                                      selected
+                                        ? "bg-orange-50 ring-1 ring-orange-200"
+                                        : "hover:bg-slate-50"
+                                    }`}
+                                  >
+                                    <div className="min-w-0">
+                                      <strong className="block truncate text-sm text-slate-800">
+                                        {zone.name}
+                                      </strong>
+                                      {zone.estimated_delivery && (
+                                        <span className="mt-0.5 block text-[10px] text-slate-400">
+                                          {zone.estimated_delivery}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <strong className="shrink-0 text-xs text-[#ff6b00]">
+                                      {formatMoney(Number(zone.fee))}
+                                    </strong>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="px-3 py-5 text-center">
+                              <p className="text-xs font-black text-slate-600">
+                                Aucun quartier trouvé
+                              </p>
+                              <p className="mt-1 text-[10px] text-slate-400">
+                                Vérifiez l&apos;orthographe ou essayez un autre quartier.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -450,16 +577,21 @@ export function CheckoutForm() {
                 className="flex justify-between gap-3 border-b border-slate-100 pb-3"
               >
                 <div className="min-w-0">
-                  <p className="line-clamp-2 text-xs font-bold">{item.name}</p>
+                  <p className="line-clamp-2 text-xs font-bold">
+                    {item.name}
+                  </p>
+
                   {item.variantLabel && (
                     <p className="mt-1 text-[10px] text-slate-400">
                       {item.variantLabel}
                     </p>
                   )}
+
                   <p className="mt-1 text-[10px] text-slate-500">
                     Qté : {item.quantity}
                   </p>
                 </div>
+
                 <strong className="shrink-0 text-xs">
                   {formatMoney(item.unitPrice * item.quantity)}
                 </strong>
