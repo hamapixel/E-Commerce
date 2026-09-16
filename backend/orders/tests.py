@@ -403,12 +403,8 @@ class OrderAPITests(
 
         self.client = APIClient()
 
-    def test_create_order_api(
-        self
-    ):
-        checkout = (
-            self.create_checkout()
-        )
+    def create_order_via_api(self):
+        checkout = self.create_checkout()
 
         response = self.client.post(
             "/api/v1/orders/",
@@ -421,6 +417,15 @@ class OrderAPITests(
                 ),
             },
             format="json",
+        )
+
+        return checkout, response
+
+    def test_create_order_api(
+        self
+    ):
+        _, response = (
+            self.create_order_via_api()
         )
 
         self.assertEqual(
@@ -461,26 +466,17 @@ class OrderAPITests(
             1,
         )
 
-    def test_order_detail_api(
-        self
-    ):
-        checkout = (
-            self.create_checkout()
+        self.assertTrue(
+            response.data[
+                "access_token"
+            ]
         )
 
-        create_response = (
-            self.client.post(
-                "/api/v1/orders/",
-                {
-                    "checkout_id": str(
-                        checkout.pk
-                    ),
-                    "payment_method": (
-                        "CASH_ON_DELIVERY"
-                    ),
-                },
-                format="json",
-            )
+    def test_order_detail_requires_access_token(
+        self
+    ):
+        _, create_response = (
+            self.create_order_via_api()
         )
 
         order_id = (
@@ -489,13 +485,45 @@ class OrderAPITests(
             ]
         )
 
-        response = (
-            self.client.get(
-                (
-                    "/api/v1/orders/"
-                    f"{order_id}/"
-                )
+        response = self.client.get(
+            (
+                "/api/v1/orders/"
+                f"{order_id}/"
             )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
+
+    def test_order_detail_accepts_valid_access_token(
+        self
+    ):
+        _, create_response = (
+            self.create_order_via_api()
+        )
+
+        order_id = (
+            create_response.data[
+                "id"
+            ]
+        )
+
+        access_token = (
+            create_response.data[
+                "access_token"
+            ]
+        )
+
+        response = self.client.get(
+            (
+                "/api/v1/orders/"
+                f"{order_id}/"
+            ),
+            HTTP_X_ORDER_ACCESS_TOKEN=(
+                access_token
+            ),
         )
 
         self.assertEqual(
@@ -508,6 +536,67 @@ class OrderAPITests(
                 "customer_name"
             ],
             "Hama TraorÃ©",
+        )
+
+    def test_order_detail_rejects_tampered_access_token(
+        self
+    ):
+        _, create_response = (
+            self.create_order_via_api()
+        )
+
+        order_id = (
+            create_response.data[
+                "id"
+            ]
+        )
+
+        response = self.client.get(
+            (
+                "/api/v1/orders/"
+                f"{order_id}/"
+            ),
+            HTTP_X_ORDER_ACCESS_TOKEN=(
+                "token-invalide"
+            ),
+        )
+
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
+
+    def test_tracking_returns_new_access_token(
+        self
+    ):
+        _, create_response = (
+            self.create_order_via_api()
+        )
+
+        response = self.client.post(
+            "/api/v1/orders/track/",
+            {
+                "order_number": (
+                    create_response.data[
+                        "order_number"
+                    ]
+                ),
+                "customer_phone": (
+                    "70000000"
+                ),
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data[
+                "access_token"
+            ]
         )
 
     def test_checkout_becomes_converted(
