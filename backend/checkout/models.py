@@ -14,6 +14,88 @@ from catalog.models import (
 from inventory.models import InventoryItem
 
 
+class DeliveryZone(models.Model):
+    name = models.CharField(
+        max_length=120,
+        verbose_name="Zone / quartier",
+    )
+
+    city = models.CharField(
+        max_length=120,
+        default="Bamako",
+        verbose_name="Ville",
+    )
+
+    fee = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[
+            MinValueValidator(
+                Decimal("0.00")
+            )
+        ],
+        verbose_name="Frais de livraison",
+    )
+
+    estimated_delivery = models.CharField(
+        max_length=120,
+        blank=True,
+        verbose_name="Délai indicatif",
+    )
+
+    display_order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Ordre d'affichage",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name="Active",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Créée le",
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Modifiée le",
+    )
+
+    class Meta:
+        verbose_name = "Zone de livraison"
+        verbose_name_plural = "Zones de livraison"
+        ordering = [
+            "display_order",
+            "city",
+            "name",
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "city",
+                    "name",
+                ],
+                name="checkout_zone_city_name_uniq",
+            ),
+            models.CheckConstraint(
+                condition=Q(
+                    fee__gte=0
+                ),
+                name="checkout_zone_fee_gte_zero",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.name} — {self.city} "
+            f"({self.fee} XOF)"
+        )
+
+
 class CheckoutSession(models.Model):
     """
     Session temporaire avant la création
