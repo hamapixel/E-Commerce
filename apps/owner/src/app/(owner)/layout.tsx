@@ -12,6 +12,7 @@ import {
   PackageCheck,
   ShoppingCart,
   Store,
+  Truck,
 } from "lucide-react";
 
 import {
@@ -67,6 +68,11 @@ export default async function OwnerLayout({
       href: "/stock",
       label: "Stock",
       icon: Boxes,
+    },
+    {
+      href: "/livraison",
+      label: "Livraison",
+      icon: Truck,
     },
     {
       href: "/publicites",
