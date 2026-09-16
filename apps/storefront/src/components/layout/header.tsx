@@ -227,6 +227,12 @@ export function Header() {
       tone: "orange",
     },
     {
+      href: "/ma-commande",
+      label: "Suivre ma commande",
+      icon: PackageSearch,
+      tone: "blue",
+    },
+    {
       href: "/favoris",
       label: "Mes favoris",
       icon: Heart,
@@ -326,6 +332,20 @@ export function Header() {
           />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <Link
+              href="/ma-commande"
+              className="hidden h-11 shrink-0 items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] transition hover:border-[#0b4da2] hover:bg-white lg:flex"
+              aria-label="Suivre ma commande"
+            >
+              <PackageSearch size={18} />
+              <span className="hidden xl:inline">
+                Suivre ma commande
+              </span>
+              <span className="xl:hidden">
+                Commande
+              </span>
+            </Link>
+
             <Link
               href="/favoris"
               className="hidden h-11 w-11 items-center justify-center rounded-xl text-slate-700 transition hover:bg-orange-50 hover:text-[#ff6b00] sm:flex"
