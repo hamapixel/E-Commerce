@@ -56,7 +56,7 @@ export const dynamic =
 export const metadata:
   Metadata = {
   title:
-    "TÃ©lÃ©phones, Ã©lectronique, maison et technologie",
+    "Téléphones, électronique, maison et technologie",
 
   description:
     SITE_DESCRIPTION,
@@ -77,7 +77,7 @@ export const metadata:
       SITE_NAME,
 
     title:
-      "SUGU KURA â€” votre boutique en ligne",
+      "SUGU KURA — votre boutique en ligne",
 
     description:
       SITE_DESCRIPTION,
@@ -88,7 +88,7 @@ export const metadata:
       "summary_large_image",
 
     title:
-      "SUGU KURA â€” votre boutique en ligne",
+      "SUGU KURA — votre boutique en ligne",
 
     description:
       SITE_DESCRIPTION,
@@ -110,7 +110,7 @@ export default async function Home() {
     <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:py-7">
 
       {/* =====================================
-          PUBLICITÃ‰S
+          PUBLICITÉS
       ===================================== */}
 
       <HeroAdSlider
@@ -121,7 +121,7 @@ export default async function Home() {
 
 
       {/* =====================================
-          RECHERCHE INSTANTANÃ‰E
+          RECHERCHE INSTANTANÉE
       ===================================== */}
 
       <HomeInstantSearch />
@@ -175,7 +175,7 @@ export default async function Home() {
         </div>
 
 
-        {/* QUALITÃ‰ */}
+        {/* QUALITÉ */}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:flex sm:items-center sm:gap-3 sm:p-4">
 
@@ -240,7 +240,7 @@ export default async function Home() {
 
 
       {/* =====================================
-          CATÃ‰GORIES
+          CATÉGORIES
 
           IMPORTANT :
           Ce ID permet au bouton mobile :
@@ -281,7 +281,7 @@ export default async function Home() {
 
 
             <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
-              Decouvrez nos produits
+              Découvrez nos produits
             </h2>
 
           </div>
@@ -315,7 +315,7 @@ export default async function Home() {
 
 
       {/* =====================================
-          RÃ‰CEMMENT CONSULTÃ‰S
+          RÉCEMMENT CONSULTÉS
       ===================================== */}
 
       <RecentlyViewedProducts />
