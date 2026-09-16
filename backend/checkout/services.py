@@ -27,6 +27,7 @@ from promotions.services import (
 from .models import (
     CheckoutItem,
     CheckoutSession,
+    DeliveryZone,
 )
 
 
@@ -314,6 +315,81 @@ def _variant_label(
     return "Option standard"
 
 
+def _resolve_delivery_zone(
+    *,
+    delivery_method,
+    delivery_zone_id,
+    city,
+    delivery_zone,
+):
+    resolved_city = (
+        city.strip()
+        or "Bamako"
+    )
+
+    resolved_zone = (
+        delivery_zone.strip()
+    )
+
+    delivery_fee = Decimal(
+        "0.00"
+    )
+
+    if (
+        delivery_method
+        == CheckoutSession
+        .DeliveryMethod
+        .PICKUP
+    ):
+        return (
+            resolved_city,
+            "",
+            delivery_fee,
+        )
+
+    active_zones = (
+        DeliveryZone.objects
+        .filter(
+            is_active=True
+        )
+    )
+
+    if delivery_zone_id is None:
+        if active_zones.exists():
+            raise CheckoutError(
+                (
+                    "Choisissez une zone de "
+                    "livraison disponible."
+                )
+            )
+
+        return (
+            resolved_city,
+            resolved_zone,
+            delivery_fee,
+        )
+
+    try:
+        selected_zone = (
+            active_zones.get(
+                pk=delivery_zone_id
+            )
+        )
+    except DeliveryZone.DoesNotExist as exc:
+        raise CheckoutError(
+            (
+                "La zone de livraison choisie "
+                "n'est plus disponible."
+            )
+        ) from exc
+
+    return (
+        selected_zone.city,
+        selected_zone.name,
+        selected_zone.fee,
+    )
+
+
 @transaction.atomic
 def create_checkout_session(
     *,
@@ -327,6 +403,7 @@ def create_checkout_session(
         .DELIVERY
     ),
     city="Bamako",
+    delivery_zone_id=None,
     delivery_zone="",
     address="",
     notes="",
@@ -352,6 +429,19 @@ def create_checkout_session(
             )
         )
 
+    (
+        resolved_city,
+        resolved_zone,
+        delivery_fee,
+    ) = _resolve_delivery_zone(
+        delivery_method=delivery_method,
+        delivery_zone_id=(
+            delivery_zone_id
+        ),
+        city=city,
+        delivery_zone=delivery_zone,
+    )
+
     session = (
         CheckoutSession.objects.create(
             customer_name=(
@@ -369,13 +459,8 @@ def create_checkout_session(
             delivery_method=(
                 delivery_method
             ),
-            city=(
-                city.strip()
-                or "Bamako"
-            ),
-            delivery_zone=(
-                delivery_zone.strip()
-            ),
+            city=resolved_city,
+            delivery_zone=resolved_zone,
             address=(
                 address.strip()
             ),
@@ -499,14 +584,10 @@ def create_checkout_session(
 
         subtotal += line_total
 
-    session.subtotal = (
-        subtotal
-    )
-
+    session.subtotal = subtotal
     session.delivery_fee = (
-        Decimal("0.00")
+        delivery_fee
     )
-
     session.total = (
         session.subtotal
         + session.delivery_fee
