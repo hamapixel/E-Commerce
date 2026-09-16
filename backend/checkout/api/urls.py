@@ -4,10 +4,17 @@ from rest_framework.routers import (
 
 from .views import (
     CheckoutSessionViewSet,
+    DeliveryZoneViewSet,
 )
 
 
 router = DefaultRouter()
+
+router.register(
+    r"delivery-zones",
+    DeliveryZoneViewSet,
+    basename="delivery-zone",
+)
 
 router.register(
     r"sessions",
