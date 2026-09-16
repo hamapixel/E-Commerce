@@ -18,13 +18,13 @@ import {
   useRouter,
 } from "next/navigation";
 
+import {
+  saveRecentOrder,
+} from "@/lib/recent-orders";
+
 import type {
   Order,
 } from "@/types/order";
-
-
-const LAST_ORDER_STORAGE_KEY =
-  "sugu-kura-last-order";
 
 
 export function OrderTrackingForm() {
@@ -127,16 +127,11 @@ export function OrderTrackingForm() {
         await response.json() as Order;
 
       try {
-        window.localStorage.setItem(
-          LAST_ORDER_STORAGE_KEY,
-          JSON.stringify({
-            id: order.id,
-            orderNumber:
-              order.order_number,
-            savedAt:
-              new Date().toISOString(),
-          }),
-        );
+        saveRecentOrder({
+          id: order.id,
+          orderNumber:
+            order.order_number,
+        });
       } catch {
         // Le suivi reste disponible même si le stockage local est bloqué.
       }
