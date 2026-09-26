@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 
 from rest_framework import (
     permissions,
@@ -120,6 +121,54 @@ class OwnerAdvertisementViewSet(
 
         advertisement.save(
             update_fields=[
+                "is_active",
+                "updated_at",
+            ]
+        )
+
+        return Response(
+            self.get_serializer(
+                advertisement
+            ).data
+        )
+
+    @action(
+        detail=True,
+        methods=[
+            "post",
+        ],
+        url_path="publish-now",
+    )
+    def publish_now(
+        self,
+        request,
+        pk=None,
+    ):
+        advertisement = (
+            self.get_object()
+        )
+
+        now = timezone.now()
+
+        if advertisement.end_at <= now:
+            return Response(
+                {
+                    "detail": (
+                        "La publicité est expirée. "
+                        "Modifiez d'abord sa date de fin."
+                    )
+                },
+                status=(
+                    status.HTTP_400_BAD_REQUEST
+                ),
+            )
+
+        advertisement.start_at = now
+        advertisement.is_active = True
+
+        advertisement.save(
+            update_fields=[
+                "start_at",
                 "is_active",
                 "updated_at",
             ]
