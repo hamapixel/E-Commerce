@@ -15,6 +15,11 @@ MAX_AD_IMAGE_SIZE = 15 * 1024 * 1024
 
 WEBP_QUALITY = 90
 
+# Les ImageField publicitaires utilisent encore la longueur Django
+# par défaut (100 caractères). On garde donc une marge confortable
+# pour le dossier d'upload, le suffixe aléatoire et l'extension.
+MAX_SAFE_STEM_LENGTH = 50
+
 
 def validate_ad_image(uploaded_file):
     """
@@ -72,7 +77,8 @@ def optimize_ad_image(
     - conservation du ratio ;
     - correction EXIF ;
     - conversion WebP ;
-    - bonne qualité.
+    - bonne qualité ;
+    - nom de fichier borné pour éviter les erreurs ImageField.
 
     Desktop :
     dimensions plus larges.
@@ -155,6 +161,10 @@ def optimize_ad_image(
 
     if not safe_stem:
         safe_stem = "advertisement"
+
+    safe_stem = safe_stem[
+        :MAX_SAFE_STEM_LENGTH
+    ]
 
     filename = (
         f"{safe_stem}-"
