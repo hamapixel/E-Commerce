@@ -124,7 +124,6 @@ export function OwnerProfileForms({
         <form
           action={profileAction}
           className="mt-6 space-y-6"
-          encType="multipart/form-data"
         >
           <Feedback state={profileState} />
 
