@@ -1,9 +1,15 @@
 export interface OwnerUser {
   id: number;
   username: string;
+  first_name: string;
+  last_name: string;
   email: string;
+  phone: string | null;
+  whatsapp: string;
   role: string;
   display_name: string;
+  profile_photo_url: string | null;
+  store_logo_url: string | null;
 }
 
 
