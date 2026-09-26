@@ -46,6 +46,10 @@ const INITIAL_STATE:
 };
 
 
+const STORE_TIME_ZONE =
+  "Africa/Bamako";
+
+
 function datetimeLocal(
   value?: string | null,
 ) {
@@ -66,31 +70,46 @@ function datetimeLocal(
     return "";
   }
 
-  const pad =
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          STORE_TIME_ZONE,
+        year:
+          "numeric",
+        month:
+          "2-digit",
+        day:
+          "2-digit",
+        hour:
+          "2-digit",
+        minute:
+          "2-digit",
+        hourCycle:
+          "h23",
+      },
+    ).formatToParts(
+      date,
+    );
+
+  const getPart =
     (
-      number: number,
+      type: Intl.DateTimeFormatPartTypes,
     ) =>
-      String(
-        number,
-      ).padStart(
-        2,
-        "0",
-      );
+      parts.find(
+        (
+          part,
+        ) =>
+          part.type === type,
+      )?.value ?? "";
 
   return (
-    `${date.getFullYear()}-`
-    + `${pad(
-      date.getMonth() + 1,
-    )}-`
-    + `${pad(
-      date.getDate(),
-    )}T`
-    + `${pad(
-      date.getHours(),
-    )}:`
-    + `${pad(
-      date.getMinutes(),
-    )}`
+    `${getPart("year")}-`
+    + `${getPart("month")}-`
+    + `${getPart("day")}T`
+    + `${getPart("hour")}:`
+    + `${getPart("minute")}`
   );
 }
 
@@ -107,8 +126,8 @@ function defaultEnd() {
   const date =
     new Date();
 
-  date.setDate(
-    date.getDate() +
+  date.setUTCDate(
+    date.getUTCDate() +
     7,
   );
 
@@ -564,6 +583,10 @@ export function AdvertisementForm({
           />
         </label>
       </div>
+
+      <p className="-mt-2 text-[10px] font-bold text-slate-400">
+        Horaires saisis et affichés en heure de Bamako (GMT).
+      </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-1.5">
