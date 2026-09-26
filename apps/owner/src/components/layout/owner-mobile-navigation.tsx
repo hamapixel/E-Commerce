@@ -18,6 +18,7 @@ import {
   ShoppingCart,
   Store,
   Truck,
+  UserRound,
   X,
 } from "lucide-react";
 
@@ -33,6 +34,8 @@ import {
 
 interface OwnerMobileNavigationProps {
   displayName: string;
+  profilePhoto?: string | null;
+  storeLogo?: string | null;
 }
 
 
@@ -87,6 +90,11 @@ const navigation = [
     label: "Notifications",
     icon: Bell,
   },
+  {
+    href: "/profil",
+    label: "Mon profil",
+    icon: UserRound,
+  },
 ];
 
 
@@ -100,6 +108,8 @@ const bottomNavigation = [
 
 export function OwnerMobileNavigation({
   displayName,
+  profilePhoto,
+  storeLogo,
 }: OwnerMobileNavigationProps) {
   const pathname = usePathname();
 
@@ -167,13 +177,27 @@ export function OwnerMobileNavigation({
           </button>
 
           <Link
-            href="/"
+            href="/profil"
             className="flex min-w-0 flex-1 items-center justify-center gap-2.5"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#ff6b00] text-white shadow-md shadow-orange-500/20">
-              <PackageCheck
-                size={18}
-              />
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#ff6b00] bg-contain bg-center bg-no-repeat text-white shadow-md shadow-orange-500/20"
+              style={
+                storeLogo
+                  ? {
+                      backgroundImage:
+                        `url(${storeLogo})`,
+                      backgroundColor:
+                        "white",
+                    }
+                  : undefined
+              }
+            >
+              {!storeLogo && (
+                <PackageCheck
+                  size={18}
+                />
+              )}
             </span>
 
             <span className="min-w-0">
@@ -223,10 +247,24 @@ export function OwnerMobileNavigation({
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-orange-500/20">
-              <PackageCheck
-                size={21}
-              />
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#ff6b00] bg-contain bg-center bg-no-repeat text-white shadow-lg shadow-orange-500/20"
+              style={
+                storeLogo
+                  ? {
+                      backgroundImage:
+                        `url(${storeLogo})`,
+                      backgroundColor:
+                        "white",
+                    }
+                  : undefined
+              }
+            >
+              {!storeLogo && (
+                <PackageCheck
+                  size={21}
+                />
+              )}
             </span>
 
             <div className="min-w-0">
@@ -251,14 +289,38 @@ export function OwnerMobileNavigation({
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500">
-            Connecté comme
+        <Link
+          href="/profil"
+          onClick={() =>
+            setMenuOpen(false)
+          }
+          className="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10"
+        >
+          <span
+            className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10 bg-cover bg-center"
+            style={
+              profilePhoto
+                ? {
+                    backgroundImage:
+                      `url(${profilePhoto})`,
+                  }
+                : undefined
+            }
+          >
+            {!profilePhoto && (
+              <UserRound size={20} />
+            )}
           </span>
-          <strong className="mt-1 block truncate text-sm font-black text-white">
-            {displayName}
-          </strong>
-        </div>
+
+          <span className="min-w-0">
+            <span className="block text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500">
+              Connecté comme
+            </span>
+            <strong className="mt-1 block truncate text-sm font-black text-white">
+              {displayName}
+            </strong>
+          </span>
+        </Link>
 
         <nav className="mt-5 flex-1 space-y-1 overflow-y-auto pb-4">
           {navigation.map(
