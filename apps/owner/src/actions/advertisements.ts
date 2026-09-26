@@ -267,6 +267,38 @@ export async function updateAdvertisementAction(
 }
 
 
+export async function publishAdvertisementNowAction(
+  formData: FormData,
+) {
+  const advertisementId =
+    Number(
+      formData.get(
+        "advertisement_id",
+      ),
+    );
+
+  if (
+    !Number.isFinite(
+      advertisementId,
+    )
+  ) {
+    throw new Error(
+      "Publicité invalide.",
+    );
+  }
+
+  await ownerFetch(
+    `/owner/advertisements/${advertisementId}/publish-now/`,
+    {
+      method:
+        "POST",
+    },
+  );
+
+  revalidateAdvertisements();
+}
+
+
 export async function toggleAdvertisementAction(
   formData: FormData,
 ) {
