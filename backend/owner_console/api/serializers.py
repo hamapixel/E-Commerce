@@ -89,6 +89,26 @@ class OwnerProfileSerializer(
             "store_logo_url",
         )
 
+    def validate_phone(
+        self,
+        value,
+    ):
+        value = (
+            str(value).strip()
+            if value is not None
+            else ""
+        )
+
+        return value or None
+
+    def validate_whatsapp(
+        self,
+        value,
+    ):
+        return str(
+            value or ""
+        ).strip()
+
     def _validate_image_size(
         self,
         image,
