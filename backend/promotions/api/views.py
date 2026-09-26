@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from catalog.models import Category
+from core.throttles import AdvertisementEventThrottle
 
 from promotions.models import (
     Advertisement,
@@ -157,6 +158,9 @@ class AdvertisementViewSet(
             "post",
         ],
         url_path="impression",
+        throttle_classes=[
+            AdvertisementEventThrottle,
+        ],
     )
     def impression(
         self,
@@ -196,6 +200,9 @@ class AdvertisementViewSet(
             "post",
         ],
         url_path="click",
+        throttle_classes=[
+            AdvertisementEventThrottle,
+        ],
     )
     def click(
         self,
