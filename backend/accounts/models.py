@@ -42,6 +42,22 @@ class User(AbstractUser):
         verbose_name="WhatsApp",
     )
 
+    profile_photo = models.ImageField(
+        upload_to="owners/profile/",
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Photo de profil",
+    )
+
+    store_logo = models.ImageField(
+        upload_to="owners/logo/",
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Logo de la boutique",
+    )
+
     REQUIRED_FIELDS = [
         "email",
     ]
