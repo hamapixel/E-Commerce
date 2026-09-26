@@ -89,6 +89,19 @@ class OwnerAdvertisementScheduleTests(TestCase):
             is_active=True,
         )
 
+    def cleanup_ad_image(self, advertisement):
+        """
+        Ferme explicitement le fichier avant suppression.
+
+        Sous Windows, un handle encore ouvert empêche os.remove()
+        et faisait échouer le test alors que la logique métier
+        de publication immédiate était correcte.
+        """
+        advertisement.desktop_image.close()
+        advertisement.desktop_image.delete(
+            save=False
+        )
+
     def test_publish_now_makes_future_ad_public(self):
         advertisement = (
             self.create_future_ad()
@@ -138,8 +151,8 @@ class OwnerAdvertisementScheduleTests(TestCase):
             ],
         )
 
-        advertisement.desktop_image.delete(
-            save=False
+        self.cleanup_ad_image(
+            advertisement
         )
 
     def test_publish_now_rejects_expired_ad(self):
@@ -178,6 +191,6 @@ class OwnerAdvertisementScheduleTests(TestCase):
             400,
         )
 
-        advertisement.desktop_image.delete(
-            save=False
+        self.cleanup_ad_image(
+            advertisement
         )
