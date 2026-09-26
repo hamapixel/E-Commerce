@@ -2,7 +2,7 @@ from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from PIL import Image
 from rest_framework.authtoken.models import Token
@@ -14,6 +14,15 @@ from promotions.models import Advertisement
 User = get_user_model()
 
 
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": (
+                "django.core.files.storage.InMemoryStorage"
+            ),
+        },
+    },
+)
 class OwnerAdvertisementScheduleTests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user(
@@ -46,6 +55,7 @@ class OwnerAdvertisementScheduleTests(TestCase):
             buffer,
             format="PNG",
         )
+        image.close()
 
         return SimpleUploadedFile(
             "schedule-test.png",
@@ -87,19 +97,6 @@ class OwnerAdvertisementScheduleTests(TestCase):
                 )
             ),
             is_active=True,
-        )
-
-    def cleanup_ad_image(self, advertisement):
-        """
-        Ferme explicitement le fichier avant suppression.
-
-        Sous Windows, un handle encore ouvert empêche os.remove()
-        et faisait échouer le test alors que la logique métier
-        de publication immédiate était correcte.
-        """
-        advertisement.desktop_image.close()
-        advertisement.desktop_image.delete(
-            save=False
         )
 
     def test_publish_now_makes_future_ad_public(self):
@@ -151,10 +148,6 @@ class OwnerAdvertisementScheduleTests(TestCase):
             ],
         )
 
-        self.cleanup_ad_image(
-            advertisement
-        )
-
     def test_publish_now_rejects_expired_ad(self):
         advertisement = (
             self.create_future_ad()
@@ -189,8 +182,4 @@ class OwnerAdvertisementScheduleTests(TestCase):
         self.assertEqual(
             response.status_code,
             400,
-        )
-
-        self.cleanup_ad_image(
-            advertisement
         )
