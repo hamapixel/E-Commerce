@@ -31,6 +31,11 @@ from .partner_views import (
     OwnerPartnerViewSet,
 )
 
+from .profile_views import (
+    owner_change_password,
+    owner_profile,
+)
+
 from .promotion_views import (
     owner_product_promotion,
 )
@@ -193,6 +198,18 @@ urlpatterns = [
         "auth/me/",
         owner_me,
         name="owner-me",
+    ),
+
+    path(
+        "auth/profile/",
+        owner_profile,
+        name="owner-profile",
+    ),
+
+    path(
+        "auth/change-password/",
+        owner_change_password,
+        name="owner-change-password",
     ),
 
 
