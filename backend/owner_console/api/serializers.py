@@ -29,6 +29,14 @@ class OwnerLoginSerializer(
 class OwnerProfileSerializer(
     serializers.ModelSerializer
 ):
+    phone = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=30,
+        validators=[],
+    )
+
     profile_photo = serializers.ImageField(
         write_only=True,
         required=False,
@@ -99,7 +107,24 @@ class OwnerProfileSerializer(
             else ""
         )
 
-        return value or None
+        if not value:
+            return None
+
+        queryset = User.objects.filter(
+            phone=value
+        )
+
+        if self.instance is not None:
+            queryset = queryset.exclude(
+                pk=self.instance.pk
+            )
+
+        if queryset.exists():
+            raise serializers.ValidationError(
+                "Ce numéro de téléphone est déjà utilisé."
+            )
+
+        return value
 
     def validate_whatsapp(
         self,
@@ -265,6 +290,18 @@ class OwnerPasswordChangeSerializer(
                 {
                     "confirm_password": (
                         "Les deux nouveaux mots de passe ne correspondent pas."
+                    )
+                }
+            )
+
+        if (
+            attrs["new_password"]
+            == attrs["current_password"]
+        ):
+            raise serializers.ValidationError(
+                {
+                    "new_password": (
+                        "Le nouveau mot de passe doit être différent de l'ancien."
                     )
                 }
             )
