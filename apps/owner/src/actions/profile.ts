@@ -100,6 +100,8 @@ export async function updateOwnerProfileAction(
   _previousState: ProfileActionState = INITIAL_STATE,
   formData: FormData,
 ): Promise<ProfileActionState> {
+  void _previousState;
+
   const token =
     await getOwnerToken();
 
@@ -230,6 +232,8 @@ export async function changeOwnerPasswordAction(
   _previousState: ProfileActionState = INITIAL_STATE,
   formData: FormData,
 ): Promise<ProfileActionState> {
+  void _previousState;
+
   const token =
     await getOwnerToken();
 
