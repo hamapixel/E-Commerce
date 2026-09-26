@@ -6,11 +6,13 @@ import {
   Megaphone,
   MousePointerClick,
   Plus,
+  Radio,
   Trash2,
 } from "lucide-react";
 
 import {
   deleteAdvertisementAction,
+  publishAdvertisementNowAction,
   toggleAdvertisementAction,
 } from "@/actions/advertisements";
 
@@ -44,6 +46,8 @@ function formatDate(
           "medium",
         timeStyle:
           "short",
+        timeZone:
+          "Africa/Bamako",
       },
     )
     .format(
@@ -95,7 +99,8 @@ export default async function AdvertisementsPage() {
           <p className="mt-2 max-w-2xl text-sm text-slate-500">
             Créez, programmez, prévisualisez
             et mesurez les publicités affichées
-            dans SUGU KURA.
+            dans SUGU KURA. Les horaires sont
+            affichés en heure de Bamako.
           </p>
         </div>
       </div>
@@ -103,7 +108,7 @@ export default async function AdvertisementsPage() {
       <section className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {[
           [
-            "Actives",
+            "Activées",
             String(
               summary.active_ads,
             ),
@@ -370,7 +375,7 @@ export default async function AdvertisementsPage() {
 
                       <div className="rounded-xl bg-slate-50 p-3">
                         <span className="block text-[10px] text-slate-400">
-                          Période
+                          Période · Bamako
                         </span>
 
                         <strong className="mt-2 block text-[10px] leading-4 text-slate-700">
@@ -389,6 +394,34 @@ export default async function AdvertisementsPage() {
                     </div>
 
                     <div className="mt-5 flex flex-wrap gap-2">
+                      {!advertisement
+                        .is_current
+                        && !expired && (
+                        <form
+                          action={
+                            publishAdvertisementNowAction
+                          }
+                        >
+                          <input
+                            type="hidden"
+                            name="advertisement_id"
+                            value={
+                              advertisement.id
+                            }
+                          />
+
+                          <button
+                            type="submit"
+                            className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#0b4da2] px-4 text-xs font-black text-white shadow-sm transition hover:bg-[#083b7f]"
+                          >
+                            <Radio
+                              size={14}
+                            />
+                            Diffuser maintenant
+                          </button>
+                        </form>
+                      )}
+
                       <form
                         action={
                           toggleAdvertisementAction

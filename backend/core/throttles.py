@@ -105,3 +105,22 @@ class OrderTrackingThrottle(
     )
 
     default_rate = "20/minute"
+
+
+class AdvertisementEventThrottle(
+    ConfiguredIPThrottle
+):
+    """
+    Protège les compteurs publics de publicités contre les rafales
+    d'impressions/clics artificiels et les écritures excessives.
+
+    Le taux reste assez large pour le carrousel automatique normal.
+    """
+
+    scope = "advertisement_event"
+
+    settings_name = (
+        "ADVERTISEMENT_EVENT_THROTTLE_RATE"
+    )
+
+    default_rate = "120/minute"

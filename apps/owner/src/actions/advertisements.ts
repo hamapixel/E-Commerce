@@ -3,6 +3,9 @@
 import {
   revalidatePath,
 } from "next/cache";
+import {
+  redirect,
+} from "next/navigation";
 
 import {
   ownerFetch,
@@ -200,13 +203,6 @@ export async function createAdvertisementAction(
           ),
       },
     );
-
-    revalidateAdvertisements();
-
-    return {
-      success: true,
-      error: "",
-    };
   }
   catch (
     error
@@ -219,6 +215,18 @@ export async function createAdvertisementAction(
         ),
     };
   }
+
+  revalidateAdvertisements();
+
+  /*
+   * Après la création, on revient sur la liste.
+   * Cela referme automatiquement le bloc
+   * « Nouvelle publicité » et évite de laisser
+   * un formulaire déjà soumis affiché à l'écran.
+   */
+  redirect(
+    "/publicites",
+  );
 }
 
 
@@ -264,6 +272,38 @@ export async function updateAdvertisementAction(
         ),
     };
   }
+}
+
+
+export async function publishAdvertisementNowAction(
+  formData: FormData,
+) {
+  const advertisementId =
+    Number(
+      formData.get(
+        "advertisement_id",
+      ),
+    );
+
+  if (
+    !Number.isFinite(
+      advertisementId,
+    )
+  ) {
+    throw new Error(
+      "Publicité invalide.",
+    );
+  }
+
+  await ownerFetch(
+    `/owner/advertisements/${advertisementId}/publish-now/`,
+    {
+      method:
+        "POST",
+    },
+  );
+
+  revalidateAdvertisements();
 }
 
 

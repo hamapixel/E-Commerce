@@ -6,6 +6,9 @@ import {
 import {
   loginAction,
 } from "@/actions/owner";
+import {
+  PasswordField,
+} from "@/components/auth/password-field";
 
 
 interface LoginPageProps {
@@ -69,17 +72,7 @@ export default async function LoginPage({
             />
           </label>
 
-          <label className="block text-sm font-bold">
-            Mot de passe
-
-            <input
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none transition focus:border-[#ff6b00]"
-            />
-          </label>
+          <PasswordField />
 
           <button
             type="submit"
