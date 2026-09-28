@@ -82,6 +82,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     command: ["sh", "-c", "exec celery -A config worker --loglevel=INFO --concurrency=${CELERY_CONCURRENCY:-2}"]
+    healthcheck:
+      disable: true
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
