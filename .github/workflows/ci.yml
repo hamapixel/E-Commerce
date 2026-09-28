@@ -136,3 +136,28 @@ jobs:
       - name: Build storefront
         working-directory: apps/storefront
         run: npm run build
+
+  docker:
+    name: Docker production stack
+    runs-on: ubuntu-latest
+
+    env:
+      DJANGO_SECRET_KEY: ci-only-docker-secret-not-for-production
+      DB_NAME: sugu_kura_ci
+      DB_USER: sugu_kura_ci
+      DB_PASSWORD: ci-only-database-password
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_STORE_PHONE: +22370000000
+      NEXT_PUBLIC_STORE_WHATSAPP: 22370000000
+      NEXT_PUBLIC_STORE_EMAIL: contact@example.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Validate Docker Compose
+        run: docker compose -f docker-compose.yml -f docker-compose.local.yml config
+
+      - name: Build Docker images
+        run: docker compose -f docker-compose.yml -f docker-compose.local.yml build
