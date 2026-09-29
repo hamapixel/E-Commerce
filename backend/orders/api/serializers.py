@@ -1,3 +1,5 @@
+from django.core.exceptions import ObjectDoesNotExist
+
 from rest_framework import serializers
 
 from orders.models import (
@@ -170,6 +172,10 @@ class OrderSerializer(
         serializers.SerializerMethodField()
     )
 
+    satisfaction = (
+        serializers.SerializerMethodField()
+    )
+
     class Meta:
         model = Order
 
@@ -195,6 +201,7 @@ class OrderSerializer(
             "updated_at",
             "items",
             "payments",
+            "satisfaction",
         )
 
     def get_status_label(
@@ -212,3 +219,24 @@ class OrderSerializer(
         return (
             obj.get_delivery_method_display()
         )
+
+    def get_satisfaction(
+        self,
+        obj,
+    ):
+        try:
+            satisfaction = obj.satisfaction
+        except ObjectDoesNotExist:
+            return None
+
+        return {
+            "id": satisfaction.id,
+            "rating": satisfaction.rating,
+            "experience": satisfaction.experience,
+            "tags": satisfaction.tags,
+            "comment": satisfaction.comment,
+            "problem_reason": satisfaction.problem_reason,
+            "wants_contact": satisfaction.wants_contact,
+            "created_at": satisfaction.created_at,
+            "updated_at": satisfaction.updated_at,
+        }
