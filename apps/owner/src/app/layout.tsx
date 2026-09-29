@@ -6,11 +6,22 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
+  applicationName:
+    "SUGU KURA OWNER",
+
   title:
     "SUGU KURA — Console propriétaire",
 
   description:
     "Console de gestion propriétaire SUGU KURA.",
+
+  manifest:
+    "/manifest.webmanifest",
+
+  icons: {
+    icon:
+      "/favicon.ico",
+  },
 };
 
 
