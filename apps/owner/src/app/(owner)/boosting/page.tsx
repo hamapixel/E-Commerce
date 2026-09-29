@@ -4,12 +4,12 @@ import Link from "next/link";
 import {
   BadgeDollarSign,
   BarChart3,
+  Camera,
   ExternalLink,
-  Facebook,
-  Instagram,
   MapPin,
   MessageCircle,
   Rocket,
+  Share2,
   ShieldCheck,
   Sparkles,
   Target,
@@ -62,35 +62,27 @@ const objectiveOptions = [
 export default async function BoostingPage({
   searchParams,
 }: BoostingPageProps) {
-  const params =
-    await searchParams;
+  const params = await searchParams;
+  const productId = Number(params.product ?? "");
 
-  const productId =
-    Number(
-      params.product ?? "",
-    );
-
-  let product:
-    OwnerProduct | null = null;
+  let product: OwnerProduct | null = null;
 
   if (
     Number.isInteger(productId)
     && productId > 0
   ) {
     try {
-      product =
-        await ownerFetch<OwnerProduct>(
-          `/owner/catalog/products/${productId}/`,
-        );
+      product = await ownerFetch<OwnerProduct>(
+        `/owner/catalog/products/${productId}/`,
+      );
     } catch {
       product = null;
     }
   }
 
-
   return (
     <>
-      <div className="overflow-hidden rounded-[28px] bg-slate-950 text-white shadow-xl shadow-slate-900/10">
+      <section className="overflow-hidden rounded-[28px] bg-slate-950 text-white shadow-xl shadow-slate-900/10">
         <div className="grid gap-7 p-6 sm:p-8 xl:grid-cols-[1.3fr_0.7fr] xl:items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-orange-300">
@@ -103,15 +95,15 @@ export default async function BoostingPage({
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-              Préparez une campagne pour Facebook, Instagram ou WhatsApp sans mélanger vos propres dépenses marketing avec les publicités partenaires affichées sur SUGU KURA.
+              Préparez vos campagnes Facebook, Instagram ou WhatsApp sans mélanger vos propres dépenses marketing avec les publicités partenaires diffusées sur SUGU KURA.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-black">
               <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
-                <Facebook size={15} /> Facebook
+                <Share2 size={15} /> Facebook
               </span>
               <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
-                <Instagram size={15} /> Instagram
+                <Camera size={15} /> Instagram
               </span>
               <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
                 <MessageCircle size={15} /> WhatsApp
@@ -126,48 +118,54 @@ export default async function BoostingPage({
               </span>
               <div>
                 <strong className="block text-sm font-black">
-                  Paiement sécurisé chez Meta
+                  Paiement géré directement par Meta
                 </strong>
                 <span className="text-xs text-slate-400">
-                  SUGU KURA ne stocke jamais votre carte bancaire.
+                  SUGU KURA ne stocke aucune donnée bancaire.
                 </span>
               </div>
             </div>
 
             <p className="mt-4 text-xs leading-5 text-slate-300">
-              Le budget publicitaire est facturé directement par Meta sur le moyen de paiement associé à votre compte publicitaire. SUGU KURA prépare et suit la campagne, mais la carte reste gérée dans Meta Billing & Payments.
+              Le budget est facturé par Meta sur le moyen de paiement de votre compte publicitaire. SUGU KURA prépare le boost et centralisera ensuite son suivi marketing.
             </p>
           </div>
         </div>
-      </div>
-
-
-      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          ["Budget dépensé", "0 FCFA", BadgeDollarSign],
-          ["Impressions", "0", BarChart3],
-          ["Commandes attribuées", "0", Target],
-          ["CA attribué", "0 FCFA", WalletCards],
-        ].map(
-          ([label, value, Icon]) => (
-            <div
-              key={String(label)}
-              className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#ff6b00]">
-                <Icon size={18} />
-              </span>
-              <span className="mt-4 block text-xs font-bold text-slate-400">
-                {label}
-              </span>
-              <strong className="mt-1 block text-xl font-black text-slate-950">
-                {value}
-              </strong>
-            </div>
-          ),
-        )}
       </section>
 
+      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#ff6b00]">
+            <BadgeDollarSign size={18} />
+          </span>
+          <span className="mt-4 block text-xs font-bold text-slate-400">Budget dépensé</span>
+          <strong className="mt-1 block text-xl font-black text-slate-950">0 FCFA</strong>
+        </div>
+
+        <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#ff6b00]">
+            <BarChart3 size={18} />
+          </span>
+          <span className="mt-4 block text-xs font-bold text-slate-400">Impressions</span>
+          <strong className="mt-1 block text-xl font-black text-slate-950">0</strong>
+        </div>
+
+        <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#ff6b00]">
+            <Target size={18} />
+          </span>
+          <span className="mt-4 block text-xs font-bold text-slate-400">Commandes attribuées</span>
+          <strong className="mt-1 block text-xl font-black text-slate-950">0</strong>
+        </div>
+
+        <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 text-[#ff6b00]">
+            <WalletCards size={18} />
+          </span>
+          <span className="mt-4 block text-xs font-bold text-slate-400">CA attribué</span>
+          <strong className="mt-1 block text-xl font-black text-slate-950">0 FCFA</strong>
+        </div>
+      </section>
 
       <section className="mt-7 grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
         <div className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -177,9 +175,7 @@ export default async function BoostingPage({
                 Produit sélectionné
               </p>
               <h2 className="mt-1 text-xl font-black text-slate-950">
-                {product
-                  ? product.name
-                  : "Choisissez un produit"}
+                {product ? product.name : "Choisissez un produit"}
               </h2>
             </div>
             <Rocket className="text-[#0b4da2]" size={24} />
@@ -231,7 +227,6 @@ export default async function BoostingPage({
           )}
         </div>
 
-
         <div className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -249,9 +244,7 @@ export default async function BoostingPage({
 
           <form className="mt-6 grid gap-5">
             <div>
-              <label className="text-xs font-black text-slate-700">
-                Objectif
-              </label>
+              <span className="text-xs font-black text-slate-700">Objectif</span>
               <div className="mt-2 grid gap-3 md:grid-cols-3">
                 {objectiveOptions.map((option, index) => {
                   const Icon = option.icon;
@@ -358,10 +351,10 @@ export default async function BoostingPage({
                 <WalletCards className="mt-0.5 shrink-0 text-[#0b4da2]" size={20} />
                 <div>
                   <strong className="text-xs font-black text-[#0b4da2]">
-                    Comment le paiement fonctionne
+                    Paiement du boosting
                   </strong>
                   <p className="mt-1 text-xs leading-5 text-slate-600">
-                    Le bouton ci-dessous ouvre Meta Ads Manager. Vous ajoutez ou sélectionnez votre moyen de paiement dans Meta. Ensuite Meta débite le compte publicitaire selon son mode de facturation et le budget réel de la campagne.
+                    Meta Ads Manager gère votre moyen de paiement, sa facturation et le débit réel de la campagne. SUGU KURA ne prélève pas le budget publicitaire.
                   </p>
                 </div>
               </div>
@@ -396,7 +389,6 @@ export default async function BoostingPage({
           </form>
         </div>
       </section>
-
 
       <section className="mt-7 rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
