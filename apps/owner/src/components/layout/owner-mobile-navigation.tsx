@@ -15,6 +15,7 @@ import {
   MessageSquareText,
   MoreHorizontal,
   PackageCheck,
+  Rocket,
   ShoppingCart,
   Store,
   Truck,
@@ -74,6 +75,11 @@ const navigation = [
     href: "/publicites",
     label: "Publicités",
     icon: Megaphone,
+  },
+  {
+    href: "/boosting",
+    label: "Booster mes produits",
+    icon: Rocket,
   },
   {
     href: "/partenaires",
