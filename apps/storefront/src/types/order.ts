@@ -53,6 +53,26 @@ export interface OrderPayment {
 }
 
 
+export type OrderSatisfactionExperience =
+  | "VERY_SATISFIED"
+  | "SATISFIED"
+  | "OK"
+  | "PROBLEM";
+
+
+export interface OrderSatisfaction {
+  id: number;
+  rating: number;
+  experience: OrderSatisfactionExperience;
+  tags: string[];
+  comment: string;
+  problem_reason: string;
+  wants_contact: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+
 export interface Order {
   id: string;
 
@@ -95,4 +115,6 @@ export interface Order {
   items: OrderItem[];
 
   payments: OrderPayment[];
+
+  satisfaction: OrderSatisfaction | null;
 }
