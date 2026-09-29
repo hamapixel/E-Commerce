@@ -6,6 +6,7 @@ import {
   Eye,
   PackagePlus,
   Pencil,
+  Rocket,
 } from "lucide-react";
 
 import {
@@ -105,19 +106,13 @@ export default async function ProductsPage({
 
   return (
     <>
-      {/* =========================================
-          EN-TÊTE
-      ========================================= */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <Link
             href="/catalogue"
             className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] shadow-sm transition hover:bg-blue-100"
           >
-            <ArrowLeft
-              size={15}
-            />
-
+            <ArrowLeft size={15} />
             Retour au catalogue
           </Link>
 
@@ -130,228 +125,139 @@ export default async function ProductsPage({
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            {data.count} produit(s)
-            dans votre catalogue.
+            {data.count} produit(s) dans votre catalogue.
           </p>
         </div>
-
 
         <Link
           href="/catalogue/produits/nouveau"
           className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#ff6b00] px-4 text-xs font-black text-white transition hover:bg-[#e65f00]"
         >
-          <PackagePlus
-            size={16}
-          />
-
+          <PackagePlus size={16} />
           Nouveau produit
         </Link>
       </div>
 
-
-      {/* =========================================
-          RECHERCHE ET FILTRES INSTANTANES
-      ========================================= */}
       <ProductCatalogFilters
         metadata={metadata}
-        initialQuery={
-          params.q ?? ""
-        }
-        initialCategory={
-          params.category ?? ""
-        }
-        initialBrand={
-          params.brand ?? ""
-        }
-        initialStatus={
-          params.status ?? ""
-        }
+        initialQuery={params.q ?? ""}
+        initialCategory={params.category ?? ""}
+        initialBrand={params.brand ?? ""}
+        initialStatus={params.status ?? ""}
       />
 
-
-      {/* =========================================
-          LISTE PRODUITS
-      ========================================= */}
       <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-
-        {data.results.map(
-          (
-            product,
-          ) => (
-            <article
-              key={
-                product.id
-              }
-              className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-
-              {/* =================================
-                  PHOTO
-              ================================= */}
-              <div className="relative aspect-[16/8] bg-slate-100">
-
-                {product.primary_image_url ? (
-                  <Image
-                    src={
-                      product.primary_image_url
-                    }
-                    alt={
-                      product.name
-                    }
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                    className="object-contain p-2"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
-                    Aucune photo
-                  </div>
-                )}
-              </div>
-
-
-              {/* =================================
-                  INFORMATIONS
-              ================================= */}
-              <div className="p-4">
-
-                <div className="flex items-start justify-between gap-3">
-
-                  <div className="min-w-0">
-
-                    <p className="text-[10px] font-black uppercase tracking-wider text-[#0b4da2]">
-                      {
-                        product.category_name
-                      }
-                    </p>
-
-                    <h2 className="mt-1 line-clamp-2 font-black text-slate-950">
-                      {
-                        product.name
-                      }
-                    </h2>
-
-                    <p className="mt-1 text-[10px] text-slate-400">
-                      SKU :{" "}
-                      {
-                        product.sku
-                      }
-                    </p>
-
-                    {product.brand_name && (
-                      <p className="mt-1 text-[10px] font-bold text-slate-500">
-                        Marque :{" "}
-                        {
-                          product.brand_name
-                        }
-                      </p>
-                    )}
-                  </div>
-
-
-                  {/* STATUT */}
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black">
-                    {
-                      product.status
-                    }
-                  </span>
+        {data.results.map((product) => (
+          <article
+            key={product.id}
+            className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+          >
+            <div className="relative aspect-[16/8] bg-slate-100">
+              {product.primary_image_url ? (
+                <Image
+                  src={product.primary_image_url}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  className="object-contain p-2"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
+                  Aucune photo
                 </div>
+              )}
+            </div>
 
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-[#0b4da2]">
+                    {product.category_name}
+                  </p>
 
-                {/* =================================
-                    PRIX
-                ================================= */}
-                <strong className="mt-4 block text-xl text-[#ff6b00]">
-                  {formatMoney(
-                    product.base_price,
+                  <h2 className="mt-1 line-clamp-2 font-black text-slate-950">
+                    {product.name}
+                  </h2>
+
+                  <p className="mt-1 text-[10px] text-slate-400">
+                    SKU : {product.sku}
+                  </p>
+
+                  {product.brand_name && (
+                    <p className="mt-1 text-[10px] font-bold text-slate-500">
+                      Marque : {product.brand_name}
+                    </p>
                   )}
-                </strong>
-
-
-                {/* =================================
-                    STATISTIQUES
-                ================================= */}
-                <div className="mt-4 grid grid-cols-3 gap-2">
-
-                  {/* STOCK */}
-                  <div className="rounded-xl bg-slate-50 p-2 text-center">
-                    <span className="block text-[9px] text-slate-400">
-                      Dispo
-                    </span>
-
-                    <strong className="text-sm">
-                      {
-                        product.stock_available
-                      }
-                    </strong>
-                  </div>
-
-
-                  {/* VARIANTES */}
-                  <div className="rounded-xl bg-slate-50 p-2 text-center">
-                    <span className="block text-[9px] text-slate-400">
-                      Variantes
-                    </span>
-
-                    <strong className="text-sm">
-                      {
-                        product.variants_count
-                      }
-                    </strong>
-                  </div>
-
-
-                  {/* PHOTOS */}
-                  <div className="rounded-xl bg-slate-50 p-2 text-center">
-                    <span className="block text-[9px] text-slate-400">
-                      Photos
-                    </span>
-
-                    <strong className="text-sm">
-                      {
-                        product.images_count
-                      }
-                    </strong>
-                  </div>
                 </div>
 
+                <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black">
+                  {product.status}
+                </span>
+              </div>
 
-                {/* =================================
-                    ACTIONS
-                ================================= */}
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <Link
-                    href={`/catalogue/produits/${product.id}`}
-                    className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-black text-emerald-700 transition hover:bg-emerald-100"
-                  >
-                    <Eye
-                      size={15}
-                    />
+              <strong className="mt-4 block text-xl text-[#ff6b00]">
+                {formatMoney(product.base_price)}
+              </strong>
 
-                    Voir détails
-                  </Link>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="rounded-xl bg-slate-50 p-2 text-center">
+                  <span className="block text-[9px] text-slate-400">
+                    Dispo
+                  </span>
+                  <strong className="text-sm">
+                    {product.stock_available}
+                  </strong>
+                </div>
 
-                  <Link
-                    href={`/catalogue/produits/${product.id}/modifier`}
-                    className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] transition hover:bg-blue-100"
-                  >
-                    <Pencil
-                      size={15}
-                    />
+                <div className="rounded-xl bg-slate-50 p-2 text-center">
+                  <span className="block text-[9px] text-slate-400">
+                    Variantes
+                  </span>
+                  <strong className="text-sm">
+                    {product.variants_count}
+                  </strong>
+                </div>
 
-                    Modifier
-                  </Link>
+                <div className="rounded-xl bg-slate-50 p-2 text-center">
+                  <span className="block text-[9px] text-slate-400">
+                    Photos
+                  </span>
+                  <strong className="text-sm">
+                    {product.images_count}
+                  </strong>
                 </div>
               </div>
-            </article>
-          ),
-        )}
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Link
+                  href={`/catalogue/produits/${product.id}`}
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-black text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  <Eye size={15} />
+                  Voir détails
+                </Link>
+
+                <Link
+                  href={`/catalogue/produits/${product.id}/modifier`}
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] transition hover:bg-blue-100"
+                >
+                  <Pencil size={15} />
+                  Modifier
+                </Link>
+
+                <Link
+                  href={`/boosting?product=${product.id}`}
+                  className="col-span-2 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white shadow-lg shadow-slate-900/10 transition hover:bg-[#ff6b00]"
+                >
+                  <Rocket size={16} />
+                  Booster ce produit
+                </Link>
+              </div>
+            </div>
+          </article>
+        ))}
       </section>
 
-
-      {/* =========================================
-          AUCUN PRODUIT
-      ========================================= */}
       {data.results.length === 0 && (
         <div className="mt-5 rounded-[20px] border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
           Aucun produit trouvé.
