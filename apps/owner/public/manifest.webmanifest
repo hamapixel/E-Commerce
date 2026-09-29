@@ -1,0 +1,19 @@
+{
+  "name": "SUGU KURA OWNER",
+  "short_name": "SUGU KURA",
+  "description": "Console propriétaire SUGU KURA",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b4da2",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ]
+}
