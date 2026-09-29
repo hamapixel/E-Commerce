@@ -18,6 +18,10 @@ import {
 } from "next/navigation";
 
 import {
+  CopyOrderNumber,
+} from "@/components/order/copy-order-number";
+
+import {
   OrderSatisfactionCard,
 } from "@/components/order/order-satisfaction-card";
 
@@ -105,7 +109,7 @@ export default async function OrderPage({
             été transmise à SUGU KURA.
           </p>
 
-          <div className="mx-auto mt-5 w-fit rounded-xl bg-blue-50 px-5 py-3">
+          <div className="mx-auto mt-5 w-fit rounded-xl bg-blue-50 px-5 py-4">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Numéro de commande
             </span>
@@ -113,6 +117,14 @@ export default async function OrderPage({
             <strong className="mt-1 block text-lg text-[#0b4da2]">
               {order.order_number}
             </strong>
+
+            <CopyOrderNumber
+              orderNumber={order.order_number}
+            />
+
+            <p className="mt-3 max-w-[320px] text-xs leading-5 text-slate-500">
+              Gardez ce num&eacute;ro pr&eacute;cieusement. Il vous servira pour suivre votre commande avec le num&eacute;ro de t&eacute;l&eacute;phone utilis&eacute; lors de l&apos;achat.
+            </p>
           </div>
         </div>
 

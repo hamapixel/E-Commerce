@@ -428,12 +428,12 @@ export function CartPageClient() {
 
             <div className="flex items-center justify-between">
               <span className="text-slate-500">
-                Sous-total
+                Sous-total avant promotion
               </span>
 
               <span className="font-bold">
                 {formatMoney(
-                  subtotal,
+                  normalTotal,
                 )}
               </span>
             </div>
@@ -441,7 +441,7 @@ export function CartPageClient() {
             {savings > 0 && (
               <div className="flex items-center justify-between text-emerald-600">
                 <span className="font-semibold">
-                  Économies
+                  Remise promotion
                 </span>
 
                 <span className="font-black">

@@ -536,12 +536,49 @@ export function OrderTicket({
 
 
           <div className="ml-auto mt-5 w-full max-w-sm space-y-2 text-sm">
+            {
+              savings > 0 && (
+                <>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-slate-500">
+                      Sous-total avant promotion
+                    </span>
+
+                    <strong className="text-slate-900">
+                      {formatMoney(
+                        numberValue(
+                          order.subtotal,
+                        ) + savings,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-emerald-700">
+                      Remise promotion
+                    </span>
+
+                    <strong className="text-emerald-700">
+                      -
+                      {formatMoney(
+                        savings,
+                      )}
+                    </strong>
+                  </div>
+                </>
+              )
+            }
+
             <div className="flex items-center justify-between gap-4">
-              <span className="text-slate-500">
-                Sous-total
+              <span className="font-semibold text-[#0b4da2]">
+                {
+                  savings > 0
+                    ? "Sous-total net"
+                    : "Sous-total"
+                }
               </span>
 
-              <strong className="text-slate-900">
+              <strong className="text-[#0b4da2]">
                 {formatMoney(
                   order.subtotal,
                 )}
@@ -560,26 +597,9 @@ export function OrderTicket({
               </strong>
             </div>
 
-            {
-              savings > 0 && (
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-emerald-700">
-                    Économie promotion
-                  </span>
-
-                  <strong className="text-emerald-700">
-                    -
-                    {formatMoney(
-                      savings,
-                    )}
-                  </strong>
-                </div>
-              )
-            }
-
             <div className="mt-3 flex items-center justify-between gap-4 border-t-2 border-slate-950 pt-3">
               <span className="font-black uppercase tracking-wider text-slate-950">
-                Total
+                TOTAL &Agrave; PAYER
               </span>
 
               <strong className="text-lg font-black text-[#ff6b00]">
@@ -589,6 +609,8 @@ export function OrderTicket({
               </strong>
             </div>
           </div>
+
+
         </section>
 
 

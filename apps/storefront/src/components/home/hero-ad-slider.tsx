@@ -516,7 +516,7 @@ export function HeroAdSlider({
                         IMAGE PUBLICITAIRE
                     ========================= */}
 
-                    <div className="relative h-[165px] w-full overflow-hidden bg-slate-900 sm:h-[195px] md:h-[215px] lg:h-[240px]">
+                    <div className="relative h-[215px] w-full overflow-hidden bg-slate-900 sm:h-[225px] md:h-[215px] lg:h-[240px]">
 
                       {/* FOND FLOUTÉ */}
 
@@ -533,11 +533,11 @@ export function HeroAdSlider({
                         aria-hidden="true"
                         fill
                         sizes="(max-width: 1100px) 100vw, 1080px"
-                        className="scale-110 object-cover opacity-35 blur-xl"
+                        className="scale-125 object-cover opacity-45 blur-2xl"
                       />
 
 
-                      <div className="absolute inset-0 bg-slate-950/15" />
+                      <div className="absolute inset-0 bg-slate-950/5" />
 
 
                       {/* IMAGE MOBILE */}
@@ -557,7 +557,7 @@ export function HeroAdSlider({
                           0
                         }
                         sizes="100vw"
-                        className="object-contain p-1.5 md:hidden"
+                        className="object-contain p-0.5 md:hidden"
                       />
 
 
@@ -627,12 +627,33 @@ export function HeroAdSlider({
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <p className="text-[9px] font-black uppercase tracking-wider text-[#0b4da2] sm:text-[10px]">
+                          <div className="flex min-w-0 items-center gap-2">
                             {
                               advertisement
-                                .company_name
+                                .company_logo
+                              && (
+                                <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:h-10 sm:w-10">
+                                  <Image
+                                    src={
+                                      advertisement
+                                        .company_logo
+                                    }
+                                    alt={`Logo ${advertisement.company_name}`}
+                                    fill
+                                    sizes="40px"
+                                    className="object-contain p-1"
+                                  />
+                                </span>
+                              )
                             }
-                          </p>
+
+                            <p className="truncate text-[9px] font-black uppercase tracking-wider text-[#0b4da2] sm:text-[10px]">
+                              {
+                                advertisement
+                                  .company_name
+                              }
+                            </p>
+                          </div>
 
 
                           {
