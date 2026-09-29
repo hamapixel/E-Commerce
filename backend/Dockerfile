@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get install -y --no-install-recommends curl gosu \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements/lock.txt /tmp/requirements.txt
@@ -18,9 +18,10 @@ COPY . /app
 
 RUN useradd --create-home --uid 10001 app \
     && mkdir -p /app/media /app/staticfiles \
-    && chown -R app:app /app
+    && chown -R app:app /app \
+    && chmod +x /app/docker-entrypoint.sh
 
-USER app
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 EXPOSE 8000
 
