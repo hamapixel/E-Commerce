@@ -6,8 +6,8 @@ self.addEventListener(
       body: "Nouvelle notification.",
       url: "/",
       kind: "SYSTEM",
-      icon: "/favicon.ico",
-      badge: "/favicon.ico",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
       data: {},
     };
 
@@ -32,11 +32,11 @@ self.addEventListener(
 
       icon:
         payload.icon ||
-        "/favicon.ico",
+        "/icons/icon-192.png",
 
       badge:
         payload.badge ||
-        "/favicon.ico",
+        "/icons/icon-192.png",
 
       data: {
         url:
