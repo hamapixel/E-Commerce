@@ -10,6 +10,7 @@ import {
   Megaphone,
   MessageSquareText,
   PackageCheck,
+  Rocket,
   ShoppingCart,
   Store,
   Truck,
@@ -92,6 +93,11 @@ export default async function OwnerLayout({
       href: "/publicites",
       label: "Publicités",
       icon: Megaphone,
+    },
+    {
+      href: "/boosting",
+      label: "Booster mes produits",
+      icon: Rocket,
     },
     {
       href: "/partenaires",
