@@ -18,6 +18,10 @@ const nextConfig:
   ],
 
   images: {
+    loader: "custom",
+    loaderFile:
+      "./src/lib/image-loader.ts",
+
     dangerouslyAllowLocalIP:
       isDevelopment,
 
