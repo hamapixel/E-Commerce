@@ -1,6 +1,9 @@
 from django.contrib import admin
 
-from .models import ProductReview
+from .models import (
+    OrderSatisfaction,
+    ProductReview,
+)
 
 
 @admin.register(ProductReview)
@@ -35,4 +38,40 @@ class ProductReviewAdmin(admin.ModelAdmin):
 
     autocomplete_fields = (
         "product",
+    )
+
+
+@admin.register(OrderSatisfaction)
+class OrderSatisfactionAdmin(admin.ModelAdmin):
+    list_display = (
+        "order",
+        "rating",
+        "experience",
+        "problem_reason",
+        "wants_contact",
+        "created_at",
+    )
+
+    list_filter = (
+        "rating",
+        "experience",
+        "problem_reason",
+        "wants_contact",
+        "created_at",
+    )
+
+    search_fields = (
+        "order__order_number",
+        "order__customer_name",
+        "order__customer_phone",
+        "comment",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+    autocomplete_fields = (
+        "order",
     )

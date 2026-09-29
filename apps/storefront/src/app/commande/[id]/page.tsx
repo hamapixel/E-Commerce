@@ -18,6 +18,10 @@ import {
 } from "next/navigation";
 
 import {
+  OrderSatisfactionCard,
+} from "@/components/order/order-satisfaction-card";
+
+import {
   OrderStatusTimeline,
 } from "@/components/order/order-status-timeline";
 
@@ -180,6 +184,29 @@ export default async function OrderPage({
             }
             deliveryMethod={
               order.delivery_method
+            }
+          />
+        </div>
+
+        <div className="mt-8">
+          <OrderSatisfactionCard
+            orderId={order.id}
+            orderNumber={
+              order.order_number
+            }
+            status={order.status}
+            initialSatisfaction={
+              order.satisfaction
+            }
+            products={
+              order.items.map(
+                (item) => ({
+                  slug:
+                    item.product_slug,
+                  name:
+                    item.product_name,
+                }),
+              )
             }
           />
         </div>

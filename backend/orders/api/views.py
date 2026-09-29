@@ -32,6 +32,13 @@ from orders.services import (
     create_order_from_checkout,
 )
 
+from reviews.api.serializers import (
+    OrderSatisfactionSerializer,
+)
+from reviews.models import (
+    OrderSatisfaction,
+)
+
 from .serializers import (
     OrderCreateSerializer,
     OrderSerializer,
@@ -70,6 +77,23 @@ def _serialize_order_with_access(
     return data
 
 
+def _request_has_order_access(
+    request,
+    order,
+):
+    access_token = (
+        request.headers.get(
+            "X-Order-Access-Token",
+            "",
+        )
+    )
+
+    return validate_order_access_token(
+        access_token,
+        order.pk,
+    )
+
+
 class OrderViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -92,7 +116,10 @@ class OrderViewSet(
                 OrderCreateThrottle()
             ]
 
-        if self.action == "track":
+        if self.action in (
+            "track",
+            "satisfaction",
+        ):
             return [
                 OrderTrackingThrottle()
             ]
@@ -103,7 +130,8 @@ class OrderViewSet(
         return (
             Order.objects
             .select_related(
-                "checkout_session"
+                "checkout_session",
+                "satisfaction",
             )
             .prefetch_related(
                 "items",
@@ -193,16 +221,9 @@ class OrderViewSet(
     ):
         order = self.get_object()
 
-        access_token = (
-            request.headers.get(
-                "X-Order-Access-Token",
-                "",
-            )
-        )
-
-        if not validate_order_access_token(
-            access_token,
-            order.pk,
+        if not _request_has_order_access(
+            request,
+            order,
         ):
             return Response(
                 {
@@ -295,4 +316,109 @@ class OrderViewSet(
                 order,
                 request,
             )
+        )
+
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="satisfaction",
+    )
+    def satisfaction(
+        self,
+        request,
+        pk=None,
+    ):
+        order = self.get_object()
+
+        if not _request_has_order_access(
+            request,
+            order,
+        ):
+            return Response(
+                {
+                    "detail": (
+                        "Commande introuvable ou accès expiré."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_404_NOT_FOUND
+                ),
+            )
+
+        existing = (
+            OrderSatisfaction.objects
+            .filter(
+                order=order,
+            )
+            .first()
+        )
+
+        if request.method == "GET":
+            return Response(
+                {
+                    "eligible": (
+                        order.status
+                        == Order.Status.DELIVERED
+                    ),
+                    "submitted": (
+                        existing is not None
+                    ),
+                    "satisfaction": (
+                        OrderSatisfactionSerializer(
+                            existing
+                        ).data
+                        if existing
+                        else None
+                    ),
+                }
+            )
+
+        if (
+            order.status
+            != Order.Status.DELIVERED
+        ):
+            return Response(
+                {
+                    "detail": (
+                        "La satisfaction est disponible après la livraison."
+                    )
+                },
+                status=(
+                    status
+                    .HTTP_400_BAD_REQUEST
+                ),
+            )
+
+        serializer = (
+            OrderSatisfactionSerializer(
+                existing,
+                data=request.data,
+            )
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        satisfaction = serializer.save(
+            order=order,
+        )
+
+        return Response(
+            {
+                "message": (
+                    "Merci pour votre retour."
+                ),
+                "satisfaction": (
+                    OrderSatisfactionSerializer(
+                        satisfaction
+                    ).data
+                ),
+            },
+            status=(
+                status.HTTP_200_OK
+                if existing
+                else status.HTTP_201_CREATED
+            ),
         )
