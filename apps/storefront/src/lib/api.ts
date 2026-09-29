@@ -9,10 +9,65 @@ import type {
   Promotion,
 } from "@/types/api";
 
+import {
+  toStorefrontMediaUrl,
+} from "@/lib/storefront-media";
+
 const API_URL =
   process.env.INTERNAL_API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
   "http://127.0.0.1:8000/api/v1";
+
+function normalizeMediaUrls<T>(
+  value: T,
+): T {
+  if (
+    typeof value === "string"
+  ) {
+    return (
+      toStorefrontMediaUrl(
+        value,
+      ) ?? value
+    ) as T;
+  }
+
+  if (
+    Array.isArray(value)
+  ) {
+    return value.map(
+      (item) =>
+        normalizeMediaUrls(
+          item,
+        ),
+    ) as T;
+  }
+
+  if (
+    value
+    && typeof value === "object"
+  ) {
+    const normalized =
+      Object.fromEntries(
+        Object.entries(
+          value as Record<
+            string,
+            unknown
+          >,
+        ).map(
+          ([key, item]) => [
+            key,
+            normalizeMediaUrls(
+              item,
+            ),
+          ],
+        ),
+      );
+
+    return normalized as T;
+  }
+
+  return value;
+}
 
 async function request<T>(
   path: string,
@@ -33,7 +88,13 @@ async function request<T>(
     );
   }
 
-  return response.json() as Promise<T>;
+  const data:
+    unknown =
+    await response.json();
+
+  return normalizeMediaUrls(
+    data,
+  ) as T;
 }
 
 async function safeRequest<T>(
