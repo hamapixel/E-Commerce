@@ -6,6 +6,10 @@ import {
   redirect,
 } from "next/navigation";
 
+import {
+  ownerMediaUrl,
+} from "@/lib/media";
+
 
 const API_URL =
   process.env.INTERNAL_API_URL ??
@@ -144,6 +148,55 @@ function isFormDataBody(
       body
     ) === "[object FormData]"
   );
+}
+
+
+function normalizeOwnerMediaUrls<T>(
+  value: T,
+): T {
+  if (
+    typeof value === "string"
+  ) {
+    return (
+      ownerMediaUrl(
+        value,
+      ) ?? value
+    ) as T;
+  }
+
+  if (
+    Array.isArray(value)
+  ) {
+    return value.map(
+      (item) =>
+        normalizeOwnerMediaUrls(
+          item,
+        ),
+    ) as T;
+  }
+
+  if (
+    value
+    && typeof value === "object"
+  ) {
+    return Object.fromEntries(
+      Object.entries(
+        value as Record<
+          string,
+          unknown
+        >,
+      ).map(
+        ([key, item]) => [
+          key,
+          normalizeOwnerMediaUrls(
+            item,
+          ),
+        ],
+      ),
+    ) as T;
+  }
+
+  return value;
 }
 
 
@@ -359,7 +412,11 @@ export async function ownerFetch<T>(
     return undefined as T;
   }
 
-  return (
-    await response.json()
+  const data:
+    unknown =
+    await response.json();
+
+  return normalizeOwnerMediaUrls(
+    data,
   ) as T;
 }
