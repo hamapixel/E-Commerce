@@ -243,11 +243,11 @@ export function OrderSatisfactionCard({
             </p>
 
             <h2 className="mt-1 text-xl font-black text-slate-950">
-              Après la livraison, dites-nous comment cela s'est passé
+              Après la livraison, dites-nous comment cela s&apos;est passé
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Dès que la commande sera marquée livrée, vous pourrez noter l'expérience, signaler un problème et laisser un avis sur les produits reçus.
+              Dès que la commande sera marquée livrée, vous pourrez noter l&apos;expérience, signaler un problème et laisser un avis sur les produits reçus.
             </p>
           </div>
         </div>
@@ -431,11 +431,11 @@ export function OrderSatisfactionCard({
         </p>
 
         <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
-          Comment s'est passée votre expérience ?
+          Comment s&apos;est passée votre expérience ?
         </h2>
 
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-          Cela prend moins d'une minute et nous aide à améliorer le service.
+          Cela prend moins d&apos;une minute et nous aide à améliorer le service.
         </p>
       </div>
 
@@ -506,7 +506,7 @@ export function OrderSatisfactionCard({
       {experience !== "PROBLEM" ? (
         <div className="mt-6">
           <p className="text-sm font-black text-slate-800">
-            Qu'avez-vous apprécié ?
+            Qu&apos;avez-vous apprécié ?
           </p>
 
           <div className="mt-3 flex flex-wrap gap-2">
@@ -541,7 +541,7 @@ export function OrderSatisfactionCard({
 
             <div className="min-w-0 flex-1">
               <p className="text-sm font-black text-slate-900">
-                Dites-nous ce qui n'a pas été
+                Dites-nous ce qui n&apos;a pas été
               </p>
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
