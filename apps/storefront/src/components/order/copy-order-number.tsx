@@ -15,6 +15,44 @@ interface CopyOrderNumberProps {
 }
 
 
+function legacyCopy(
+  value: string,
+) {
+  const textarea =
+    document.createElement(
+      "textarea",
+    );
+
+  textarea.value = value;
+  textarea.readOnly = true;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+
+  document.body.appendChild(
+    textarea,
+  );
+
+  textarea.focus();
+  textarea.select();
+  textarea.setSelectionRange(
+    0,
+    textarea.value.length,
+  );
+
+  const copied =
+    document.execCommand(
+      "copy",
+    );
+
+  document.body.removeChild(
+    textarea,
+  );
+
+  return copied;
+}
+
+
 export function CopyOrderNumber({
   orderNumber,
 }: CopyOrderNumberProps) {
@@ -23,30 +61,52 @@ export function CopyOrderNumber({
     setCopied,
   ] = useState(false);
 
+
   async function copyNumber() {
+    let success = false;
+
     try {
-      await navigator.clipboard.writeText(
+      if (
+        navigator.clipboard
+        &&
+        window.isSecureContext
+      ) {
+        await navigator.clipboard.writeText(
+          orderNumber,
+        );
+
+        success = true;
+      }
+      else {
+        success = legacyCopy(
+          orderNumber,
+        );
+      }
+    }
+    catch {
+      success = legacyCopy(
         orderNumber,
       );
+    }
 
-      setCopied(true);
+    setCopied(success);
 
+    if (success) {
       window.setTimeout(
         () => {
           setCopied(false);
         },
         2000,
       );
-    } catch {
-      setCopied(false);
     }
   }
+
 
   return (
     <button
       type="button"
       onClick={copyNumber}
-      className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#0b4da2] px-4 text-xs font-black text-white transition hover:bg-[#083b7f]"
+      className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0b4da2] px-4 text-sm font-black text-white transition active:scale-[0.98] hover:bg-[#083b7f] sm:h-10 sm:w-auto sm:text-xs"
     >
       {copied ? (
         <>
