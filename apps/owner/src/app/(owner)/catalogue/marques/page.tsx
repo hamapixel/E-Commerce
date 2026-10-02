@@ -1,5 +1,9 @@
+import Link from "next/link";
+
 import {
+  ArrowLeft,
   BadgePlus,
+  ChevronDown,
   Pencil,
   Power,
   Tags,
@@ -51,7 +55,15 @@ export default async function BrandsPage() {
   return (
     <>
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
+        <Link
+          href="/catalogue"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-[#0b4da2] shadow-sm transition hover:bg-blue-100"
+        >
+          <ArrowLeft size={15} />
+          Retour au catalogue
+        </Link>
+
+        <p className="mt-4 text-xs font-black uppercase tracking-[0.2em] text-[#ff6b00]">
           Catalogue
         </p>
 
@@ -80,28 +92,35 @@ export default async function BrandsPage() {
       </div>
 
 
-      <section className="mt-7 rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex items-center gap-3">
-          <BadgePlus
-            className="text-[#ff6b00]"
-          />
+      <details className="group mt-7 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#ff6b00]">
+              <BadgePlus size={20} />
+            </div>
 
-          <div>
-            <h2 className="font-black">
-              Nouvelle marque
-            </h2>
+            <div>
+              <h2 className="font-black">
+                Ajouter une marque
+              </h2>
 
-            <p className="text-xs text-slate-500">
-              Ajoutez une marque et son identité visuelle.
-            </p>
+              <p className="text-xs text-slate-500">
+                Ouvrir le formulaire de création.
+              </p>
+            </div>
           </div>
-        </div>
+
+          <ChevronDown
+            size={19}
+            className="shrink-0 text-slate-400 transition group-open:rotate-180"
+          />
+        </summary>
 
         <form
           action={
             createBrandAction
           }
-          className="mt-6 grid gap-4 md:grid-cols-2"
+          className="grid gap-4 border-t border-slate-200 p-5 sm:p-6 md:grid-cols-2"
         >
           <label>
             <span className="text-xs font-black">
@@ -212,16 +231,24 @@ export default async function BrandsPage() {
             />
           </label>
 
-          <div className="md:col-span-2">
+          <div className="flex flex-wrap gap-2 md:col-span-2">
             <button
               type="submit"
               className="min-h-12 w-full rounded-xl bg-[#ff6b00] px-5 text-sm font-black text-white transition hover:bg-[#e65f00] sm:w-auto"
             >
               Enregistrer la marque
             </button>
+
+            <Link
+              href="/catalogue"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 text-sm font-black text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+            >
+              <ArrowLeft size={16} />
+              Retour
+            </Link>
           </div>
         </form>
-      </section>
+      </details>
 
 
       <section className="mt-7">
