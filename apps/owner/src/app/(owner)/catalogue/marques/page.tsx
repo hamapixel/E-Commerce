@@ -1,11 +1,22 @@
 import {
   BadgePlus,
+  Pencil,
+  Power,
   Tags,
 } from "lucide-react";
 
 import {
   createBrandAction,
 } from "@/actions/catalogue";
+
+import {
+  toggleBrandAction,
+  updateBrandAction,
+} from "@/actions/brand-actions";
+
+import {
+  BrandDeleteButton,
+} from "@/components/catalogue/brand-delete-button";
 
 import {
   ownerFetch,
@@ -24,6 +35,18 @@ export default async function BrandsPage() {
       "/owner/catalog/brands/"
     );
 
+  const activeCount =
+    brands.filter(
+      (brand) =>
+        brand.is_active,
+    ).length;
+
+  const featuredCount =
+    brands.filter(
+      (brand) =>
+        brand.is_featured,
+    ).length;
+
 
   return (
     <>
@@ -37,9 +60,23 @@ export default async function BrandsPage() {
         </h1>
 
         <p className="mt-2 text-sm text-slate-500">
-          Gérez Samsung, Apple et toutes
-          vos futures marques.
+          Créez, modifiez, activez ou désactivez
+          les marques de votre boutique.
         </p>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-[#0b4da2]">
+            {brands.length} marque(s)
+          </span>
+
+          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700">
+            {activeCount} active(s)
+          </span>
+
+          <span className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black text-[#ff6b00]">
+            {featuredCount} mise(s) en avant
+          </span>
+        </div>
       </div>
 
 
@@ -49,9 +86,15 @@ export default async function BrandsPage() {
             className="text-[#ff6b00]"
           />
 
-          <h2 className="font-black">
-            Nouvelle marque
-          </h2>
+          <div>
+            <h2 className="font-black">
+              Nouvelle marque
+            </h2>
+
+            <p className="text-xs text-slate-500">
+              Ajoutez une marque et son identité visuelle.
+            </p>
+          </div>
         </div>
 
         <form
@@ -172,7 +215,7 @@ export default async function BrandsPage() {
           <div className="md:col-span-2">
             <button
               type="submit"
-              className="min-h-12 w-full rounded-xl bg-[#ff6b00] px-5 text-sm font-black text-white sm:w-auto"
+              className="min-h-12 w-full rounded-xl bg-[#ff6b00] px-5 text-sm font-black text-white transition hover:bg-[#e65f00] sm:w-auto"
             >
               Enregistrer la marque
             </button>
@@ -193,51 +236,224 @@ export default async function BrandsPage() {
           </h2>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 space-y-4">
           {brands.map(
-            (
-              brand,
-            ) => (
-              <article
-                key={
-                  brand.id
-                }
-                className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <strong>
-                    {
-                      brand.name
-                    }
-                  </strong>
+            (brand) => {
+              const updateAction =
+                updateBrandAction.bind(
+                  null,
+                  brand.id,
+                );
 
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[9px] font-black ${
-                      brand.is_active
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {brand.is_active
-                      ? "Active"
-                      : "Inactive"}
-                  </span>
-                </div>
+              const toggleAction =
+                toggleBrandAction.bind(
+                  null,
+                  brand.id,
+                  brand.is_active,
+                );
 
-                <p className="mt-4 text-xs text-slate-500">
-                  {
-                    brand.products_count
-                  }{" "}
-                  produit(s)
-                </p>
+              return (
+                <article
+                  key={brand.id}
+                  className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <strong className="text-base text-slate-950">
+                          {brand.name}
+                        </strong>
 
-                {brand.is_featured && (
-                  <p className="mt-2 text-[10px] font-black text-[#ff6b00]">
-                    ⭐ Mise en avant
-                  </p>
-                )}
-              </article>
-            ),
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[9px] font-black ${
+                            brand.is_active
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-slate-100 text-slate-500"
+                          }`}
+                        >
+                          {brand.is_active
+                            ? "ACTIVE"
+                            : "INACTIVE"}
+                        </span>
+
+                        {brand.is_featured && (
+                          <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[9px] font-black text-[#ff6b00]">
+                            MISE EN AVANT
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-xs text-slate-500">
+                        {brand.products_count} produit(s)
+                        {" · "}
+                        /{brand.slug}
+                      </p>
+                    </div>
+
+                    <form
+                      action={toggleAction}
+                    >
+                      <button
+                        type="submit"
+                        className={`flex h-10 items-center gap-2 rounded-xl px-4 text-xs font-black ${
+                          brand.is_active
+                            ? "bg-slate-100 text-slate-700"
+                            : "bg-emerald-50 text-emerald-700"
+                        }`}
+                      >
+                        <Power size={15} />
+
+                        {brand.is_active
+                          ? "Désactiver"
+                          : "Activer"}
+                      </button>
+                    </form>
+                  </div>
+
+                  <details className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-xs font-black text-[#0b4da2]">
+                      <Pencil size={15} />
+                      Modifier cette marque
+                    </summary>
+
+                    <form
+                      action={updateAction}
+                      className="grid gap-4 border-t border-slate-200 p-4 md:grid-cols-2"
+                    >
+                      <label>
+                        <span className="text-xs font-black text-slate-600">
+                          Nom
+                        </span>
+
+                        <input
+                          name="name"
+                          required
+                          defaultValue={brand.name}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3"
+                        />
+                      </label>
+
+                      <label>
+                        <span className="text-xs font-black text-slate-600">
+                          Site web
+                        </span>
+
+                        <input
+                          name="website"
+                          type="url"
+                          defaultValue={brand.website}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3"
+                        />
+                      </label>
+
+                      <label className="md:col-span-2">
+                        <span className="text-xs font-black text-slate-600">
+                          Description
+                        </span>
+
+                        <textarea
+                          name="description"
+                          rows={3}
+                          defaultValue={brand.description}
+                          className="mt-2 w-full rounded-xl border border-slate-200 p-3"
+                        />
+                      </label>
+
+                      <label>
+                        <span className="text-xs font-black text-slate-600">
+                          Nouveau logo
+                        </span>
+
+                        <input
+                          name="logo"
+                          type="file"
+                          accept="image/*"
+                          className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-xs"
+                        />
+                      </label>
+
+                      <label>
+                        <span className="text-xs font-black text-slate-600">
+                          Ordre
+                        </span>
+
+                        <input
+                          name="display_order"
+                          type="number"
+                          min="0"
+                          defaultValue={brand.display_order}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3"
+                        />
+                      </label>
+
+                      <div className="grid gap-2 sm:grid-cols-2 md:col-span-2">
+                        <label className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 px-3">
+                          <input
+                            name="is_active"
+                            type="checkbox"
+                            defaultChecked={brand.is_active}
+                          />
+
+                          <span className="text-xs font-black">
+                            Active
+                          </span>
+                        </label>
+
+                        <label className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 px-3">
+                          <input
+                            name="is_featured"
+                            type="checkbox"
+                            defaultChecked={brand.is_featured}
+                          />
+
+                          <span className="text-xs font-black">
+                            Mise en avant
+                          </span>
+                        </label>
+                      </div>
+
+                      <label>
+                        <span className="text-xs font-black text-slate-600">
+                          Titre SEO
+                        </span>
+
+                        <input
+                          name="seo_title"
+                          defaultValue={brand.seo_title}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3"
+                        />
+                      </label>
+
+                      <label>
+                        <span className="text-xs font-black text-slate-600">
+                          Description SEO
+                        </span>
+
+                        <input
+                          name="seo_description"
+                          defaultValue={brand.seo_description}
+                          className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3"
+                        />
+                      </label>
+
+                      <div className="flex flex-wrap gap-2 md:col-span-2">
+                        <button
+                          type="submit"
+                          className="h-10 rounded-xl bg-[#0b4da2] px-5 text-xs font-black text-white transition hover:bg-[#083b7f]"
+                        >
+                          Enregistrer les modifications
+                        </button>
+
+                        <BrandDeleteButton
+                          brandId={brand.id}
+                          brandName={brand.name}
+                        />
+                      </div>
+                    </form>
+                  </details>
+                </article>
+              );
+            },
           )}
         </div>
       </section>
