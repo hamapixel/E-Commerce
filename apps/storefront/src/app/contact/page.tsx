@@ -2,13 +2,20 @@ import type {
   Metadata,
 } from "next";
 
+import Link from "next/link";
+
 import {
+  ArrowRight,
   Clock3,
   Mail,
   MessageCircle,
   Phone,
   ShieldCheck,
 } from "lucide-react";
+
+import {
+  InfoPageNav,
+} from "@/components/content/info-page-nav";
 
 import {
   STORE_EMAIL,
@@ -37,10 +44,14 @@ export default function ContactPage() {
       "Bonjour SUGU KURA, je souhaite avoir des informations.",
     );
 
+
   return (
     <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:py-14">
-      <section className="overflow-hidden rounded-[32px] bg-gradient-to-br from-[#061f43] via-[#0b4da2] to-[#123f78] text-white shadow-xl">
-        <div className="grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.1fr_0.9fr] lg:p-12">
+      <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#061f43] via-[#0b4da2] to-[#123f78] text-white shadow-xl">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-orange-400/15 blur-3xl" />
+
+        <div className="relative grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.1fr_0.9fr] lg:p-12">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-300">
               Assistance SUGU KURA
@@ -50,7 +61,7 @@ export default function ContactPage() {
               Besoin d&apos;aide ? Contactez-nous facilement.
             </h1>
 
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-blue-100/85 sm:text-base">
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-blue-100/90 sm:text-base">
               Une question sur un produit, une commande ou une livraison ? Vous pouvez nous appeler directement ou nous écrire sur WhatsApp.
             </p>
 
@@ -58,7 +69,7 @@ export default function ContactPage() {
               {callLink ? (
                 <a
                   href={callLink}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ff6b00] px-6 text-sm font-black text-white transition hover:bg-[#e86100]"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#ff6b00] px-6 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-[#e86100]"
                 >
                   <Phone size={18} />
                   Appeler maintenant
@@ -74,7 +85,7 @@ export default function ContactPage() {
                   href={whatsappLink}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 text-sm font-black text-white transition hover:brightness-95"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 text-sm font-black text-white transition hover:-translate-y-0.5 hover:brightness-95"
                 >
                   <MessageCircle size={18} />
                   Écrire sur WhatsApp
@@ -93,34 +104,61 @@ export default function ContactPage() {
             </h2>
 
             <div className="mt-5 grid gap-4">
-              <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4">
-                <Phone
-                  size={20}
-                  className="mt-0.5 shrink-0 text-orange-300"
-                />
+              {callLink ? (
+                <a
+                  href={callLink}
+                  className="group flex items-start gap-3 rounded-2xl bg-white/10 p-4 transition hover:bg-white/15"
+                >
+                  <Phone
+                    size={20}
+                    className="mt-0.5 shrink-0 text-orange-300"
+                  />
 
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-100/70">
-                    Téléphone
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-100/70">
+                      Téléphone
+                    </p>
 
-                  <p className="mt-1 font-black">
-                    {STORE_PHONE || "À configurer"}
-                  </p>
+                    <p className="mt-1 font-black">
+                      {STORE_PHONE || "À configurer"}
+                    </p>
+                  </div>
+
+                  <ArrowRight
+                    size={16}
+                    className="mt-1 shrink-0 text-blue-100/60 transition group-hover:translate-x-0.5"
+                  />
+                </a>
+              ) : (
+                <div className="flex items-start gap-3 rounded-2xl bg-white/10 p-4">
+                  <Phone
+                    size={20}
+                    className="mt-0.5 shrink-0 text-orange-300"
+                  />
+
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-100/70">
+                      Téléphone
+                    </p>
+
+                    <p className="mt-1 font-black">
+                      À configurer
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {STORE_EMAIL && (
                 <a
                   href={`mailto:${STORE_EMAIL}`}
-                  className="flex items-start gap-3 rounded-2xl bg-white/10 p-4"
+                  className="group flex items-start gap-3 rounded-2xl bg-white/10 p-4 transition hover:bg-white/15"
                 >
                   <Mail
                     size={20}
                     className="mt-0.5 shrink-0 text-orange-300"
                   />
 
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-100/70">
                       E-mail
                     </p>
@@ -129,6 +167,11 @@ export default function ContactPage() {
                       {STORE_EMAIL}
                     </p>
                   </div>
+
+                  <ArrowRight
+                    size={16}
+                    className="mt-1 shrink-0 text-blue-100/60 transition group-hover:translate-x-0.5"
+                  />
                 </a>
               )}
 
@@ -154,36 +197,88 @@ export default function ContactPage() {
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <Phone className="text-[#0b4da2]" />
-          <h2 className="mt-4 font-black text-slate-950">
-            Par téléphone
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Pour une question rapide sur un produit ou une commande.
-          </p>
-        </div>
+        {callLink ? (
+          <a
+            href={callLink}
+            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <Phone className="text-[#0b4da2]" />
+              <ArrowRight className="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#ff6b00]" size={18} />
+            </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <MessageCircle className="text-[#25D366]" />
-          <h2 className="mt-4 font-black text-slate-950">
-            Par WhatsApp
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Envoyez-nous votre message directement depuis votre téléphone.
-          </p>
-        </div>
+            <h2 className="mt-4 font-black text-slate-950">
+              Par téléphone
+            </h2>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <ShieldCheck className="text-[#ff6b00]" />
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Pour une question rapide sur un produit ou une commande.
+            </p>
+          </a>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <Phone className="text-[#0b4da2]" />
+            <h2 className="mt-4 font-black text-slate-950">
+              Par téléphone
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Pour une question rapide sur un produit ou une commande.
+            </p>
+          </div>
+        )}
+
+        {whatsappLink ? (
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noreferrer"
+            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <MessageCircle className="text-[#25D366]" />
+              <ArrowRight className="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#25D366]" size={18} />
+            </div>
+
+            <h2 className="mt-4 font-black text-slate-950">
+              Par WhatsApp
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Envoyez-nous votre message directement depuis votre téléphone.
+            </p>
+          </a>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <MessageCircle className="text-[#25D366]" />
+            <h2 className="mt-4 font-black text-slate-950">
+              Par WhatsApp
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Envoyez-nous votre message directement depuis votre téléphone.
+            </p>
+          </div>
+        )}
+
+        <Link
+          href="/faq"
+          className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <ShieldCheck className="text-[#ff6b00]" />
+            <ArrowRight className="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#ff6b00]" size={18} />
+          </div>
+
           <h2 className="mt-4 font-black text-slate-950">
             Assistance fiable
           </h2>
+
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Nous vous accompagnons avant et après votre achat.
+            Consultez aussi nos réponses aux questions fréquentes.
           </p>
-        </div>
+        </Link>
       </section>
+
+      <InfoPageNav />
     </div>
   );
 }
